@@ -23,6 +23,20 @@ def _compute_file_hash(file_path: str) -> str:
         return hashlib.file_digest(f, "sha256").hexdigest()
 
 
+DEFAULT_LLM_MODELS = {
+    "ollama": "qwen2.5-coder:14b",
+    "huggingface": "Qwen/Qwen2.5-Coder-14B-Instruct",
+    "google-ai": "gemini-2.0-flash",
+    "groq": "qwen-qwq-32b",
+}
+
+DEFAULT_EMBEDDINGS_MODELS = {
+    "ollama": "snowflake-arctic-embed:110m",
+    "huggingface": "Snowflake/snowflake-arctic-embed-m",
+    "google-ai": "gemini-embedding-exp-03-07",
+}
+
+
 class Config:
     """Configuration class for setting up variables used in the log graph building.
 
@@ -36,7 +50,10 @@ class Config:
     experiment_id = os.getenv("EXPERIMENT_ID", str(uuid.uuid4()))
 
     # The path to the ontology file.
-    ontology_path = os.getenv("ONTOLOGY_PATH", "resources/ontologies/logs_dictionary.ttl")
+    ontology_path = os.getenv("ONTOLOGY_PATH", "resources/ontologies/logs.ttl")
+
+    # The path to the SHACL constraints file for the ontology.
+    shacl_path = os.getenv("CONSTRAINTS_PATH", "resources/ontologies/logs_shacl.ttl")
 
     # The path to the examples log graphs file.
     examples_path = os.getenv("EXAMPLES_PATH", "resources/data/train.ttl")
@@ -52,9 +69,9 @@ class Config:
     neo4j_username = os.getenv("NEO4J_USERNAME", "neo4j")
     neo4j_password = os.getenv("NEO4J_PASSWORD", "password")
 
-    # Whether to use the Ollama or HuggingFace backends for parsing logs.
-    # The default is to use Ollama.
-    use_ollama_backend = bool(int(os.getenv("USE_OLLAMA_BACKEND", "1")))
+    # The backend to use for the LLM.
+    # Must be one of "ollama", "huggingface", or "google-ai".
+    backend = os.getenv("BACKEND", "ollama")
 
     # The HuggingFace hub api token to use for downloading models,
     # generated from https://huggingface.co/docs/hub/security-tokens.
@@ -64,12 +81,18 @@ class Config:
     # it's just to remind that it can be set in the environment.
     huggingfacehub_api_token = os.getenv("HUGGINGFACEHUB_API_TOKEN", None)
 
+    # The Google AI api key, can be generated from https://ai.google.dev/gemini-api/docs/api-key.
+    # Required when using the Google AI backend.
+    # This variable is not used anywhere in the project,
+    # it's just to remind that it must be set in the environment if using the Google AI backend.
+    google_ai_api_key = os.getenv("GOOGLE_API_KEY", None)
+
     # The model used to embed logs.
     # Must be a model from the HuggingFace model hub if using the HuggingFace backend,
     # or a model from the Ollama model hub if using the Ollama backend.
     embeddings_model = os.getenv(
         "EMBEDDINGS_MODEL",
-        "snowflake-arctic-embed:110m" if use_ollama_backend else "Snowflake/snowflake-arctic-embed-m",
+        DEFAULT_EMBEDDINGS_MODELS[backend],
     )
 
     # The model used to parse logs.
@@ -77,7 +100,7 @@ class Config:
     # or a model from the Ollama model hub if using the Ollama backend.
     parser_model = os.getenv(
         "PARSER_MODEL",
-        "qwen2.5-coder:14b" if use_ollama_backend else "Qwen/Qwen2.5-Coder-14B-Instruct",
+        DEFAULT_LLM_MODELS[backend],
     )
 
     # The temperature of the LLM used to parse logs.
@@ -95,6 +118,14 @@ class Config:
 
         if self.self_reflection_steps < 0:
             msg = "self_reflection_steps must be greater than 0"
+            raise ValueError(msg)
+
+        if self.backend not in ["ollama", "huggingface", "google-ai"]:
+            msg = f"backend must be one of 'ollama', 'huggingface', or 'google-ai', but got '{self.backend}'"
+            raise ValueError(msg)
+
+        if self.backend == "google-ai" and self.google_ai_api_key is None:
+            msg = "GOOGLE_API_KEY must be set in the environment when using the Google AI backend"
             raise ValueError(msg)
 
     def ontology_hash(self) -> str:

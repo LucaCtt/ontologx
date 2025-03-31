@@ -14,7 +14,7 @@ class Backend(ABC):
     """
 
     @abstractmethod
-    def get_embeddings(self, model: str) -> Embeddings:
+    def embeddings(self, model: str) -> Embeddings:
         """Retrieve embeddings from the specified model.
 
         Args:
@@ -26,7 +26,7 @@ class Backend(ABC):
         """
 
     @abstractmethod
-    def get_parser_model(self, model: str, temperature: float) -> BaseChatModel:
+    def llm(self, model: str, temperature: float) -> BaseChatModel:
         """Retrieve a parser model based on the specified parameters.
 
         Args:
@@ -39,10 +39,41 @@ class Backend(ABC):
         """
 
 
+class BackendFactory:
+    """Factory class for creating backend instances based on the specified backend type."""
+
+    @staticmethod
+    def create(backend_type: str) -> Backend:
+        """Create a backend instance based on the specified backend type.
+
+        Args:
+            backend_type (str): The type of backend to create.
+            Supported types include "huggingface", "ollama", and "google-ai".
+
+        Returns:
+            Backend: An instance of the specified backend type.
+
+        Raises:
+            ValueError: If the specified backend type is not supported.
+
+        """
+        if backend_type == "huggingface":
+            return HuggingFaceBackend()
+
+        if backend_type == "ollama":
+            return OllamaBackend()
+
+        if backend_type == "google-ai":
+            return GoogleAIBackend()
+
+        msg = f"Unsupported backend type: {backend_type}"
+        raise ValueError(msg)
+
+
 class HuggingFaceBackend(Backend):
     """A backend implementation that uses Hugging Face models for generating embeddings and parsing text."""
 
-    def get_embeddings(self, model: str) -> Embeddings:
+    def embeddings(self, model: str) -> Embeddings:
         try:
             from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 
@@ -51,7 +82,7 @@ class HuggingFaceBackend(Backend):
             msg = "Please install langchain-huggingface to use HuggingFaceBackend"
             raise ImportError(msg) from e
 
-    def get_parser_model(self, model: str, temperature: float) -> BaseChatModel:
+    def llm(self, model: str, temperature: float) -> BaseChatModel:
         try:
             from langchain_huggingface import ChatHuggingFace, HuggingFacePipeline
 
@@ -72,7 +103,7 @@ class HuggingFaceBackend(Backend):
 class OllamaBackend(Backend):
     """A backend implementation that uses Ollama models for generating embeddings and parsing text."""
 
-    def get_embeddings(self, model: str) -> Embeddings:
+    def embeddings(self, model: str) -> Embeddings:
         try:
             from langchain_ollama.embeddings import OllamaEmbeddings  # type: ignore[import]
 
@@ -81,11 +112,33 @@ class OllamaBackend(Backend):
             msg = "Please install langchain-ollama to use OllamaBackend"
             raise ImportError(msg) from e
 
-    def get_parser_model(self, model: str, temperature: float) -> BaseChatModel:
+    def llm(self, model: str, temperature: float) -> BaseChatModel:
         try:
             from langchain_ollama.chat_models import ChatOllama  # type: ignore[import]
 
             return ChatOllama(model=model, temperature=temperature, num_ctx=1024 * 12)
         except ModuleNotFoundError as e:
             msg = "Please install langchain-ollama to use OllamaBackend"
+            raise ImportError(msg) from e
+
+
+class GoogleAIBackend(Backend):
+    """A backend implementation that uses Google AI models for generating embeddings and parsing text."""
+
+    def embeddings(self, model: str) -> Embeddings:
+        try:
+            from langchain_googleai.embeddings import GoogleAIEmbeddings  # type: ignore[import]
+
+            return GoogleAIEmbeddings(model=model)
+        except ModuleNotFoundError as e:
+            msg = "Please install langchain-googleai to use GoogleAIBackend"
+            raise ImportError(msg) from e
+
+    def llm(self, model: str, temperature: float) -> BaseChatModel:
+        try:
+            from langchain_googleai import ChatGoogleAI  # type: ignore[import]
+
+            return ChatGoogleAI(model=model, temperature=temperature)
+        except ModuleNotFoundError as e:
+            msg = "Please install langchain-googleai to use GoogleAIBackend"
             raise ImportError(msg) from e

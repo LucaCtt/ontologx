@@ -11,7 +11,7 @@ from rich.logging import RichHandler
 from rich.progress import track
 
 from lkgb.accuracy import graph_edit_distance
-from lkgb.backend import HuggingFaceBackend, OllamaBackend
+from lkgb.backend import BackendFactory
 from lkgb.config import Config
 from lkgb.parser import Parser, RunSummary
 from lkgb.store import Store
@@ -24,10 +24,10 @@ logger = logging.getLogger("rich")
 logger.setLevel(logging.DEBUG)
 
 # Set the backend
-backend = OllamaBackend() if config.use_ollama_backend else HuggingFaceBackend()
+backend = BackendFactory.create(config.backend)
 
 # Load the embeddings model
-embeddings = backend.get_embeddings(model=config.embeddings_model)
+embeddings = backend.embeddings(model=config.embeddings_model)
 
 # Create the vector store
 store = Store(config=config, embeddings=embeddings)
@@ -43,12 +43,12 @@ def clear() -> None:
 
 @app.command()
 def parse() -> None:
-    logger.info("Using %s backend.", "Ollama" if config.use_ollama_backend else "HuggingFace")
+    logger.info("Using %s backend.", config.backend)
     logger.info("Experiment ID: %s", config.experiment_id)
     logger.info("Embeddings model: '%s'", config.embeddings_model)
 
     # Load the parser model
-    llm = backend.get_parser_model(
+    llm = backend.llm(
         model=config.parser_model,
         temperature=config.parser_temperature,
     )
