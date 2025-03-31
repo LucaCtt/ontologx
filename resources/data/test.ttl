@@ -176,7 +176,8 @@
   log:sourceType "csv".
 
 :file-6 rdf:type log:File;
-  log:fileHashSHA256 "SHA256:wZvMsGOInOVqvsOlhNmCH7PNFaKk0EZfNcFDcFLShk8".
+  log:fileHash "SHA256:wZvMsGOInOVqvsOlhNmCH7PNFaKk0EZfNcFDcFLShk8";
+  log:fileHashType "SHA256".
 
 :user-6 rdf:type log:User;
   log:userName "root".

@@ -47,7 +47,7 @@ class Config:
     experiment_date_time = datetime.now(UTC)
 
     # Used to distinguish between the data in different experiments.
-    experiment_id = os.getenv("EXPERIMENT_ID", str(uuid.uuid4()))
+    experiment_id = os.getenv("EXPERIMENT_ID", str(uuid.uuid4()).replace("-", "_"))
 
     # The path to the ontology file.
     ontology_path = os.getenv("ONTOLOGY_PATH", "resources/ontologies/logs.ttl")

@@ -2,9 +2,10 @@ from enum import Enum
 
 from langchain_neo4j.graphs.graph_document import GraphDocument, Node, Relationship
 from pydantic import BaseModel, Field, model_validator
+from pydantic_core import PydanticCustomError
 
 
-class EventGraph(BaseModel):
+class BaseEventGraph(BaseModel):
     """Base graph model to represent the information extracted from a log event."""
 
     nodes: list
@@ -29,7 +30,7 @@ class EventGraph(BaseModel):
         return GraphDocument(nodes=list(nodes_dict.values()), relationships=relationships)
 
 
-def build_dynamic_model(ontology: GraphDocument) -> type[EventGraph]:
+def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
     """Build a dynamic event graph model based on the ontology."""
     valid_node_types = [node.type for node in ontology.nodes]
     valid_properties_per_node = {node.type: [*list(node.properties.keys()), "uri"] for node in ontology.nodes}
@@ -79,7 +80,7 @@ def build_dynamic_model(ontology: GraphDocument) -> type[EventGraph]:
             f"{valid_triples}."
         )
 
-    class DynamicEventGraph(EventGraph):
+    class EventGraph(BaseEventGraph):
         """Represents a dynamic event-based knowledge graph composed of nodes and relationships."""
 
         nodes: list[Node] = Field(description="List of nodes in the graph.")
@@ -88,17 +89,21 @@ def build_dynamic_model(ontology: GraphDocument) -> type[EventGraph]:
         )
 
         @model_validator(mode="after")
-        def validate_relationships(self) -> "DynamicEventGraph":
+        def validate_relationships(self) -> "EventGraph":
             node_ids = {node.id for node in self.nodes}
 
-            missing_nodes = {rel.source_id for rel in self.relationships} | {
-                rel.target_id for rel in self.relationships
-            } - node_ids
+            missing_nodes = {rel.source_id for rel in self.relationships if rel.source_id not in node_ids} | {
+                rel.target_id for rel in self.relationships if rel.target_id not in node_ids
+            }
 
             if missing_nodes:
-                msg = f"Relationships mention node ids that are not present in the nodes list: {missing_nodes}"
-                raise ValueError(msg)
+                msg = "Relationships mention node ids that are not present in the nodes list: {missing_nodes}"
+                raise PydanticCustomError(
+                    error_type="InvalidRelationships",
+                    message_template=msg,
+                    context={"missing_nodes": missing_nodes},
+                )
 
             return self
 
-    return DynamicEventGraph
+    return EventGraph

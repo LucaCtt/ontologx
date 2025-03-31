@@ -8,7 +8,10 @@ from lkgb.store.module import StoreModule
 
 LOG_ONTOLOGY_URL = "http://example.com/lkgb/logs/dictionary"
 TIME_ONTOLOGY_URL = "http://www.w3.org/2006/time"
+XML_SCHEMA_URL = "http://www.w3.org/2001/XMLSchema#"
+OWL_SCHEMA_URL = "http://www.w3.org/2002/07/owl#"
 N10S_CONSTRAINT_NAME = "n10s_unique_uri"
+N10S_TRIGGER_NAME = "shacl-validate"
 
 
 class Ontology(StoreModule):
@@ -44,16 +47,61 @@ class Ontology(StoreModule):
             params={"url": TIME_ONTOLOGY_URL},
         )
 
+        # Load the constraints
+        self.__driver.query(
+            "CALL n10s.validation.shacl.import.inline($constraints, 'Turtle')",
+            params={"constraints": Path(self._config.shacl_path).read_text()},
+        )
+
+        # Add transaction validator
+        self.__driver.query(
+            """
+            USE system
+            CALL apoc.trigger.install(
+                'neo4j',
+                $trigger_name,
+                'call n10s.validation.shacl.validateTransaction(
+                    $createdNodes,
+                    $createdRelationships,
+                    $assignedLabels,
+                    $removedLabels,
+                    $assignedNodeProperties,
+                    $removedNodeProperties,
+                    $deletedRelationships,
+                    $deletedNodes)',
+                { labels: ['Run']},
+                {phase:'before'})
+            """,
+            params={"trigger_name": N10S_TRIGGER_NAME},
+        )
+
     def clear(self) -> None:
         """Clear the store to its initial state."""
         self.__driver.query("MATCH (n:_GraphConfig) DETACH DELETE n")
+        self.__driver.query("MATCH (n:_n10sValidatorConfig) DETACH DELETE n")
         self.__driver.query(
-            "MATCH (n:Resource) WHERE n.uri STARTS WITH $time_url OR n.uri STARTS WITH $log_url DETACH DELETE n",
-            params={"time_url": TIME_ONTOLOGY_URL, "log_url": LOG_ONTOLOGY_URL},
+            """
+            MATCH (n:Resource) WHERE n.uri STARTS WITH $time_url
+                OR n.uri STARTS WITH $log_url
+                OR n.uri STARTS WITH $xml_schema_url
+                OR n.uri STARTS WITH $owl_schema_url
+            DETACH DELETE n
+            """,
+            params={
+                "time_url": TIME_ONTOLOGY_URL,
+                "log_url": LOG_ONTOLOGY_URL,
+                "xml_schema_url": XML_SCHEMA_URL,
+                "owl_schema_url": OWL_SCHEMA_URL,
+            },
         )
         self.__driver.query(
             "DROP CONSTRAINT $constraint_name IF EXISTS",
             params={"constraint_name": N10S_CONSTRAINT_NAME},
+        )
+
+        self.__driver.query(
+            "USE system CALL apoc.trigger.drop('neo4j',$trigger_name)",
+            params={"trigger_name": N10S_TRIGGER_NAME},
         )
 
     def graph(self) -> GraphDocument:

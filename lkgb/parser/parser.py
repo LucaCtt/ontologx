@@ -10,7 +10,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_neo4j.graphs.graph_document import GraphDocument
 from pydantic import ValidationError
 
-from lkgb.parser.models import EventGraph, build_dynamic_model
+from lkgb.parser.models import BaseEventGraph, build_dynamic_model
 from lkgb.parser.reports import ParserReport
 from lkgb.store import Store
 from lkgb.tools import fetch_ip_address_info
@@ -74,7 +74,7 @@ class Parser:
         self.self_reflection_steps = self_reflection_steps
 
         try:
-            parser_model.with_structured_output(EventGraph)
+            parser_model.with_structured_output(BaseEventGraph)
         except NotImplementedError as e:
             msg = "The parser model must support structured output."
             raise ValueError(msg) from e

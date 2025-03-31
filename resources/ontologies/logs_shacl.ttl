@@ -1,0 +1,369 @@
+@prefix log: <neo4j://graph.schema#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+log:EventShape rdf:type sh:NodeShape;
+  sh:targetClass log:Event;
+  sh:property [
+    sh:path log:eventMessage;
+    sh:datatype xsd:string;
+    sh:minCount 1;
+    sh:maxCount 1;
+    sh:message "Event must have a message";
+  ];
+  sh:property [
+    sh:path log:eventSeverity;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Event may have at most one severity among DEBUG, INFO, WARN, ERROR, FATAL";
+  ];
+  sh:property [
+    sh:path log:eventCommand;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Event may have at most one command";
+  ];
+  sh:property [
+    sh:path log:hasSource;
+    sh:class log:Source;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Event may have at most one source";
+  ];
+  sh:property [
+    sh:path log:hasTimeStamp;
+    sh:class log:TimeStamp;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Event may have at most one timestamp";
+  ].
+
+log:SourceShape rdf:type sh:NodeShape;
+  sh:targetClass log:Source;
+  sh:property [
+    sh:path log:sourceName;
+    sh:datatype xsd:string;
+    sh:minCount 1;
+    sh:maxCount 1;
+    sh:message "Source must have a name";
+  ];
+  sh:property [
+    sh:path log:sourceType;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Source may have at most one type";
+  ];
+  sh:property [
+    sh:path log:sourceDevice;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Source may have at most one device";
+  ].
+
+log:AddressShape rdf:type sh:NodeShape;
+  sh:targetClass log:Address;
+  sh:property [
+    sh:path log:addressIPV4;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:pattern "^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"^^xsd:string;
+    sh:message "Address may have at most one valid IPv4 address";
+  ];
+  sh:property [
+    sh:path log:addressIPV6;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:pattern "^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$"^^xsd:string;
+    sh:message "Address may have at most one valid IPv6 address";
+  ];
+  sh:property [
+    sh:path log:addressMAC;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:pattern "^([0-9a-fA-F]{2}[:-]){5}([0-9a-fA-F]{2})$"^^xsd:string;
+    sh:message "Address may have at most one valid MAC address";
+  ];
+  sh:property [
+    sh:path log:addressPort;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:pattern "^[0-9]{1,5}$"^^xsd:string;
+    sh:message "Address may have at most one valid port";
+  ];
+  sh:property [
+    sh:path log:addressHostname;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Address may have at most one hostname";
+  ];
+  sh:property [
+    sh:path log:addressCity;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:condition [
+      sh:path log:addressIPV4;
+      sh:minCount 1;
+    ];
+    sh:message "Address may have at most one city";
+  ];
+  sh:property [
+    sh:path log:addressRegion;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:condition [
+      sh:path log:addressIPV4;
+      sh:minCount 1;
+    ];
+    sh:message "Address may have at most one region";
+  ];
+  sh:property [
+    sh:path log:addressCountry;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:condition [
+      sh:path log:addressIPV4;
+      sh:minCount 1;
+    ];
+    sh:message "Address may have at most one country";
+  ];
+  sh:property [
+    sh:path log:addressTimezone;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:condition [
+      sh:path log:addressIPV4;
+      sh:minCount 1;
+    ];
+    sh:message "Address may have at most one timezone";
+  ];
+  sh:property [
+    sh:path log:addressASN;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:condition [
+      sh:path log:addressIPV4;
+      sh:minCount 1;
+    ];
+    sh:message "Address may have at most one ASN";
+  ];
+  sh:property [
+    sh:path log:addressOrganization;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:condition [
+      sh:path log:addressIPV4;
+      sh:minCount 1;
+    ];
+    sh:message "Address may have at most one organization";
+  ].
+
+log:ApplicationShape rdf:type sh:NodeShape;
+  sh:targetClass log:Application;
+  sh:or (
+    [ sh:path log:applicationName ]
+    [ sh:path log:applicationVendor ]
+    [ sh:path log:applicationVersion ]
+    [ sh:path log:hasProcess ]
+  );
+  sh:property [
+    sh:path log:applicationName;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Application may have at most one name";
+  ];
+  sh:property [
+    sh:path log:applicationVendor;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Application may have at most one vendor";
+  ];
+  sh:property [
+    sh:path log:applicationVersion;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Application may have at most one version";
+  ].
+
+log:FileShape rdf:type sh:NodeShape;
+  sh:targetClass log:File;
+  sh:property [
+    sh:path log:fileName;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "File may have at most one name";
+  ];
+  sh:property [
+    sh:path log:filePath;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "File may have at most one path";
+  ];
+  sh:property [
+    sh:path log:fileSize;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "File may have at most one size";
+  ];
+  sh:property [
+    sh:path log:filePermissions;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "File may have at most one permissions value";
+  ];
+  sh:property [
+    sh:path log:fileLine;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "File may have at most one hash";
+  ];
+  sh:property [
+    sh:path log:fileHash;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "File may have at most one hash";
+  ];
+  sh:property [
+    sh:path log:fileHashType;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:condition [
+      sh:path log:fileHash;
+      sh:minCount 1;
+    ];
+    sh:message "File may have at most one hash type";
+  ].
+
+log:ProcessShape rdf:type sh:NodeShape;
+  sh:targetClass log:Process;
+  sh:or (
+    [ sh:path log:processPID ]
+    [ sh:path log:processTID ]
+    [ sh:path log:processSignal ]
+  );
+  sh:property [
+    sh:path log:processPID;
+    sh:or (
+      [ sh:datatype xsd:string ]
+      [ sh:datatype xsd:integer ]
+    );
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Process may have at most one PID";
+  ];
+  sh:property [
+    sh:path log:processTID;
+    sh:or (
+      [ sh:datatype xsd:string ]
+      [ sh:datatype xsd:integer ]
+    );
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Process may have at most one TID";
+  ];
+  sh:property [
+    sh:path log:processSignal;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Process may have at most one signal";
+  ].
+  
+log:URLShape rdf:type sh:NodeShape;
+  sh:targetClass log:URL;
+  sh:property [
+    sh:path log:url;
+    sh:datatype xsd:string;
+    sh:minCount 1;
+    sh:maxCount 1;
+    sh:pattern "^https?://[\\w.-]+(:\\d+)?(/.*)?$"^^xsd:string;
+    sh:message "URL must have an url address";
+  ].
+
+log:UserShape rdf:type sh:NodeShape;
+  sh:targetClass log:User;
+  sh:or (
+    [ sh:path log:userName ]
+    [ sh:path log:userUID ]
+    [ sh:path log:userAUID ]
+    [ sh:path log:userGID ]
+    [ sh:path log:userDomain ]
+    [ sh:path log:userGroupName ]
+  );
+  sh:property [
+    sh:path log:userName;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "User may have at most one name";
+  ];
+  sh:property [
+    sh:path log:userUID;
+    sh:or (
+      [ sh:datatype xsd:string ]
+      [ sh:datatype xsd:integer ]
+    );
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "User may have at most one UID";
+  ];
+  sh:property [
+    sh:path log:userAUID;
+    sh:or (
+      [ sh:datatype xsd:string ]
+      [ sh:datatype xsd:integer ]
+    );
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "User may have at most one AUID";
+  ];
+  sh:property [
+    sh:path log:userGID;
+    sh:or (
+      [ sh:datatype xsd:string ]
+      [ sh:datatype xsd:integer ]
+    );
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "User may have at most one GID";
+  ];
+  sh:property [
+    sh:path log:userDomain;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "User may have at most one domain";
+  ];
+  sh:property [
+    sh:path log:userGroupName;
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "User may have at most one group name";
+  ].
+

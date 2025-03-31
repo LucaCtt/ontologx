@@ -219,29 +219,23 @@
   rdfs:range xsd:string;
   rdfs:comment "Application version".
 
-###  http://example.com/lkgb/logs/dictionary#fileHashSHA256
-:fileHashSHA256 rdf:type owl:DatatypeProperty;
+###  http://example.com/lkgb/logs/dictionary#fileHash
+:fileHash rdf:type owl:DatatypeProperty;
   rdfs:domain :File;
   rdfs:range xsd:string;
-  rdfs:comment "File SHA256 Hashsum".
+  rdfs:comment "File hashsum".
 
-###  http://example.com/lkgb/logs/dictionary#fileHashMD5
-:fileHashMD5 rdf:type owl:DatatypeProperty;
+###  http://example.com/lkgb/logs/dictionary#fileHashType
+:fileHashType rdf:type owl:DatatypeProperty;
   rdfs:domain :File;
   rdfs:range xsd:string;
-  rdfs:comment "File MD5 Hashsum".
+  rdfs:comment "File hash type (e.g. MD5, SHA1, SHA256)".
 
 ###  http://example.com/lkgb/logs/dictionary#fileLine
 :fileLine rdf:type owl:DatatypeProperty;
   rdfs:domain :File;
   rdfs:range xsd:integer;
   rdfs:comment "File line number".
-
-###  http://example.com/lkgb/logs/dictionary#fileModes
-:fileModes rdf:type owl:DatatypeProperty;
-  rdfs:domain :File;
-  rdfs:range xsd:string;
-  rdfs:comment "File mode flags".
 
 ###  http://example.com/lkgb/logs/dictionary#fileName
 :fileName rdf:type owl:DatatypeProperty;

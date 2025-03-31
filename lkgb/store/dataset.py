@@ -10,9 +10,10 @@ from lkgb.config import Config
 from lkgb.store.driver import Driver
 from lkgb.store.module import StoreModule
 
-EVENTS_INDEX_NAME = "eventMessageIndex"
+EVENTS_INDEX_BASE = "eventMessageIndex"
 LOG_EXAMPLES_URL = "http://example.com/lkgb/logs/examples"
 LOG_TESTS_URL = "http://example.com/lkgb/logs/tests"
+LOG_RUN_URL = "http://example.com/lkgb/logs/run/"
 
 
 class Dataset(StoreModule):
@@ -26,6 +27,8 @@ class Dataset(StoreModule):
 
         self.__driver = driver
         self.__embeddings = embeddings
+
+        self.__index_name = f"{EVENTS_INDEX_BASE}_{self._config.experiment_id}"
 
     def initialize(self) -> None:
         # Check if the examples are already loaded
@@ -47,7 +50,7 @@ class Dataset(StoreModule):
         # Create the vector index
         self.__driver.query(
             f"""
-            CREATE VECTOR INDEX {EVENTS_INDEX_NAME}
+            CREATE VECTOR INDEX {self.__index_name}
             FOR (n:Event) ON n.embedding
             OPTIONS {{ indexConfig : {{
                 `vector.similarity_function` : 'cosine'
@@ -87,7 +90,10 @@ class Dataset(StoreModule):
         )
 
     def clear(self) -> None:
-        self.__driver.query(f"DROP INDEX {EVENTS_INDEX_NAME} IF EXISTS")
+        vector_indexes = self.__driver.query("SHOW VECTOR INDEXES YIELD name")
+        for index in vector_indexes:
+            self.__driver.query(f"DROP INDEX {index['name']}")
+
         self.__driver.query(
             """
             MATCH (n:Resource)
@@ -96,12 +102,13 @@ class Dataset(StoreModule):
             """,
             params={"examples_url": LOG_EXAMPLES_URL, "tests_url": LOG_TESTS_URL},
         )
-        # TODO: Make this more specific
         self.__driver.query(
             """
             MATCH (n)
+            WHERE n.uri STARTS WITH $run_url
             DETACH DELETE n
             """,
+            params={"run_url": LOG_RUN_URL},
         )
 
     def tests(self) -> list[tuple[str, dict, GraphDocument]]:
@@ -109,6 +116,7 @@ class Dataset(StoreModule):
             """
             MATCH (n:Event)
             WHERE n.uri STARTS WITH $log_tests_url
+            ORDER BY n.uri
             RETURN n.eventMessage as message, n.uri as uri
             """,
             params={"log_tests_url": LOG_TESTS_URL},
@@ -145,7 +153,7 @@ class Dataset(StoreModule):
                 additional_properties["embedding"] = self.__embeddings.embed_query(node.properties["eventMessage"])
 
             self.__driver.query(
-                "CALL apoc.create.node([$type], $props) YIELD node",
+                "CALL apoc.create.node([$type, 'Run'], $props) YIELD node",
                 params={"type": node.type, "props": {**node.properties, **additional_properties}},
             )
 
@@ -186,7 +194,6 @@ class Dataset(StoreModule):
         """
         query_embeddings = self.__embeddings.embed_query(event)
 
-        # TODO: fix: this also retrieves stuff with different experimentId
         # Find k similar events using embeddings
         similar_events = self.__driver.query(
             """
@@ -194,7 +201,7 @@ class Dataset(StoreModule):
             YIELD node, score
             RETURN node.eventMessage as eventMessage, node.uri AS node_uri, node.embedding AS embedding, score
             """,
-            params={"index": EVENTS_INDEX_NAME, "k": fetch_k, "embedding": query_embeddings},
+            params={"index": self.__index_name, "k": fetch_k, "embedding": query_embeddings},
         )
 
         embeddings = [similar_event["embedding"] for similar_event in similar_events]
