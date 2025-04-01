@@ -27,13 +27,12 @@ DEFAULT_LLM_MODELS = {
     "ollama": "qwen2.5-coder:14b",
     "huggingface": "Qwen/Qwen2.5-Coder-14B-Instruct",
     "google-ai": "gemini-2.0-flash",
-    "groq": "qwen-qwq-32b",
 }
 
 DEFAULT_EMBEDDINGS_MODELS = {
     "ollama": "snowflake-arctic-embed:110m",
     "huggingface": "Snowflake/snowflake-arctic-embed-m",
-    "google-ai": "gemini-embedding-exp-03-07",
+    "google-ai": "models/text-embedding-004",
 }
 
 
@@ -52,14 +51,27 @@ class Config:
     # The path to the ontology file.
     ontology_path = os.getenv("ONTOLOGY_PATH", "resources/ontologies/logs.ttl")
 
-    # The path to the SHACL constraints file for the ontology.
-    shacl_path = os.getenv("CONSTRAINTS_PATH", "resources/ontologies/logs_shacl.ttl")
+    # The URI of the ontology.
+    ontology_uri = os.getenv("ONTOLOGY_URI", "https://cyberseclab.unibs.it/ontologx/log/dictionary")
 
     # The path to the examples log graphs file.
+    # Used to retrieve the examples
     examples_path = os.getenv("EXAMPLES_PATH", "resources/data/train.ttl")
 
+    # The URI of the examples.
+    examples_uri = os.getenv("EXAMPLES_URI", "https://cyberseclab.unibs.it/ontologx/log/examples")
+
     # The input path to the logs to parse.
-    tests_path = os.getenv("TEST_LOG_PATH", "resources/data/test.ttl")
+    tests_path = os.getenv("TESTS_PATH", "resources/data/test.ttl")
+
+    # The URI of the tests.
+    tests_uri = os.getenv("TESTS_URI", "https://cyberseclab.unibs.it/ontologx/log/tests")
+
+    # The URI of the run nodes.
+    run_uri = os.getenv("RUN_URI", "https://cyberseclab.unibs.it/ontologx/log/run")
+
+    # The path to the SHACL constraints file for the ontology.
+    shacl_path = os.getenv("CONSTRAINTS_PATH", "resources/ontologies/logs_shacl.ttl")
 
     # The prompt used to build the graph
     prompt_build_graph = os.getenv("PROMPT_BUILD_GRAPH", Path("resources/prompts/build_graph.system.md").read_text())
@@ -110,6 +122,15 @@ class Config:
     # The number of self-reflection steps to take.
     # Must be greater or equal than 0.
     self_reflection_steps = int(os.getenv("SELF_REFLECTION_STEPS", "3"))
+
+    # The name of the vector index to use for the events in the graph store.
+    events_index_name = os.getenv("EVENTS_INDEX_NAME", "eventMessageIndex")
+
+    # The name of the neosemantics constraint for unique URIs
+    n10s_constraint_name = os.getenv("N10S_CONSTRAINT_NAME", "n10s_unique_uri")
+
+    # The name of the neosemantics trigger for validating the graph.
+    n10s_trigger_name = os.getenv("N10S_TRIGGER_NAME", "shacl-validate")
 
     def __init__(self):
         if self.parser_temperature < 0 or self.parser_temperature > 1:

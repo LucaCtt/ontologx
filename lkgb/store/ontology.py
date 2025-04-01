@@ -6,12 +6,9 @@ from lkgb.config import Config
 from lkgb.store.driver import Driver
 from lkgb.store.module import StoreModule
 
-LOG_ONTOLOGY_URL = "http://example.com/lkgb/logs/dictionary"
-TIME_ONTOLOGY_URL = "http://www.w3.org/2006/time"
-XML_SCHEMA_URL = "http://www.w3.org/2001/XMLSchema#"
-OWL_SCHEMA_URL = "http://www.w3.org/2002/07/owl#"
-N10S_CONSTRAINT_NAME = "n10s_unique_uri"
-N10S_TRIGGER_NAME = "shacl-validate"
+TIME_ONTOLOGY_URI = "http://www.w3.org/2006/time"
+XML_SCHEMA_URI = "http://www.w3.org/2001/XMLSchema#"
+OWL_SCHEMA_URI = "http://www.w3.org/2002/07/owl#"
 
 
 class Ontology(StoreModule):
@@ -35,7 +32,9 @@ class Ontology(StoreModule):
         # Init neosemantics plugin
         self.__driver.query("CALL n10s.graphconfig.init()")
         self.__driver.query("CALL n10s.graphconfig.set({ handleVocabUris: 'IGNORE' })")
-        self.__driver.query(f"CREATE CONSTRAINT {N10S_CONSTRAINT_NAME} FOR (r:Resource) REQUIRE r.uri IS UNIQUE")
+        self.__driver.query(
+            f"CREATE CONSTRAINT {self._config.n10s_constraint_name} FOR (r:Resource) REQUIRE r.uri IS UNIQUE",
+        )
 
         # Load the ontologies
         self.__driver.query(
@@ -44,7 +43,7 @@ class Ontology(StoreModule):
         )
         self.__driver.query(
             "CALL n10s.onto.import.fetch($url, 'Turtle')",
-            params={"url": TIME_ONTOLOGY_URL},
+            params={"url": TIME_ONTOLOGY_URI},
         )
 
         # Load the constraints
@@ -72,7 +71,7 @@ class Ontology(StoreModule):
                 { labels: ['Run']},
                 {phase:'before'})
             """,
-            params={"trigger_name": N10S_TRIGGER_NAME},
+            params={"trigger_name": self._config.n10s_trigger_name},
         )
 
     def clear(self) -> None:
@@ -81,27 +80,27 @@ class Ontology(StoreModule):
         self.__driver.query("MATCH (n:_n10sValidatorConfig) DETACH DELETE n")
         self.__driver.query(
             """
-            MATCH (n:Resource) WHERE n.uri STARTS WITH $time_url
-                OR n.uri STARTS WITH $log_url
-                OR n.uri STARTS WITH $xml_schema_url
-                OR n.uri STARTS WITH $owl_schema_url
+            MATCH (n:Resource) WHERE n.uri STARTS WITH $time_uri
+                OR n.uri STARTS WITH $log_uri
+                OR n.uri STARTS WITH $xml_schema_uri
+                OR n.uri STARTS WITH $owl_schema_uri
             DETACH DELETE n
             """,
             params={
-                "time_url": TIME_ONTOLOGY_URL,
-                "log_url": LOG_ONTOLOGY_URL,
-                "xml_schema_url": XML_SCHEMA_URL,
-                "owl_schema_url": OWL_SCHEMA_URL,
+                "time_uri": TIME_ONTOLOGY_URI,
+                "log_uri": self._config.ontology_uri,
+                "xml_schema_uri": XML_SCHEMA_URI,
+                "owl_schema_uri": OWL_SCHEMA_URI,
             },
         )
         self.__driver.query(
             "DROP CONSTRAINT $constraint_name IF EXISTS",
-            params={"constraint_name": N10S_CONSTRAINT_NAME},
+            params={"constraint_name": self._config.n10s_constraint_name},
         )
 
         self.__driver.query(
             "USE system CALL apoc.trigger.drop('neo4j',$trigger_name)",
-            params={"trigger_name": N10S_TRIGGER_NAME},
+            params={"trigger_name": self._config.n10s_trigger_name},
         )
 
     def graph(self) -> GraphDocument:
@@ -121,15 +120,15 @@ class Ontology(StoreModule):
         nodes_with_props = self.__driver.query(
             """
             MATCH (c:Class)
-            WHERE c.uri STARTS WITH $log_ontology_url OR c.uri = $time_instant_url OR c.uri = $time_datetime_url
+            WHERE c.uri STARTS WITH $log_ontology_uri OR c.uri = $time_instant_uri OR c.uri = $time_datetime_uri
             OPTIONAL MATCH (c)<-[:DOMAIN]-(p:Property)
             WITH c.name AS class, c.uri as uri, COLLECT([p.name, p.comment]) AS pairs
             RETURN class, uri, apoc.map.fromPairs(pairs) AS properties
             """,
             params={
-                "log_ontology_url": LOG_ONTOLOGY_URL,
-                "time_instant_url": f"{TIME_ONTOLOGY_URL}#Instant",
-                "time_datetime_url": f"{TIME_ONTOLOGY_URL}#GeneralDateTimeDescription",
+                "log_ontology_uri": self._config.ontology_uri,
+                "time_instant_uri": f"{TIME_ONTOLOGY_URI}#Instant",
+                "time_datetime_uri": f"{TIME_ONTOLOGY_URI}#GeneralDateTimeDescription",
             },
         )
         nodes_dict = {
@@ -141,21 +140,21 @@ class Ontology(StoreModule):
             MATCH (n:Class)<-[:DOMAIN]-(r:Relationship)-[:RANGE]->(m:Class)
             WHERE
             (
-                n.uri STARTS WITH $log_ontology_url
-                AND m.uri STARTS WITH $log_ontology_url
-                AND r.uri STARTS WITH $log_ontology_url
+                n.uri STARTS WITH $log_ontology_uri
+                AND m.uri STARTS WITH $log_ontology_uri
+                AND r.uri STARTS WITH $log_ontology_uri
             )
             OR
             (
-                n.uri = $time_instant_url
-                AND m.uri = $time_datetime_url
+                n.uri = $time_instant_uri
+                AND m.uri = $time_datetime_uri
             )
             RETURN n.uri AS subject_uri, r.name AS predicate, m.uri AS object_uri
             """,
             params={
-                "log_ontology_url": LOG_ONTOLOGY_URL,
-                "time_instant_url": f"{TIME_ONTOLOGY_URL}#Instant",
-                "time_datetime_url": f"{TIME_ONTOLOGY_URL}#GeneralDateTimeDescription",
+                "log_ontology_uri": self._config.ontology_uri,
+                "time_instant_uri": f"{TIME_ONTOLOGY_URI}#Instant",
+                "time_datetime_uri": f"{TIME_ONTOLOGY_URI}#GeneralDateTimeDescription",
             },
         )
         relationships = [

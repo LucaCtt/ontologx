@@ -1,13 +1,13 @@
-@base <http://example.com/lkgb/logs/dictionary>.
-@prefix : <http://example.com/lkgb/logs/dictionary#>.
+@base <https://cyberseclab.unibs.it/ontologx/log/dictionary>.
+@prefix : <https://cyberseclab.unibs.it/ontologx/log/dictionary#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix time: <http://www.w3.org/2006/time#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 
-<http://example.com/lkgb/logs/dictionary> rdf:type owl:Ontology;
-  owl:versionIRI <http://example.com/lkgb/logs/dictionary/1.0.0>;
+<https://cyberseclab.unibs.it/ontologx/log/dictionary> rdf:type owl:Ontology;
+  owl:versionIRI <https://cyberseclab.unibs.it/ontologx/log/dictionary/1.0.0>;
   <http://purl.org/dc/elements/1.1/creator> "Luca Cotti";
   <http://purl.org/dc/elements/1.1/description> "An ontology to represent log events.";
   <http://purl.org/dc/elements/1.1/rights> "http://creativecommons.org/licenses/by/4.0/";
@@ -35,48 +35,48 @@
 #################################################################
 #    Classes
 #################################################################
-###  http://example.com/lkgb/logs/dictionary#Event
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#Event
 :Event rdf:type owl:Class;
   rdfs:comment "A single log event, such a log line in a log file.";
   rdfs:label "Event".
 
-###  http://example.com/lkgb/logs/dictionary#Source
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#Source
 :Source rdf:type owl:Class;
   rdfs:comment "A log source, such as an aggregation of logs from different applications (e.g., SysLog) or aggregation of several log files from different devices.";
   rdfs:label "Source".
 
-###  http://example.com/lkgb/logs/dictionary#TimeStamp
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#TimeStamp
 :TimeStamp rdf:type owl:Class;
   rdfs:subClassOf time:Instant;
   rdfs:comment "A timestamp associated with an event.";
   rdfs:label "Timestamp".
 
-###  http://example.com/lkgb/logs/dictionary#Address
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#Address
 :Address rdf:type owl:Class;
   rdfs:comment "A logical address in a network, such as an IP address or a MAC address.";
   rdfs:label "Network Address".
 
-###  http://example.com/lkgb/logs/dictionary#Application
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#Application
 :Application rdf:type owl:Class;
   rdfs:comment "An application, such as a web server, a database, etc.";
   rdfs:label "Application".
 
-###  http://example.com/lkgb/logs/dictionary#File
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#File
 :File rdf:type owl:Class;
   rdfs:comment "A file, such as a configuration file, a data file, etc.";
   rdfs:label "File".
 
-###  http://example.com/lkgb/logs/dictionary#Process
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#Process
 :Process rdf:type owl:Class;
   rdfs:comment "An operating system process, such as a daemon, a service, etc.";
   rdfs:label "Process".
 
-###  http://example.com/lkgb/logs/dictionary#URL
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#URL
 :URL rdf:type owl:Class;
   rdfs:comment "A URL, e.g. leading to a web page, a file, etc.";
   rdfs:label "URL".
 
-###  http://example.com/lkgb/logs/dictionary#User
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#User
 :User rdf:type owl:Class;
   rdfs:comment "A user account, such as a local user, a domain user, etc.";
   rdfs:label "User Account".
@@ -84,49 +84,49 @@
 #################################################################
 #    Object Properties
 #################################################################
-###  http://example.com/lkgb/logs/dictionary#hasAddress
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#hasAddress
 :hasAddress rdf:type owl:ObjectProperty;
   rdfs:domain :Event;
   rdfs:range :Address;
   rdfs:comment "Relation between an Event and a Network Address.".
 
-###  http://example.com/lkgb/logs/dictionary#hasApplication
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#hasApplication
 :hasApplication rdf:type owl:ObjectProperty;
   rdfs:domain :Event;
   rdfs:range :Application;
   rdfs:comment "Relation between an Event and an Application mentioned in it.".
 
-###  http://example.com/lkgb/logs/dictionary#hasFile
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#hasFile
 :hasFile rdf:type owl:ObjectProperty;
   rdfs:domain :Event;
   rdfs:range :File;
   rdfs:comment "Relation between an Event and a File mentioned in it.".
 
-###  http://example.com/lkgb/logs/dictionary#hasProcess
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#hasProcess
 :hasProcess rdf:type owl:ObjectProperty;
   rdfs:domain :Application;
   rdfs:range :Process;
   rdfs:comment "Relation between an Application and its system process.".
 
-###  http://example.com/lkgb/logs/dictionary#hasSource
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#hasSource
 :hasSource rdf:type owl:ObjectProperty;
   rdfs:domain :Event;
   rdfs:range :Source;
   rdfs:comment "Relation between an Event and the data Source it originates from (e.g. a file, or a log stream).".
 
-###  http://example.com/lkgb/logs/dictionary#hasURL
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#hasURL
 :hasURL rdf:type owl:ObjectProperty;
   rdfs:domain :Event;
   rdfs:range :URL;
   rdfs:comment "Relation between an Event and a URL mentioned in it.".
 
-###  http://example.com/lkgb/logs/dictionary#hasUser
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#hasUser
 :hasUser rdf:type owl:ObjectProperty;
   rdfs:domain :Event;
   rdfs:range :User;
   rdfs:comment "Relation between an Event and a User mentioned in it.".
 
-###  http://example.com/lkgb/logs/dictionary#hasTimeStamp
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#hasTimeStamp
 :hasTimeStamp rdf:type owl:ObjectProperty;
   rdfs:domain :Event;
   rdfs:range :TimeStamp;
@@ -135,229 +135,229 @@
 #################################################################
 #    Data properties
 #################################################################
-###  http://example.com/lkgb/logs/dictionary#addressIPV4
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#addressIPV4
 :addressIPV4 rdf:type owl:DatatypeProperty;
   rdfs:domain :Address;
   rdfs:range xsd:string;
   rdfs:comment "IPv4 address".
 
-###  http://example.com/lkgb/logs/dictionary#addressIPV6
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#addressIPV6
 :addressIPV6 rdf:type owl:DatatypeProperty;
   rdfs:domain :Address;
   rdfs:range xsd:string;
   rdfs:comment "IPv6 address".
 
-###  http://example.com/lkgb/logs/dictionary#addressHostname
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#addressHostname
 :addressHostname rdf:type owl:DatatypeProperty;
   rdfs:domain :Address;
   rdfs:range xsd:string;
   rdfs:comment "Hostname associated with the address".
 
-###  http://example.com/lkgb/logs/dictionary#addressMAC
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#addressMAC
 :addressMAC rdf:type owl:DatatypeProperty;
   rdfs:domain :Address;
   rdfs:range xsd:string;
   rdfs:comment "MAC address associated with the address".
 
-###  http://example.com/lkgb/logs/dictionary#addressPort
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#addressPort
 :addressPort rdf:type owl:DatatypeProperty;
   rdfs:domain :Address;
   rdfs:range xsd:integer;
   rdfs:comment "Port".
 
-###  http://example.com/lkgb/logs/dictionary#addressCity
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#addressCity
 :addressCity rdf:type owl:DatatypeProperty;
   rdfs:domain :Address;
   rdfs:range xsd:string;
   rdfs:comment "City in which the address is located".
 
-###  http://example.com/lkgb/logs/dictionary#addressRegion
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#addressRegion
 :addressRegion rdf:type owl:DatatypeProperty;
   rdfs:domain :Address;
   rdfs:range xsd:string;
   rdfs:comment "Region in which the address is located".
 
-###  http://example.com/lkgb/logs/dictionary#addressCountry
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#addressCountry
 :addressCountry rdf:type owl:DatatypeProperty;
   rdfs:domain :Address;
   rdfs:range xsd:string;
   rdfs:comment "Country in which the address is located".
 
-###  http://example.com/lkgb/logs/dictionary#addressTimezone
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#addressTimezone
 :addressTimezone rdf:type owl:DatatypeProperty;
   rdfs:domain :Address;
   rdfs:range xsd:string;
   rdfs:comment "Timezone in which the address is located".
 
-###  http://example.com/lkgb/logs/dictionary#addressASN
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#addressASN
 :addressASN rdf:type owl:DatatypeProperty;
   rdfs:domain :Address;
   rdfs:range xsd:string;
   rdfs:comment "Autonomous System Number associated with the address".
 
-###  http://example.com/lkgb/logs/dictionary#addressOrganization
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#addressOrganization
 :addressOrganization rdf:type owl:DatatypeProperty;
   rdfs:domain :Address;
   rdfs:range xsd:string;
   rdfs:comment "Organization associated with the address".
 
-###  http://example.com/lkgb/logs/dictionary#applicationName
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#applicationName
 :applicationName rdf:type owl:DatatypeProperty;
   rdfs:domain :Application;
   rdfs:range xsd:string;
   rdfs:comment "Application name".
 
-###  http://example.com/lkgb/logs/dictionary#applicationVendor
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#applicationVendor
 :applicationVendor rdf:type owl:DatatypeProperty;
   rdfs:domain :Application;
   rdfs:range xsd:string;
   rdfs:comment "Application vendor".
 
-###  http://example.com/lkgb/logs/dictionary#applicationVersion
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#applicationVersion
 :applicationVersion rdf:type owl:DatatypeProperty;
   rdfs:domain :Application;
   rdfs:range xsd:string;
   rdfs:comment "Application version".
 
-###  http://example.com/lkgb/logs/dictionary#fileHash
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#fileHash
 :fileHash rdf:type owl:DatatypeProperty;
   rdfs:domain :File;
   rdfs:range xsd:string;
   rdfs:comment "File hashsum".
 
-###  http://example.com/lkgb/logs/dictionary#fileHashType
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#fileHashType
 :fileHashType rdf:type owl:DatatypeProperty;
   rdfs:domain :File;
   rdfs:range xsd:string;
   rdfs:comment "File hash type (e.g. MD5, SHA1, SHA256)".
 
-###  http://example.com/lkgb/logs/dictionary#fileLine
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#fileLine
 :fileLine rdf:type owl:DatatypeProperty;
   rdfs:domain :File;
   rdfs:range xsd:integer;
   rdfs:comment "File line number".
 
-###  http://example.com/lkgb/logs/dictionary#fileName
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#fileName
 :fileName rdf:type owl:DatatypeProperty;
   rdfs:domain :File;
   rdfs:range xsd:string;
   rdfs:comment "File name".
 
-###  http://example.com/lkgb/logs/dictionary#filePath
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#filePath
 :filePath rdf:type owl:DatatypeProperty;
   rdfs:domain :File;
   rdfs:range xsd:string;
   rdfs:comment "File system path".
 
-###  http://example.com/lkgb/logs/dictionary#filePermissions
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#filePermissions
 :filePermissions rdf:type owl:DatatypeProperty;
   rdfs:domain :File;
   rdfs:range xsd:string;
   rdfs:comment "File permissions".
 
-###  http://example.com/lkgb/logs/dictionary#fileSize
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#fileSize
 :fileSize rdf:type owl:DatatypeProperty;
   rdfs:domain :File;
   rdfs:range xsd:integer;
   rdfs:comment "File size in octets".
 
-###  http://example.com/lkgb/logs/dictionary#eventCommand
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#eventCommand
 :eventCommand rdf:type owl:DatatypeProperty;
   rdfs:domain :Event;
   rdfs:range xsd:string;
   rdfs:comment "Command".
 
-###  http://example.com/lkgb/logs/dictionary#eventMessage
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#eventMessage
 :eventMessage rdf:type owl:DatatypeProperty;
   rdfs:domain :Event;
   rdfs:range xsd:string;
   rdfs:comment "Event message".
 
-###  http://example.com/lkgb/logs/dictionary#eventSeverity
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#eventSeverity
 :eventSeverity rdf:type owl:DatatypeProperty;
   rdfs:domain :Event;
   rdfs:range xsd:string;
   rdfs:comment "Event priority (e.g. ERROR, WARN, DEBUG, CRIT)".
 
-###  http://example.com/lkgb/logs/dictionary#processPID
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#processPID
 :processPID rdf:type owl:DatatypeProperty;
   rdfs:domain :Process;
   rdfs:range xsd:integer;
   rdfs:comment "Process ID (pid)".
 
-###  http://example.com/lkgb/logs/dictionary#processTID
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#processTID
 :processTID rdf:type owl:DatatypeProperty;
   rdfs:domain :Process;
   rdfs:range xsd:integer;
   rdfs:comment "Thread identifier of the process".
 
-###  http://example.com/lkgb/logs/dictionary#processSignal
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#processSignal
 :processSignal rdf:type owl:DatatypeProperty;
   rdfs:domain :Process;
   rdfs:range xsd:string;
   rdfs:comment "Signal sent to the process".
 
-###  http://example.com/lkgb/logs/dictionary#urlParam
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#urlParam
 :urlParam rdf:type owl:DatatypeProperty;
   rdfs:domain :URL;
   rdfs:range xsd:string;
   rdfs:comment "URL parameter".
 
-###  http://example.com/lkgb/logs/dictionary#url
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#url
 :url rdf:type owl:DatatypeProperty;
   rdfs:domain :URL;
   rdfs:range xsd:string;
   rdfs:comment "Complete URL".
 
-###  http://example.com/lkgb/logs/dictionary#userDomain
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#userDomain
 :userDomain rdf:type owl:DatatypeProperty;
   rdfs:domain :User;
   rdfs:range xsd:string;
   rdfs:comment "User account NT domain".
 
-###  http://example.com/lkgb/logs/dictionary#userGID
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#userGID
 :userGID rdf:type owl:DatatypeProperty;
   rdfs:domain :User;
   rdfs:range xsd:integer;
   rdfs:comment "User account group ID (gid)".
 
-###  http://example.com/lkgb/logs/dictionary#userGroupName
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#userGroupName
 :userGroupName rdf:type owl:DatatypeProperty;
   rdfs:domain :User;
   rdfs:range xsd:string;
   rdfs:comment "User account group name".
 
-###  http://example.com/lkgb/logs/dictionary#userUID
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#userUID
 :userUID rdf:type owl:DatatypeProperty;
   rdfs:domain :User;
   rdfs:range xsd:integer;
   rdfs:comment "User account ID (uid)".
 
-###  http://example.com/lkgb/logs/dictionary#userAUID
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#userAUID
 :userAUID rdf:type owl:DatatypeProperty;
   rdfs:domain :User;
   rdfs:range xsd:integer;
   rdfs:comment "User account audit ID (auid)".
 
-###  http://example.com/lkgb/logs/dictionary#userName
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#userName
 :userName rdf:type owl:DatatypeProperty;
   rdfs:domain :User;
   rdfs:range xsd:string;
   rdfs:comment "User account name".
 
-###  http://example.com/lkgb/logs/dictionary#sourceType
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#sourceType
 :sourceType rdf:type owl:DatatypeProperty;
   rdfs:domain :Source;
   rdfs:range xsd:string;
   rdfs:comment "Type of log source (e.g. SysLog, Windows Event Log, etc.)".
 
-###  http://example.com/lkgb/logs/dictionary#sourceName
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#sourceName
 :sourceName rdf:type owl:DatatypeProperty;
   rdfs:domain :Source;
   rdfs:range xsd:string;
   rdfs:comment "Name of the log source (e.g. file name, log stream name, etc.)".
 
-###  http://example.com/lkgb/logs/dictionary#sourceDevice
+###  https://cyberseclab.unibs.it/ontologx/log/dictionary#sourceDevice
 :sourceDevice rdf:type owl:DatatypeProperty;
   rdfs:domain :Source;
   rdfs:range xsd:string;

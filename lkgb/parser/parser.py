@@ -108,11 +108,10 @@ class Parser:
         for similar_event, graph in similar_events:
             source_node = next((node for node in graph.nodes if node.type == "Source"), None)
 
-            context = {
-                key: source_node.properties[key]
-                for key in ["sourceName", "sourceType", "sourceDevice"]
-                if source_node and key in source_node.properties
-            }
+            context = {}
+            if source_node:
+                context["source"] = source_node.properties.get("sourceName", "")
+                context["device"] = source_node.properties.get("sourceDevice", "")
 
             messages.extend(_get_message_group(similar_event, graph, context))
 

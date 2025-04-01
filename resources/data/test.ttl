@@ -1,5 +1,5 @@
-@prefix : <http://example.com/lkgb/logs/tests#>.
-@prefix log: <http://example.com/lkgb/logs/dictionary#>.
+@prefix : <https://cyberseclab.unibs.it/ontologx/log/tests#>.
+@prefix log: <https://cyberseclab.unibs.it/ontologx/log/dictionary#>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix time: <http://www.w3.org/2006/time#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.

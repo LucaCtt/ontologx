@@ -127,18 +127,18 @@ class GoogleAIBackend(Backend):
 
     def embeddings(self, model: str) -> Embeddings:
         try:
-            from langchain_googleai.embeddings import GoogleAIEmbeddings  # type: ignore[import]
+            from langchain_google_genai.embeddings import GoogleGenerativeAIEmbeddings  # type: ignore[import]
 
-            return GoogleAIEmbeddings(model=model)
+            return GoogleGenerativeAIEmbeddings(model=model)
         except ModuleNotFoundError as e:
             msg = "Please install langchain-googleai to use GoogleAIBackend"
             raise ImportError(msg) from e
 
     def llm(self, model: str, temperature: float) -> BaseChatModel:
         try:
-            from langchain_googleai import ChatGoogleAI  # type: ignore[import]
+            from langchain_google_genai import ChatGoogleGenerativeAI  # type: ignore[import]
 
-            return ChatGoogleAI(model=model, temperature=temperature)
+            return ChatGoogleGenerativeAI(model=model, temperature=temperature)
         except ModuleNotFoundError as e:
             msg = "Please install langchain-googleai to use GoogleAIBackend"
             raise ImportError(msg) from e

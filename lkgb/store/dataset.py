@@ -1,19 +1,14 @@
 from pathlib import Path
 from typing import Any
 
-import numpy as np
-from langchain_community.vectorstores.utils import maximal_marginal_relevance
+import neo4j
 from langchain_core.embeddings import Embeddings
-from langchain_neo4j.graphs.graph_document import GraphDocument
+from langchain_neo4j import Neo4jVector
+from langchain_neo4j.graphs.graph_document import GraphDocument, Node, Relationship
 
 from lkgb.config import Config
 from lkgb.store.driver import Driver
 from lkgb.store.module import StoreModule
-
-EVENTS_INDEX_BASE = "eventMessageIndex"
-LOG_EXAMPLES_URL = "http://example.com/lkgb/logs/examples"
-LOG_TESTS_URL = "http://example.com/lkgb/logs/tests"
-LOG_RUN_URL = "http://example.com/lkgb/logs/run/"
 
 
 class Dataset(StoreModule):
@@ -28,16 +23,25 @@ class Dataset(StoreModule):
         self.__driver = driver
         self.__embeddings = embeddings
 
-        self.__index_name = f"{EVENTS_INDEX_BASE}_{self._config.experiment_id}"
+        self.__vector_index = Neo4jVector(
+            embedding=self.__embeddings,
+            node_label="Event",
+            embedding_node_property="embedding",
+            text_node_property="eventMessage",
+            url=self._config.neo4j_url,
+            username=self._config.neo4j_username,
+            password=self._config.neo4j_password,
+            index_name=self._config.events_index_name,
+            retrieval_query="""
+            RETURN node.eventMessage AS text,
+            score,
+            {uri: node.uri, experimentId: node.experimentId, _embedding_: node.embedding} AS metadata
+            """,
+        )
 
     def initialize(self) -> None:
         # Check if the examples are already loaded
-        result = self.__driver.query(
-            """
-            MATCH (n:Resource) WHERE n.uri STARTS WITH $examples_uri RETURN COUNT(n) AS count
-            """,
-            params={"examples_uri": LOG_EXAMPLES_URL},
-        )
+        result = self.__driver.query("MATCH (n:Event:Resource) RETURN COUNT(n) AS count")
         if result[0]["count"] != 0:
             return
 
@@ -47,16 +51,8 @@ class Dataset(StoreModule):
             params={"examples": Path(self._config.examples_path).read_text()},
         )
 
-        # Create the vector index
-        self.__driver.query(
-            f"""
-            CREATE VECTOR INDEX {self.__index_name}
-            FOR (n:Event) ON n.embedding
-            OPTIONS {{ indexConfig : {{
-                `vector.similarity_function` : 'cosine'
-            }} }}
-            """,
-        )
+        # Create the index for the event messages
+        self.__vector_index.create_new_index()
 
         # Populate the embeddings for the examples
         to_populate = self.__driver.query(
@@ -90,40 +86,37 @@ class Dataset(StoreModule):
         )
 
     def clear(self) -> None:
-        vector_indexes = self.__driver.query("SHOW VECTOR INDEXES YIELD name")
-        for index in vector_indexes:
-            self.__driver.query(f"DROP INDEX {index['name']}")
-
+        self.__driver.query(f"DROP INDEX {self._config.events_index_name} IF EXISTS")
         self.__driver.query(
             """
             MATCH (n:Resource)
-            WHERE n.uri STARTS WITH $examples_url OR n.uri STARTS WITH $tests_url
+            WHERE n.uri STARTS WITH $examples_uri OR n.uri STARTS WITH $tests_uri
             DETACH DELETE n
             """,
-            params={"examples_url": LOG_EXAMPLES_URL, "tests_url": LOG_TESTS_URL},
+            params={"examples_uri": self._config.examples_uri, "tests_uri": self._config.tests_uri},
         )
         self.__driver.query(
             """
             MATCH (n)
-            WHERE n.uri STARTS WITH $run_url
+            WHERE n.uri STARTS WITH $run_uri
             DETACH DELETE n
             """,
-            params={"run_url": LOG_RUN_URL},
+            params={"run_uri": self._config.run_uri},
         )
 
     def tests(self) -> list[tuple[str, dict, GraphDocument]]:
         test_nodes = self.__driver.query(
             """
             MATCH (n:Event)
-            WHERE n.uri STARTS WITH $log_tests_url
+            WHERE n.uri STARTS WITH $tests_uri
             ORDER BY n.uri
             RETURN n.eventMessage as message, n.uri as uri
             """,
-            params={"log_tests_url": LOG_TESTS_URL},
+            params={"tests_uri": self._config.tests_uri},
         )
         tests = []
         for test in test_nodes:
-            ground_truth = self.__driver.get_subgraph_from_node(test["uri"])
+            ground_truth = self.__get_subgraph_from_node(test["uri"])
 
             source_node = next((node for node in ground_truth.nodes if node.type == "Source"), None)
             context = (
@@ -192,32 +185,85 @@ class Dataset(StoreModule):
                 with the nodes they are connected to and their relationships.
 
         """
-        query_embeddings = self.__embeddings.embed_query(event)
-
-        # Find k similar events using embeddings
-        similar_events = self.__driver.query(
-            """
-            CALL db.index.vector.queryNodes($index, $k, $embedding)
-            YIELD node, score
-            RETURN node.eventMessage as eventMessage, node.uri AS node_uri, node.embedding AS embedding, score
-            """,
-            params={"index": self.__index_name, "k": fetch_k, "embedding": query_embeddings},
-        )
-
-        embeddings = [similar_event["embedding"] for similar_event in similar_events]
-
-        selected_indices = maximal_marginal_relevance(
-            query_embedding=np.array(query_embeddings),
-            embedding_list=embeddings,
+        relevant_docs = self.__vector_index.max_marginal_relevance_search(
+            query=event,
             k=k,
+            fetch_k=fetch_k,
             lambda_mult=lambda_mult,
         )
-        selected_events = [similar_events[i] for i in selected_indices]
 
         return [
             (
-                similar_event["eventMessage"],
-                self.__driver.get_subgraph_from_node(similar_event["node_uri"], ["experimentId"]),
+                doc.page_content,
+                self.__get_subgraph_from_node(doc.metadata["uri"]),
             )
-            for similar_event in selected_events
+            for doc in relevant_docs
         ]
+
+    def __get_subgraph_from_node(self, node_uri: str, props_to_remove: list[str] | None = None) -> GraphDocument:
+        """Get the subgraph of a node in the store.
+
+        The subgraph will contain all the nodes and relationships connected to the given node, even indirectly.
+        """
+        if props_to_remove is None:
+            props_to_remove = []
+
+        props_to_remove = [*props_to_remove, "embedding"]
+
+        # Ugly but quite efficient. Also filters out the embedding property and the Resource label.
+        nodes_subgraphs = self.__driver.query(
+            """
+            MATCH (n {uri: $node_uri})
+            CALL apoc.path.subgraphAll(n, {})
+            YIELD nodes, relationships
+            RETURN
+            [node IN nodes | {
+            uri: node.uri,
+            type: HEAD([label IN LABELS(node) WHERE label <> 'Resource']),
+            properties: apoc.map.removeKeys(PROPERTIES(node), $props_to_remove)
+            }] AS nodes,
+            [rel IN relationships | {
+            source: STARTNODE(rel).uri,
+            target: ENDNODE(rel).uri,
+            type: TYPE(rel)
+            }] AS relationships
+            """,
+            params={"node_uri": node_uri, "props_to_remove": props_to_remove},
+        )
+
+        if not nodes_subgraphs:
+            return GraphDocument(nodes=[], relationships=[])
+
+        nodes_subgraph = nodes_subgraphs[0]
+
+        # The neo4j date and time objects are quite problematic, as they are not JSON serializable.
+        # This is a workaround to convert them to strings.
+        for node in nodes_subgraph["nodes"]:
+            for key, value in node["properties"].items():
+                if isinstance(value, neo4j.time.DateTime):
+                    node["properties"][key] = value.iso_format()
+                if isinstance(value, neo4j.time.Date):
+                    node["properties"][key] = value.iso_format()
+
+        nodes_dict = {
+            node["uri"]: Node(id=node["uri"], type=node["type"], properties=node["properties"])
+            for node in nodes_subgraph["nodes"]
+        }
+
+        relationships = (
+            [
+                Relationship(
+                    source=nodes_dict[relationship["source"]],
+                    target=nodes_dict[relationship["target"]],
+                    type=relationship["type"],
+                )
+                for relationship in nodes_subgraph["relationships"]
+            ]
+            if "relationships" in nodes_subgraph
+            else []  # The node may not have any relationships
+        )
+
+        return GraphDocument(
+            nodes=list(nodes_dict.values()),
+            relationships=relationships,
+        )

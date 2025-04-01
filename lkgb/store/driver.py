@@ -1,8 +1,6 @@
 from typing import Any
 
-import neo4j
 from langchain_neo4j import Neo4jGraph
-from langchain_neo4j.graphs.graph_document import GraphDocument, Node, Relationship
 
 from lkgb.config import Config
 from lkgb.store.module import StoreModule
@@ -80,71 +78,3 @@ class Driver(StoreModule):
     def clear(self) -> None:
         """Clear any experiment in the graph store."""
         self.__graph_store.query("MATCH (n:Experiment) DETACH DELETE n")
-
-    def get_subgraph_from_node(self, node_uri: str, props_to_remove: list[str] | None = None) -> GraphDocument:
-        """Get the subgraph of a node in the store.
-
-        The subgraph will contain all the nodes and relationships connected to the given node, even indirectly.
-        """
-        if props_to_remove is None:
-            props_to_remove = []
-
-        props_to_remove = [*props_to_remove, "embedding"]
-
-        # Ugly but quite efficient. Also filters out the embedding property and the Resource label.
-        nodes_subgraphs = self.__graph_store.query(
-            """
-            MATCH (n {uri: $node_uri})
-            CALL apoc.path.subgraphAll(n, {})
-            YIELD nodes, relationships
-            RETURN
-            [node IN nodes | {
-            uri: node.uri,
-            type: HEAD([label IN LABELS(node) WHERE label <> 'Resource']),
-            properties: apoc.map.removeKeys(PROPERTIES(node), $props_to_remove)
-            }] AS nodes,
-            [rel IN relationships | {
-            source: STARTNODE(rel).uri,
-            target: ENDNODE(rel).uri,
-            type: TYPE(rel)
-            }] AS relationships
-            """,
-            params={"node_uri": node_uri, "props_to_remove": props_to_remove},
-        )
-
-        if not nodes_subgraphs:
-            return GraphDocument(nodes=[], relationships=[])
-
-        nodes_subgraph = nodes_subgraphs[0]
-
-        # The neo4j date and time objects are quite problematic, as they are not JSON serializable.
-        # This is a workaround to convert them to strings.
-        for node in nodes_subgraph["nodes"]:
-            for key, value in node["properties"].items():
-                if isinstance(value, neo4j.time.DateTime):
-                    node["properties"][key] = value.iso_format()
-                if isinstance(value, neo4j.time.Date):
-                    node["properties"][key] = value.iso_format()
-
-        nodes_dict = {
-            node["uri"]: Node(id=node["uri"], type=node["type"], properties=node["properties"])
-            for node in nodes_subgraph["nodes"]
-        }
-
-        relationships = (
-            [
-                Relationship(
-                    source=nodes_dict[relationship["source"]],
-                    target=nodes_dict[relationship["target"]],
-                    type=relationship["type"],
-                )
-                for relationship in nodes_subgraph["relationships"]
-            ]
-            if "relationships" in nodes_subgraph
-            else []  # The node may not have any relationships
-        )
-
-        return GraphDocument(
-            nodes=list(nodes_dict.values()),
-            relationships=relationships,
-        )
