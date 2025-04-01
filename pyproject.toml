@@ -1,22 +1,24 @@
-[tool.poetry]
-name = "lkgb"
+[project]
+name = "ontologx"
 version = "0.1.0"
 description = ""
-authors = ["Luca Cotti <luca.cotti@unibs.it>"]
-license = "MIT"
+authors = [{name="Luca Cotti", email = "luca.cotti@unibs.it"}]
+license = {text = "MIT"}
 readme = "README.md"
+requires-python = ">=3.13,<4.0"
+dependencies = [
+    "langchain>=0.3.18",
+    "langchain-community>=0.3.17",
+    "python-dotenv>=1.0.1",
+    "neo4j>=5.28.1",
+    "pydantic>=2.10.6",
+    "langchain-neo4j>=0.4.0",
+    "typer>=0.15.2",
+    "networkx>=3.4.2"
+]
 
-[tool.poetry.dependencies]
-python = "^3.13"
-langchain = "^0.3.18"
-langchain-community = "^0.3.17"
-python-dotenv = "^1.0.1"
-neo4j = "^5.28.1"
-pydantic = "^2.10.6"
-langchain-neo4j = "^0.4.0"
-typer = "^0.15.2"
-networkx = "^3.4.2"
-numpy = "^2.2.4"
+[project.scripts]
+olx = "ontologx.__main__:main"
 
 [tool.poetry.group.dev.dependencies]
 ipykernel = "^6.29.5"
@@ -44,9 +46,6 @@ optional = true
 
 [tool.poetry.group.google-ai.dependencies]
 langchain-google-genai = "^2.1.2"
-
-[tool.poetry.scripts]
-lkgb = "lkgb.__main__:main"
 
 [build-system]
 requires = ["poetry-core"]

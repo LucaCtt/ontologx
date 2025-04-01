@@ -10,10 +10,10 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_neo4j.graphs.graph_document import GraphDocument
 from pydantic import ValidationError
 
-from lkgb.parser.models import BaseEventGraph, build_dynamic_model
-from lkgb.parser.reports import ParserReport
-from lkgb.store import Store
-from lkgb.tools import fetch_ip_address_info
+from ontologx.parser.models import BaseEventGraph, build_dynamic_model
+from ontologx.parser.reports import ParserReport
+from ontologx.store import Store
+from ontologx.tools import fetch_ip_address_info
 
 logger = logging.getLogger("rich")
 

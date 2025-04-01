@@ -1,10 +1,10 @@
 from langchain_core.embeddings import Embeddings
 
-from lkgb.config import Config
-from lkgb.store.dataset import Dataset
-from lkgb.store.driver import Driver
-from lkgb.store.module import StoreModule
-from lkgb.store.ontology import Ontology
+from ontologx.config import Config
+from ontologx.store.dataset import Dataset
+from ontologx.store.driver import Driver
+from ontologx.store.module import StoreModule
+from ontologx.store.ontology import Ontology
 
 
 class Store(StoreModule):

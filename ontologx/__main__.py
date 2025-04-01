@@ -10,11 +10,11 @@ import typer
 from rich.logging import RichHandler
 from rich.progress import track
 
-from lkgb.accuracy import graph_edit_distance
-from lkgb.backend import BackendFactory
-from lkgb.config import Config
-from lkgb.parser import Parser, RunSummary
-from lkgb.store import Store
+from ontologx.accuracy import graph_edit_distance
+from ontologx.backend import BackendFactory
+from ontologx.config import Config
+from ontologx.parser import Parser, RunSummary
+from ontologx.store import Store
 
 config = Config()
 

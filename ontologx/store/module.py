@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from lkgb.config import Config
+from ontologx.config import Config
 
 
 class StoreModule(ABC):

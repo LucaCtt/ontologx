@@ -2,8 +2,8 @@ from typing import Any
 
 from langchain_neo4j import Neo4jGraph
 
-from lkgb.config import Config
-from lkgb.store.module import StoreModule
+from ontologx.config import Config
+from ontologx.store.module import StoreModule
 
 
 class Driver(StoreModule):

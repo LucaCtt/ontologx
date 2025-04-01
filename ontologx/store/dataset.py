@@ -6,9 +6,9 @@ from langchain_core.embeddings import Embeddings
 from langchain_neo4j import Neo4jVector
 from langchain_neo4j.graphs.graph_document import GraphDocument, Node, Relationship
 
-from lkgb.config import Config
-from lkgb.store.driver import Driver
-from lkgb.store.module import StoreModule
+from ontologx.config import Config
+from ontologx.store.driver import Driver
+from ontologx.store.module import StoreModule
 
 
 class Dataset(StoreModule):

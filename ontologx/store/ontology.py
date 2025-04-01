@@ -2,9 +2,9 @@ from pathlib import Path
 
 from langchain_neo4j.graphs.graph_document import GraphDocument, Node, Relationship
 
-from lkgb.config import Config
-from lkgb.store.driver import Driver
-from lkgb.store.module import StoreModule
+from ontologx.config import Config
+from ontologx.store.driver import Driver
+from ontologx.store.module import StoreModule
 
 TIME_ONTOLOGY_URI = "http://www.w3.org/2006/time"
 XML_SCHEMA_URI = "http://www.w3.org/2001/XMLSchema#"
