@@ -46,7 +46,7 @@ def _get_message_group(event: str, graph: GraphDocument, context: dict) -> list[
             id=f"run_{uuid.uuid4()!s}",
             tool_calls=[
                 {
-                    "name": "DynamicEventGraph",
+                    "name": "EventGraph",  # This must be the name of the class returned by structured output
                     "args": {
                         "nodes": nodes,
                         "relationships": relationships,
@@ -175,7 +175,6 @@ class Parser:
                     errors = [
                         {
                             "location": ".".join(map(str, err.get("loc"))),
-                            "message": err.get("msg"),
                             "invalid_input": err.get("input"),
                         }
                         for err in parsing_error.errors()

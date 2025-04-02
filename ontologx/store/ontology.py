@@ -1,9 +1,9 @@
 from pathlib import Path
 
+from langchain_neo4j import Neo4jGraph
 from langchain_neo4j.graphs.graph_document import GraphDocument, Node, Relationship
 
 from ontologx.config import Config
-from ontologx.store.driver import Driver
 from ontologx.store.module import StoreModule
 
 TIME_ONTOLOGY_URI = "http://www.w3.org/2006/time"
@@ -18,42 +18,43 @@ class Ontology(StoreModule):
     providing access to the ontology.
     """
 
-    def __init__(self, config: Config, driver: Driver) -> None:
-        super().__init__(config)
-        self.__driver = driver
+    def __init__(self, config: Config, graph_store: Neo4jGraph) -> None:
+        self.__config = config
+        self.__graph_store = graph_store
 
     def initialize(self) -> None:
         # Check if the neosemantics configuration is present,
         # if it is, assume the ontology is already loaded.
-        result = self.__driver.query("MATCH (n:_GraphConfig) RETURN COUNT(n) AS count")
+        result = self.__graph_store.query("MATCH (n:_GraphConfig) RETURN COUNT(n) AS count")
         if result[0]["count"] != 0:
             return
 
         # Init neosemantics plugin
-        self.__driver.query("CALL n10s.graphconfig.init()")
-        self.__driver.query("CALL n10s.graphconfig.set({ handleVocabUris: 'IGNORE' })")
-        self.__driver.query(
-            f"CREATE CONSTRAINT {self._config.n10s_constraint_name} FOR (r:Resource) REQUIRE r.uri IS UNIQUE",
+        self.__graph_store.query("CALL n10s.graphconfig.init()")
+        self.__graph_store.query("CALL n10s.graphconfig.set({ handleVocabUris: 'IGNORE' })")
+        self.__graph_store.query(
+            f"""CREATE CONSTRAINT {self.__config.n10s_constraint_name} IF NOT EXISTS
+            FOR (r:Resource) REQUIRE r.uri IS UNIQUE""",
         )
 
         # Load the ontologies
-        self.__driver.query(
+        self.__graph_store.query(
             "CALL n10s.onto.import.inline($ontology, 'Turtle')",
-            params={"ontology": Path(self._config.ontology_path).read_text()},
+            params={"ontology": Path(self.__config.ontology_path).read_text()},
         )
-        self.__driver.query(
+        self.__graph_store.query(
             "CALL n10s.onto.import.fetch($url, 'Turtle')",
             params={"url": TIME_ONTOLOGY_URI},
         )
 
         # Load the constraints
-        self.__driver.query(
+        self.__graph_store.query(
             "CALL n10s.validation.shacl.import.inline($constraints, 'Turtle')",
-            params={"constraints": Path(self._config.shacl_path).read_text()},
+            params={"constraints": Path(self.__config.shacl_path).read_text()},
         )
 
         # Add transaction validator
-        self.__driver.query(
+        self.__graph_store.query(
             """
             USE system
             CALL apoc.trigger.install(
@@ -71,14 +72,14 @@ class Ontology(StoreModule):
                 { labels: ['Run']},
                 {phase:'before'})
             """,
-            params={"trigger_name": self._config.n10s_trigger_name},
+            params={"trigger_name": self.__config.n10s_trigger_name},
         )
 
     def clear(self) -> None:
         """Clear the store to its initial state."""
-        self.__driver.query("MATCH (n:_GraphConfig) DETACH DELETE n")
-        self.__driver.query("MATCH (n:_n10sValidatorConfig) DETACH DELETE n")
-        self.__driver.query(
+        self.__graph_store.query("MATCH (n:_GraphConfig) DETACH DELETE n")
+        self.__graph_store.query("MATCH (n:_n10sValidatorConfig) DETACH DELETE n")
+        self.__graph_store.query(
             """
             MATCH (n:Resource) WHERE n.uri STARTS WITH $time_uri
                 OR n.uri STARTS WITH $log_uri
@@ -93,14 +94,14 @@ class Ontology(StoreModule):
                 "owl_schema_uri": OWL_SCHEMA_URI,
             },
         )
-        self.__driver.query(
+        self.__graph_store.query(
             "DROP CONSTRAINT $constraint_name IF EXISTS",
-            params={"constraint_name": self._config.n10s_constraint_name},
+            params={"constraint_name": self.__config.n10s_constraint_name},
         )
 
-        self.__driver.query(
+        self.__graph_store.query(
             "USE system CALL apoc.trigger.drop('neo4j',$trigger_name)",
-            params={"trigger_name": self._config.n10s_trigger_name},
+            params={"trigger_name": self.__config.n10s_trigger_name},
         )
 
     def graph(self) -> GraphDocument:
@@ -117,7 +118,7 @@ class Ontology(StoreModule):
             and relationships are relationships between classes.
 
         """
-        nodes_with_props = self.__driver.query(
+        nodes_with_props = self.__graph_store.query(
             """
             MATCH (c:Class)
             WHERE c.uri STARTS WITH $log_ontology_uri OR c.uri = $time_instant_uri OR c.uri = $time_datetime_uri
@@ -126,7 +127,7 @@ class Ontology(StoreModule):
             RETURN class, uri, apoc.map.fromPairs(pairs) AS properties
             """,
             params={
-                "log_ontology_uri": self._config.ontology_uri,
+                "log_ontology_uri": self.__config.ontology_uri,
                 "time_instant_uri": f"{TIME_ONTOLOGY_URI}#Instant",
                 "time_datetime_uri": f"{TIME_ONTOLOGY_URI}#GeneralDateTimeDescription",
             },
@@ -135,7 +136,7 @@ class Ontology(StoreModule):
             row["uri"]: Node(id=row["uri"], type=row["class"], properties=row["properties"]) for row in nodes_with_props
         }
 
-        triples = self.__driver.query(
+        triples = self.__graph_store.query(
             """
             MATCH (n:Class)<-[:DOMAIN]-(r:Relationship)-[:RANGE]->(m:Class)
             WHERE
@@ -152,7 +153,7 @@ class Ontology(StoreModule):
             RETURN n.uri AS subject_uri, r.name AS predicate, m.uri AS object_uri
             """,
             params={
-                "log_ontology_uri": self._config.ontology_uri,
+                "log_ontology_uri": self.__config.ontology_uri,
                 "time_instant_uri": f"{TIME_ONTOLOGY_URI}#Instant",
                 "time_datetime_uri": f"{TIME_ONTOLOGY_URI}#GeneralDateTimeDescription",
             },

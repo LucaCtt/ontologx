@@ -3,11 +3,10 @@ from typing import Any
 
 import neo4j
 from langchain_core.embeddings import Embeddings
-from langchain_neo4j import Neo4jVector
+from langchain_neo4j import Neo4jGraph, Neo4jVector
 from langchain_neo4j.graphs.graph_document import GraphDocument, Node, Relationship
 
 from ontologx.config import Config
-from ontologx.store.driver import Driver
 from ontologx.store.module import StoreModule
 
 
@@ -17,10 +16,9 @@ class Dataset(StoreModule):
     Includes the loading of the examples and tests, and the search for similar events.
     """
 
-    def __init__(self, config: Config, driver: Driver, embeddings: Embeddings) -> None:
-        super().__init__(config)
-
-        self.__driver = driver
+    def __init__(self, config: Config, graph_store: Neo4jGraph, embeddings: Embeddings) -> None:
+        self.__config = config
+        self.__graph_store = graph_store
         self.__embeddings = embeddings
 
         self.__vector_index = Neo4jVector(
@@ -28,10 +26,10 @@ class Dataset(StoreModule):
             node_label="Event",
             embedding_node_property="embedding",
             text_node_property="eventMessage",
-            url=self._config.neo4j_url,
-            username=self._config.neo4j_username,
-            password=self._config.neo4j_password,
-            index_name=self._config.events_index_name,
+            url=self.__config.neo4j_url,
+            username=self.__config.neo4j_username,
+            password=self.__config.neo4j_password,
+            index_name=self.__config.events_index_name,
             retrieval_query="""
             RETURN node.eventMessage AS text,
             score,
@@ -41,21 +39,21 @@ class Dataset(StoreModule):
 
     def initialize(self) -> None:
         # Check if the examples are already loaded
-        result = self.__driver.query("MATCH (n:Event:Resource) RETURN COUNT(n) AS count")
+        result = self.__graph_store.query("MATCH (n:Event:Resource) RETURN COUNT(n) AS count")
         if result[0]["count"] != 0:
             return
 
         # Load the examples
-        self.__driver.query(
+        self.__graph_store.query(
             "CALL n10s.rdf.import.inline($examples, 'Turtle')",
-            params={"examples": Path(self._config.examples_path).read_text()},
+            params={"examples": Path(self.__config.examples_path).read_text()},
         )
 
         # Create the index for the event messages
         self.__vector_index.create_new_index()
 
         # Populate the embeddings for the examples
-        to_populate = self.__driver.query(
+        to_populate = self.__graph_store.query(
             """
             MATCH (n:Event)
             WHERE n.embedding IS null
@@ -63,7 +61,7 @@ class Dataset(StoreModule):
             """,
         )
         text_embeddings = self.__embeddings.embed_documents([el["eventMessage"] for el in to_populate])
-        self.__driver.query(
+        self.__graph_store.query(
             """
             UNWIND $data AS row
             MATCH (n:Event)
@@ -80,39 +78,39 @@ class Dataset(StoreModule):
 
         # Load the tests
         # Note: the test events should not have an embedding
-        self.__driver.query(
+        self.__graph_store.query(
             "CALL n10s.rdf.import.inline($tests, 'Turtle')",
-            params={"tests": Path(self._config.tests_path).read_text()},
+            params={"tests": Path(self.__config.tests_path).read_text()},
         )
 
     def clear(self) -> None:
-        self.__driver.query(f"DROP INDEX {self._config.events_index_name} IF EXISTS")
-        self.__driver.query(
+        self.__graph_store.query(f"DROP INDEX {self.__config.events_index_name} IF EXISTS")
+        self.__graph_store.query(
             """
             MATCH (n:Resource)
             WHERE n.uri STARTS WITH $examples_uri OR n.uri STARTS WITH $tests_uri
             DETACH DELETE n
             """,
-            params={"examples_uri": self._config.examples_uri, "tests_uri": self._config.tests_uri},
+            params={"examples_uri": self.__config.examples_uri, "tests_uri": self.__config.tests_uri},
         )
-        self.__driver.query(
+        self.__graph_store.query(
             """
             MATCH (n)
             WHERE n.uri STARTS WITH $run_uri
             DETACH DELETE n
             """,
-            params={"run_uri": self._config.run_uri},
+            params={"run_uri": self.__config.run_uri},
         )
 
     def tests(self) -> list[tuple[str, dict, GraphDocument]]:
-        test_nodes = self.__driver.query(
+        test_nodes = self.__graph_store.query(
             """
             MATCH (n:Event)
             WHERE n.uri STARTS WITH $tests_uri
             ORDER BY n.uri
             RETURN n.eventMessage as message, n.uri as uri
             """,
-            params={"tests_uri": self._config.tests_uri},
+            params={"tests_uri": self.__config.tests_uri},
         )
         tests = []
         for test in test_nodes:
@@ -140,18 +138,18 @@ class Dataset(StoreModule):
         """
         for node in graph.nodes:
             # Add the experiment_id and (for the Event nodes) the embedding.
-            additional_properties: dict[str, Any] = {"experimentId": self._config.experiment_id}
+            additional_properties: dict[str, Any] = {"experimentId": self.__config.run_id}
             if node.type == "Event":
                 # This will raise an exception if the LLM produces an Event node without a message property.
                 additional_properties["embedding"] = self.__embeddings.embed_query(node.properties["eventMessage"])
 
-            self.__driver.query(
+            self.__graph_store.query(
                 "CALL apoc.create.node([$type, 'Run'], $props) YIELD node",
                 params={"type": node.type, "props": {**node.properties, **additional_properties}},
             )
 
         for relationship in graph.relationships:
-            self.__driver.query(
+            self.__graph_store.query(
                 """
                 MATCH (a {uri: $source_uri}), (b {uri: $target_uri})
                 CALL apoc.create.relationship(a, $type, {}, b) YIELD rel
@@ -211,7 +209,7 @@ class Dataset(StoreModule):
         props_to_remove = [*props_to_remove, "embedding"]
 
         # Ugly but quite efficient. Also filters out the embedding property and the Resource label.
-        nodes_subgraphs = self.__driver.query(
+        nodes_subgraphs = self.__graph_store.query(
             """
             MATCH (n {uri: $node_uri})
             CALL apoc.path.subgraphAll(n, {})

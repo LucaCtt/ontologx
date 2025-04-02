@@ -10,7 +10,6 @@ import os
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
 
 from dotenv import load_dotenv
 
@@ -45,8 +44,8 @@ class Config:
     # The date and time of the experiment.
     experiment_date_time = datetime.now(UTC)
 
-    # Used to distinguish between the data in different experiments.
-    experiment_id = os.getenv("EXPERIMENT_ID", str(uuid.uuid4()).replace("-", "_"))
+    # The id of the run
+    run_id = os.getenv("RUN_ID", str(uuid.uuid4()))
 
     # The path to the ontology file.
     ontology_path = os.getenv("ONTOLOGY_PATH", "resources/ontologies/logs.ttl")
@@ -67,7 +66,7 @@ class Config:
     # The URI of the tests.
     tests_uri = os.getenv("TESTS_URI", "https://cyberseclab.unibs.it/ontologx/log/tests")
 
-    # The URI of the run nodes.
+    # The URI of the nodes generated in the run
     run_uri = os.getenv("RUN_URI", "https://cyberseclab.unibs.it/ontologx/log/run")
 
     # The path to the SHACL constraints file for the ontology.
@@ -155,20 +154,19 @@ class Config:
     def examples_hash(self) -> str:
         return _compute_file_hash(self.examples_path)
 
-    def dump(self) -> dict[str, Any]:
-        """Dump the configuration as a dictionary.
+    def tests_hash(self) -> str:
+        return _compute_file_hash(self.tests_path)
 
-        This method also includes the ontology and examples hash.
-        Authentication params are not included in the dump for security reasons.
+    def hyperparameters(self) -> dict[str, str]:
+        """Return the hyperparameters used in the experiment.
+
+        Returns:
+            dict[str, str]: The hyperparameters used in the experiment.
+
         """
-        excluded_prefixes = ["_", "neo4j", "huggingface_api_token"]
-
-        dump = {
-            key: value
-            for key, value in self.__class__.__dict__.items()
-            if not any(key.startswith(prefix) for prefix in excluded_prefixes) and not callable(value)
+        return {
+            "parser_model": self.parser_model,
+            "parser_temperature": str(self.parser_temperature),
+            "self_reflection_steps": str(self.self_reflection_steps),
+            "embeddings_model": self.embeddings_model,
         }
-        dump["ontology_hash"] = self.ontology_hash()
-        dump["examples_hash"] = self.examples_hash()
-
-        return dump

@@ -34,7 +34,7 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
     """Build a dynamic event graph model based on the ontology."""
     valid_node_types = [node.type for node in ontology.nodes]
     valid_properties_per_node = {node.type: [*list(node.properties.keys()), "uri"] for node in ontology.nodes}
-    valid_properties = list({prop for props in valid_properties_per_node.values() for prop in props})
+    valid_properties: list[str] = list({prop for props in valid_properties_per_node.values() for prop in props})
 
     valid_relationship_types = [rel.type for rel in ontology.relationships]
     valid_triples = [(rel.source.type, rel.type, rel.target.type) for rel in ontology.relationships]

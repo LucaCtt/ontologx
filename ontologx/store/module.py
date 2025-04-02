@@ -1,13 +1,8 @@
 from abc import ABC, abstractmethod
 
-from ontologx.config import Config
-
 
 class StoreModule(ABC):
     """Abstract class for store modules."""
-
-    def __init__(self, config: Config) -> None:
-        self._config = config
 
     @abstractmethod
     def initialize(self) -> None:
