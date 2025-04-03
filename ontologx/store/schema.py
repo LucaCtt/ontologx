@@ -46,6 +46,7 @@ class Schema(StoreModule):
         self.__graph_store.query("MATCH (s:Study) DETACH DELETE s")
         self.__graph_store.query("MATCH (e:Experiment) DETACH DELETE e")
         self.__graph_store.query("MATCH (r:Run) DETACH DELETE r")
+        self.__graph_store.query("MATCH (r:Dataset) DETACH DELETE r")
 
     def __initialize_study(self) -> str:
         """Initialize the study node in the graph store.
@@ -84,10 +85,6 @@ class Schema(StoreModule):
             str: The URI of the experiment node.
 
         """
-        ontology_hash = self.__config.ontology_hash()
-        examples_hash = self.__config.examples_hash()
-        tests_hash = self.__config.tests_hash()
-
         # Check if there is an experiment node with the same ontology and examples.
         exp = self.__graph_store.query(
             """
@@ -96,7 +93,7 @@ class Schema(StoreModule):
             LIMIT 1
             """,
             params={
-                "details": {"ontologyHash": ontology_hash, "examplesHash": examples_hash, "testsHash": tests_hash},
+                "details": {"hasName": self.__config.experiment_name},
                 "study_uri": study_uri,
             },
         )
@@ -106,16 +103,11 @@ class Schema(StoreModule):
         # Create the experiment node if it does not exist
         uri = self.gen_uri()
         self.__graph_store.query(
-            """
-            CREATE (e:Experiment $details)<-[:hasPart]-(s:Study {uri: $study_uri})
-            """,
+            "CREATE (e:Experiment $details)<-[:hasPart]-(s:Study {uri: $study_uri})",
             params={
                 "details": {
                     "uri": uri,
-                    "dateTime": self.__config.experiment_date_time,
-                    "ontologyHash": ontology_hash,
-                    "examplesHash": examples_hash,
-                    "testsHash": tests_hash,
+                    "hasName": self.__config.experiment_name,
                 },
                 "study_uri": study_uri,
             },
@@ -125,16 +117,17 @@ class Schema(StoreModule):
 
     def __initialize_run(self, experiment_uri: str) -> None:
         # Create the run node and attach it to the experiment node
+        run_uri = self.gen_uri(self.__config.run_id)
+
         self.__graph_store.query(
-            """
-            CREATE (r:Run $details)<-[:hasPart]-(e:Experiment {uri: $experiment_uri})
-            """,
+            "CREATE (r:Run $details)<-[:hasPart]-(e:Experiment {uri: $experiment_uri})",
             params={
-                "details": {"uri": self.gen_uri(self.__config.run_id)},
+                "details": {"uri": run_uri},
                 "experiment_uri": experiment_uri,
             },
         )
 
+        # Create hyperparameter nodes
         for name, value in self.__config.hyperparameters().items():
             param = self.__graph_store.query(
                 """
@@ -153,10 +146,28 @@ class Schema(StoreModule):
 
             self.__graph_store.query(
                 """
-                MATCH (s:HyperParameterSetting {hasValue: $value})-[:specifiedBy]->(h:HyperParameter {hasName: $name})
+                MATCH (r:Run {uri: $run_uri})-[:hasInput]->(s:HyperParameterSetting {hasValue: $value})
+                -[:specifiedBy]->(h:HyperParameter {hasName: $name})
                 """,
-                params={"name": name, "value": value},
+                params={"name": name, "value": value, "run_uri": run_uri},
             )
+
+        # Create Dataset node
+        self.__graph_store.query(
+            """
+            CREATE (d:Dataset $details)<-[:hasInput]-(r:Run {uri: $run_uri})
+            """,
+            params={
+                "details": {
+                    "uri": self.gen_uri(),
+                    "examples_path": self.__config.examples_path,
+                    "examples_hash": self.__config.examples_hash(),
+                    "tests_path": self.__config.tests_path,
+                    "tests_hash": self.__config.tests_hash(),
+                },
+                "run_uri": run_uri,
+            },
+        )
 
     def gen_uri(self, node_id: str = str(uuid.uuid4())) -> str:
         return f"{self.__config.run_uri}#{node_id}"

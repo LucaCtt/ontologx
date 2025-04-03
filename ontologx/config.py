@@ -8,7 +8,6 @@ in the root directory of the project.
 import hashlib
 import os
 import uuid
-from datetime import UTC, datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -36,108 +35,117 @@ DEFAULT_EMBEDDINGS_MODELS = {
 
 
 class Config:
-    """Configuration class for setting up variables used in the log graph building.
+    """Configuration class for setting up variables used in the log graph building."""
 
-    Having a class for this is useful for easily exporting the configuration as a dictionary.
+    experiment_name: str = os.getenv("EXPERIMENT_NAME", "Default")
+    """
+    The name of the current experiment. Experiments are used to group runs together,
+    the criterion for grouping is up to the user.
     """
 
-    # The date and time of the experiment.
-    experiment_date_time = datetime.now(UTC)
+    run_name = os.getenv("RUN_NAME", str(uuid.uuid4()))
+    """ The name of the run. A run is a single execution of the ontologx pipeline."""
 
-    # The id of the run
-    run_id = os.getenv("RUN_ID", str(uuid.uuid4()))
-
-    # The path to the ontology file.
     ontology_path = os.getenv("ONTOLOGY_PATH", "resources/ontologies/logs.ttl")
+    """The path to the ontology file."""
 
-    # The URI of the ontology.
     ontology_uri = os.getenv("ONTOLOGY_URI", "https://cyberseclab.unibs.it/ontologx/log/dictionary")
+    """The URI of the ontology."""
 
-    # The path to the examples log graphs file.
-    # Used to retrieve the examples
     examples_path = os.getenv("EXAMPLES_PATH", "resources/data/train.ttl")
+    """ The path to the examples log graphs file. Used to retrieve the examples."""
 
-    # The URI of the examples.
     examples_uri = os.getenv("EXAMPLES_URI", "https://cyberseclab.unibs.it/ontologx/log/examples")
+    """The URI of the examples."""
 
-    # The input path to the logs to parse.
     tests_path = os.getenv("TESTS_PATH", "resources/data/test.ttl")
+    """The input path to the logs to parse."""
 
-    # The URI of the tests.
     tests_uri = os.getenv("TESTS_URI", "https://cyberseclab.unibs.it/ontologx/log/tests")
+    """The URI of the tests."""
 
-    # The URI of the nodes generated in the run
     run_uri = os.getenv("RUN_URI", "https://cyberseclab.unibs.it/ontologx/log/run")
+    """The URI of the nodes generated in the run."""
 
-    # The path to the SHACL constraints file for the ontology.
     shacl_path = os.getenv("CONSTRAINTS_PATH", "resources/ontologies/logs_shacl.ttl")
+    """The path to the SHACL constraints file for the ontology."""
 
-    # The prompt used to build the graph
     prompt_build_graph = os.getenv("PROMPT_BUILD_GRAPH", Path("resources/prompts/build_graph.system.md").read_text())
+    """The prompt used to build the graph."""
 
-    # Neo4j config
     neo4j_url = os.getenv("NEO4J_URL", "bolt://localhost:7687")
+    """The URL of the Neo4j database. Use bolt+ssc for self-signed certificates."""
+
     neo4j_username = os.getenv("NEO4J_USERNAME", "neo4j")
+    """The username to use for the Neo4j database."""
+
     neo4j_password = os.getenv("NEO4J_PASSWORD", "password")
+    """The password to use for the Neo4j database."""
 
-    # The backend to use for the LLM.
-    # Must be one of "ollama", "huggingface", or "google-ai".
     backend = os.getenv("BACKEND", "ollama")
+    """
+    The backend to use for the LLM.
+    Must be one of "ollama", "huggingface", or "google-ai".
+    """
 
-    # The HuggingFace hub api token to use for downloading models,
-    # generated from https://huggingface.co/docs/hub/security-tokens.
-    # Only useful with the HuggingFace backend and when using private models.
-    # For public models, this can be left unset.
-    # This variable is not used anywhere in the project,
-    # it's just to remind that it can be set in the environment.
     huggingfacehub_api_token = os.getenv("HUGGINGFACEHUB_API_TOKEN", None)
+    """
+    The HuggingFace hub api token to use for downloading models,
+    generated from https://huggingface.co/docs/hub/security-tokens.
+    Only useful with the HuggingFace backend and when using private models.
+    For public models, this can be left unset.
+    This variable is not used anywhere in the project,
+    it's just to remind that it can be set in the environment.
+    """
 
-    # The Google AI api key, can be generated from https://ai.google.dev/gemini-api/docs/api-key.
-    # Required when using the Google AI backend.
-    # This variable is not used anywhere in the project,
-    # it's just to remind that it must be set in the environment if using the Google AI backend.
     google_ai_api_key = os.getenv("GOOGLE_API_KEY", None)
+    """
+    The Google AI api key, can be generated from https://ai.google.dev/gemini-api/docs/api-key.
+    Required when using the Google AI backend.
+    This variable is not used anywhere in the project,
+    it's just to remind that it must be set in the environment if using the Google AI backend.
+    """
 
-    # The model used to embed logs.
-    # Must be a model from the HuggingFace model hub if using the HuggingFace backend,
-    # or a model from the Ollama model hub if using the Ollama backend.
     embeddings_model = os.getenv(
         "EMBEDDINGS_MODEL",
         DEFAULT_EMBEDDINGS_MODELS[backend],
     )
+    """
+    The model used to embed logs. Must be a valid model for the backend used,
+    e.g. a model from the HuggingFace model hub if using the HuggingFace backend.
+    """
 
-    # The model used to parse logs.
-    # Must be a model from the HuggingFace model hub if using the HuggingFace backend,
-    # or a model from the Ollama model hub if using the Ollama backend.
     parser_model = os.getenv(
         "PARSER_MODEL",
         DEFAULT_LLM_MODELS[backend],
     )
+    """
+    The model used to parse logs. Must be a valid model for the backend used,
+    e.g. a model from the HuggingFace model hub if using the HuggingFace backend.
+    """
 
-    # The temperature of the LLM used to parse logs.
-    # Must be between (strictly) 0 and 1.
     parser_temperature = float(os.getenv("PARSER_TEMPERATURE", "0.5"))
+    """The temperature of the LLM used to parse logs. Must be between 0 and 1."""
 
-    # The number of self-reflection steps to take.
-    # Must be greater or equal than 0.
     self_reflection_steps = int(os.getenv("SELF_REFLECTION_STEPS", "3"))
+    """The number of self-reflection steps to take. Must be greater or equal to 0."""
 
-    # The name of the vector index to use for the events in the graph store.
     events_index_name = os.getenv("EVENTS_INDEX_NAME", "eventMessageIndex")
+    """The name of the vector index to use for the events in the graph store."""
 
-    # The name of the neosemantics constraint for unique URIs
     n10s_constraint_name = os.getenv("N10S_CONSTRAINT_NAME", "n10s_unique_uri")
+    """The name of the neosemantics constraint for unique URIs."""
 
-    # The name of the neosemantics trigger for validating the graph.
     n10s_trigger_name = os.getenv("N10S_TRIGGER_NAME", "shacl-validate")
+    """The name of the neosemantics trigger for validating the graph."""
 
     def __init__(self):
         if self.parser_temperature < 0 or self.parser_temperature > 1:
-            msg = "parser_temperature must be between 0 and 1"
+            msg = "Parser temperature must be between 0 and 1"
             raise ValueError(msg)
 
         if self.self_reflection_steps < 0:
-            msg = "self_reflection_steps must be greater than 0"
+            msg = "Self reflection steps must be greater than 0"
             raise ValueError(msg)
 
         if self.backend not in ["ollama", "huggingface", "google-ai"]:
@@ -165,8 +173,6 @@ class Config:
 
         """
         return {
-            "parser_model": self.parser_model,
             "parser_temperature": str(self.parser_temperature),
             "self_reflection_steps": str(self.self_reflection_steps),
-            "embeddings_model": self.embeddings_model,
         }
