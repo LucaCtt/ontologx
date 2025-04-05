@@ -50,3 +50,13 @@ russellmitchell_lc,intranet_server,error.log.2.csv,Connecting to github.com (git
 russellmitchell_lc,inet-firewall,shorewall-init.log.1.csv,Jan 20 11:22:30    Table filter Optimized -- Passes =
 russellmitchell_lc,vpn,openvpn.log.csv,2022-01-23 22:43:34 twhite/192.168.230.95:36864 Validating certificate extended key usage
 russellmitchell_lc,intranet_server,suricata.log.csv,20/1/2022 -- 13:16:23 - <Config> - enabling 'eve-log' module 'ssh'
+russellmitchell_lc,cloud_share,redis-server.log.1.csv,_._
+russellmitchell_lc,intranet_server,error.log.2.csv,bash: 196: Bad file descriptor
+russellmitchell_lc,morris_mail,syslog.4.csv,Jan 20 12:19:28 morris-mail php7.0-cli: php_invoke ftp: already enabled for PHP 7.0 cli sapi
+russellmitchell_lc,vpn,suricata.log.csv,"20/1/2022 -- 13:16:42 - <Perf> - AppLayer MPM ""toserver http_user_agent (http)"": 6"
+russellmitchell_lc,cloud_share,suricata-start.log.csv,20/1/2022 -- 13:16:23 - <Info> - CPUs/cores online: 1
+russellmitchell_lc,vpn,openvpn.log.csv,2022-01-22 12:44:02 jhall/192.168.230.165:59814 VERIFY EKU OK
+russellmitchell_lc,vpn,openvpn.log.csv,2022-01-22 11:56:06 ahayes/192.168.231.127:37135 peer info: IV_LZO=1
+russellmitchell_lc,morris_mail,syslog.4.csv,Jan 20 11:13:29 morris-mail kernel: [    2.185874] ACPI: PCI Interrupt Link [LNKB] enabled at IRQ 11
+russellmitchell_lc,internal_share,suricata-start.log.csv,20/1/2022 -- 13:16:23 - <Config> - Adding interface ens3 from config file
+russellmitchell_lc,cloud_share,redis-server.log.1.csv,"(    '      ,       .-`  | `,    )     Running in standalone mode"
