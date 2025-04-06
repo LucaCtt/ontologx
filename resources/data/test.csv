@@ -1,4 +1,3 @@
-# Generated on 2025-03-20T12:33:12.778219+00:00
 Device,Application,File,Log Event
 russellmitchell_lc,mail,mainlog.3.csv,2022-01-22 13:54:21 1nBGqT-0005kq-CQ Completed
 russellmitchell_lc,internal_share,suricata-start.log.csv,20/1/2022 -- 13:16:23 - <Info> - Found an MTU of 1450 for 'ens3'

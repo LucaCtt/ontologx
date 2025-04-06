@@ -1,4 +1,3 @@
-# Generated on 2025-03-20T12:33:12.777192+00:00
 Device,Application,File,Log Event
 russellmitchell_lc,inet-dns,syslog.1.csv,Jan 25 06:17:01 inet-dns CRON[16314]: (root) CMD (   cd / && run-parts --report /etc/cron.hourly)
 russellmitchell_lc,cloud_share,suricata.log.csv,20/1/2022 -- 13:16:23 - <Perf> - using shared mpm ctx' for http_stat_msg
