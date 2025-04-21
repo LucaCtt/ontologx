@@ -345,6 +345,11 @@
   rdfs:range xsd:string;
   rdfs:comment "User account name".
 
+:userEmail rdf:type owl:DatatypeProperty;
+  rdfs:domain :User;
+  rdfs:range xsd:string;
+  rdfs:comment "User account email".
+
 ###  https://cyberseclab.unibs.it/ontologx/log/dictionary#sourceType
 :sourceType rdf:type owl:DatatypeProperty;
   rdfs:domain :Source;

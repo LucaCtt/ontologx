@@ -20,8 +20,8 @@
   time:inDateTime :datetime-1.
 
 :source-1 rdf:type log:Source;
-  log:sourceName "syslog.1.csv";
-  log:sourceType "csv";
+  log:sourceName "syslog.1";
+  log:sourceType "syslog";
   log:sourceDevice "inet-dns".
 
 :user-1 rdf:type log:User;
@@ -36,6 +36,7 @@
 
 :event-1 rdf:type log:Event;
   log:eventMessage "Jan 25 06:17:01 inet-dns CRON[16314]: (root) CMD (   cd / && run-parts --report /etc/cron.hourly)";
+  log:eventSeverity "INFO";
   log:eventCommand "cd / && run-parts --report /etc/cron.hourly";
   log:hasSource :source-1;
   log:hasUser :user-1;
@@ -61,12 +62,13 @@
   log:applicationName "suricata".
 
 :source-2 rdf:type log:Source;
-  log:sourceName "suricata.log.csv";
-  log:sourceType "csv";
+  log:sourceName "suricata.log";
+  log:sourceType "application";
   log:sourceDevice "cloud_share".
 
 :event-2 rdf:type log:Event;
   log:eventMessage "20/1/2022 -- 13:16:23 - <Perf> - using shared mpm ctx\' for http_stat_msg";
+  log:eventSeverity "INFO";
   log:hasTimeStamp :timestamp-2;
   log:hasApplication :application-2;
   log:hasSource :source-2.
@@ -98,12 +100,13 @@
   log:ipv4 "192.168.231.180".
 
 :source-3 rdf:type log:Source;
-  log:sourceName "dnsmasq.log.csv";
-  log:sourceType "csv";
+  log:sourceName "dnsmasq.log";
+  log:sourceType "application";
   log:sourceDevice "inet-dns".
 
 :event-3 rdf:type log:Event;
   log:eventMessage "Jan 20 13:47:21 dnsmasq[3326]: query[AAAA] d1zkz3k4cclnv6.cloudfront.net from 192.168.231.180";
+  log:eventSeverity "INFO";
   log:hasTimeStamp :timestamp-3;
   log:hasProcess :process-3;
   log:hasAddress :address-3;
@@ -131,12 +134,13 @@
   log:userName "traci.stevenson".
 
 :source-4 rdf:type log:Source;
-  log:sourceName "mail.log.csv";
-  log:sourceType "csv";
+  log:sourceName "mail.log";
+  log:sourceType "application";
   log:sourceDevice "mail".
 
 :event-4 rdf:type log:Event;
   log:eventMessage "Jan 23 08:06:19 mail dovecot: imap(traci.stevenson): Logged out in=70 out=599";
+  log:eventSeverity "INFO";
   log:hasTimeStamp :timestamp-4;
   log:hasApplication :application-4;
   log:hasUser :user-4;
@@ -165,12 +169,13 @@
   log:hasProcess :process-5.
 
 :source-5 rdf:type log:Source;
-  log:sourceName "syslog.3.csv";
-  log:sourceType "csv";
+  log:sourceName "syslog.3";
+  log:sourceType "syslog";
   log:sourceDevice "vpn".
 
 :event-5 rdf:type log:Event;
   log:eventMessage "Jan 22 19:12:09 vpn systemd[1]: Starting Daily apt download activities...";
+  log:eventSeverity "INFO";
   log:hasTimeStamp :timestamp-5;
   log:hasApplication :application-5;
   log:hasSource :source-5.
@@ -191,12 +196,13 @@
   time:inDateTime :datetime-6.
 
 :source-6 rdf:type log:Source;
-  log:sourceName "stats.log.csv";
-  log:sourceType "csv";
+  log:sourceName "stats.log";
+  log:sourceType "application";
   log:sourceDevice "mail".
 
 :event-6 rdf:type log:Event;
   log:eventMessage "Date: 1/23/2022 -- 06:42:05 (uptime: 2d, 17h 25m 39s)";
+  log:eventSeverity "INFO";
   log:hasTimeStamp :timestamp-6;
   log:hasSource :source-6.
 
@@ -218,19 +224,23 @@
 :process-7 rdf:type log:Process;
   log:processPID 1993.
 
-:application-7 rdf:type log:Application;
+:application-7-1 rdf:type log:Application;
   log:applicationName "systemd";
   log:hasProcess :process-7.
 
+:application-7-2 rdf:type log:Application;
+  log:applicationName "GnuPG".
+
 :source-7 rdf:type log:Source;
-  log:sourceName "syslog.csv";
-  log:sourceType "csv";
+  log:sourceName "syslog";
+  log:sourceType "syslog";
   log:sourceDevice "morris-mail".
 
 :event-7 rdf:type log:Event;
   log:eventMessage "Jan 25 06:57:57 morris-mail systemd[1993]: Closed GnuPG cryptographic agent (access for web browsers).";
+  log:eventSeverity "INFO";
   log:hasTimeStamp :timestamp-7;
-  log:hasApplication :application-7;
+  log:hasApplication :application-7-1, :application-7-2;
   log:hasSource :source-7.
 
 # inet-dns, syslog.4.csv, Jan 20 11:12:22 inet-dns kernel: [    3.552456] raid6: using avx2x2 recovery algorithm
@@ -252,12 +262,13 @@
   log:applicationName "kernel".
 
 :source-8 rdf:type log:Source;
-  log:sourceName "syslog.4.csv";
-  log:sourceType "csv";
+  log:sourceName "syslog.4";
+  log:sourceType "syslog";
   log:sourceDevice "inet-dns".
 
 :event-8 rdf:type log:Event;
   log:eventMessage "Jan 20 11:12:22 inet-dns kernel: [    3.552456] raid6: using avx2x2 recovery algorithm";
+  log:eventSeverity "INFO";
   log:hasTimeStamp :timestamp-8;
   log:hasApplication :application-8;
   log:hasSource :source-8.
@@ -285,19 +296,20 @@
   log:hasProcess :process-9.
 
 :source-9 rdf:type log:Source;
-  log:sourceName "syslog.1.csv";
-  log:sourceType "csv";
+  log:sourceName "syslog.1";
+  log:sourceType "syslog";
   log:sourceDevice "webserver".
 
 :event-9 rdf:type log:Event;
   log:eventMessage "Jan 24 22:48:53 webserver systemd-timesyncd[30824]: Network configuration changed, trying to establish connection.";
+  log:eventSeverity "INFO";
   log:hasTimeStamp :timestamp-9;
   log:hasApplication :application-9;
   log:hasSource :source-9.
 
 # cloud_share, redis-server.log.1.csv, 5030:signal-handler (1642682292) Received SIGTERM scheduling shutdown...
 :address-10 rdf:type log:Address;
-  log:addressPort "5030".
+  log:addressPort 5030.
 
 :process-10 rdf:type log:Process;
   log:processSignal "SIGTERM".
@@ -307,12 +319,13 @@
   log:hasProcess :process-10.
 
 :source-10 rdf:type log:Source;
-  log:sourceName "redis-server.log.1.csv";
-  log:sourceType "csv";
+  log:sourceName "redis-server.log.1";
+  log:sourceType "application";
   log:sourceDevice "cloud_share".
 
 :event-10 rdf:type log:Event;
   log:eventMessage "5030:signal-handler (1642682292) Received SIGTERM scheduling shutdown...";
+  log:eventSeverity "INFO";
   log:hasApplication :application-10;
   log:hasAddress :address-10;
   log:hasSource :source-10.

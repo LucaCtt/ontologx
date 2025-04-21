@@ -17,7 +17,7 @@ log:EventShape rdf:type sh:NodeShape;
     sh:datatype xsd:string;
     sh:minCount 0;
     sh:maxCount 1;
-    sh:message "Event may have at most one severity among DEBUG, INFO, WARN, ERROR, FATAL";
+    sh:message "Event may have at most one severity";
   ];
   sh:property [
     sh:path log:eventCommand;
@@ -93,10 +93,9 @@ log:AddressShape rdf:type sh:NodeShape;
   ];
   sh:property [
     sh:path log:addressPort;
-    sh:datatype xsd:string;
+    sh:datatype xsd:integer;
     sh:minCount 0;
     sh:maxCount 1;
-    sh:pattern "^[0-9]{1,5}$"^^xsd:string;
     sh:message "Address may have at most one valid port";
   ];
   sh:property [
