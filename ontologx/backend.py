@@ -75,7 +75,7 @@ class HuggingFaceBackend(Backend):
 
     def embeddings(self, model: str) -> Embeddings:
         try:
-            from langchain_huggingface.embeddings import HuggingFaceEmbeddings
+            from langchain_huggingface.embeddings import HuggingFaceEmbeddings  # type: ignore[attr-defined]
 
             return HuggingFaceEmbeddings(model_name=model, model_kwargs={"trust_remote_code": True})
         except ModuleNotFoundError as e:
@@ -84,7 +84,7 @@ class HuggingFaceBackend(Backend):
 
     def llm(self, model: str, temperature: float) -> BaseChatModel:
         try:
-            from langchain_huggingface import ChatHuggingFace, HuggingFacePipeline
+            from langchain_huggingface import ChatHuggingFace, HuggingFacePipeline  # type: ignore[attr-defined]
 
             parser_pipeline = HuggingFacePipeline.from_model_id(
                 model_id=model,
@@ -141,4 +141,31 @@ class GoogleAIBackend(Backend):
             return ChatGoogleGenerativeAI(model=model, temperature=temperature)
         except ModuleNotFoundError as e:
             msg = "Please install langchain-googleai to use GoogleAIBackend"
+            raise ImportError(msg) from e
+
+
+class VllmBackend(Backend):
+    """A backend implementation that uses vLLM models for generating embeddings and parsing text."""
+
+    def embeddings(self, model: str) -> Embeddings:
+        try:
+            from langchain_huggingface.embeddings import HuggingFaceEmbeddings  # type: ignore[attr-defined]
+
+            return HuggingFaceEmbeddings(model_name=model, model_kwargs={"trust_remote_code": True})
+        except ModuleNotFoundError as e:
+            msg = "Please install langchain_huggingface to use VllmBackend"
+            raise ImportError(msg) from e
+
+    def llm(self, model: str, temperature: float) -> BaseChatModel:
+        try:
+            from langchain_community.llms.vllm import VLLMOpenAI
+
+            return VLLMOpenAI(
+                model_name=model,
+                temperature=temperature,
+                openai_api_key="EMPTY",
+                openai_api_base="http://localhost:8000/v1",
+            )
+        except ModuleNotFoundError as e:
+            msg = "Please install langchain_community to use VllmBackend"
             raise ImportError(msg) from e
