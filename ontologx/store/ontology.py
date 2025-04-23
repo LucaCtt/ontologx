@@ -89,7 +89,7 @@ class Ontology(StoreModule):
             """,
             params={
                 "time_uri": TIME_ONTOLOGY_URI,
-                "log_uri": self._config.ontology_uri,
+                "log_uri": self.__config.ontology_uri,
                 "xml_schema_uri": XML_SCHEMA_URI,
                 "owl_schema_uri": OWL_SCHEMA_URI,
             },

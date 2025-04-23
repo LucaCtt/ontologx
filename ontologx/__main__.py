@@ -43,8 +43,9 @@ def clear() -> None:
 
 @app.command()
 def parse() -> None:
+    logger.info("Experiment: %s", config.experiment_name)
+    logger.info("Run: %s", config.run_name)
     logger.info("Using %s backend.", config.backend)
-    logger.info("Run ID: %s", config.run_id)
     logger.info("Embeddings model: '%s'", config.embeddings_model)
 
     # Load the parser model

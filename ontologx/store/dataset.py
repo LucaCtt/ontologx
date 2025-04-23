@@ -21,26 +21,17 @@ class Dataset(StoreModule):
         self.__graph_store = graph_store
         self.__embeddings = embeddings
 
-        self.__vector_index = Neo4jVector(
-            embedding=self.__embeddings,
-            node_label="Event",
-            embedding_node_property="embedding",
-            text_node_property="eventMessage",
-            url=self.__config.neo4j_url,
-            username=self.__config.neo4j_username,
-            password=self.__config.neo4j_password,
-            index_name=self.__config.events_index_name,
-            retrieval_query="""
-            RETURN node.eventMessage AS text,
-            score,
-            {uri: node.uri, experimentId: node.experimentId, _embedding_: node.embedding} AS metadata
-            """,
-        )
-
     def initialize(self) -> None:
         # Check if the examples are already loaded
-        result = self.__graph_store.query("MATCH (n:Event:Resource) RETURN COUNT(n) AS count")
-        if result[0]["count"] != 0:
+        result = self.__graph_store.query(
+            """
+            MATCH (r:Run {name: $run_name})-[:hasInput]->(d:Dataset)
+            RETURN d
+            LIMIT 1
+            """,
+            params={"run_name": self.__config.run_name},
+        )
+        if result:
             return
 
         # Load the examples
@@ -50,15 +41,21 @@ class Dataset(StoreModule):
         )
 
         # Create the index for the event messages
-        self.__vector_index.create_new_index()
+        self.__graph_store.query(
+            f"""
+            CREATE INDEX {self.__config.events_index_name} IF NOT EXISTS
+            FOR (n:Event) ON (n.embedding)
+            """,
+        )
 
         # Populate the embeddings for the examples
         to_populate = self.__graph_store.query(
             """
-            MATCH (n:Event)
+            MATCH (r:Run {name: $run_name})-[:hasInput]->(n:Event)
             WHERE n.embedding IS null
             RETURN elementId(n) AS id, n.eventMessage as eventMessage
             """,
+            params={"run_name": self.__config.run_name},
         )
         text_embeddings = self.__embeddings.embed_documents([el["eventMessage"] for el in to_populate])
         self.__graph_store.query(
@@ -78,6 +75,7 @@ class Dataset(StoreModule):
 
         # Load the tests
         # Note: the test events should not have an embedding
+        # so they are not populated in the index.
         self.__graph_store.query(
             "CALL n10s.rdf.import.inline($tests, 'Turtle')",
             params={"tests": Path(self.__config.tests_path).read_text()},
@@ -129,7 +127,7 @@ class Dataset(StoreModule):
     def add_event_graph(self, graph: GraphDocument) -> None:
         """Add an event graph to the store.
 
-        All the nodes will be tagged with the current experiment id,
+        All the nodes will be tagged with the current run name,
         and for Event nodes the embedding will be added.
 
         Args:
@@ -137,14 +135,14 @@ class Dataset(StoreModule):
 
         """
         for node in graph.nodes:
-            # Add the experiment_id and (for the Event nodes) the embedding.
-            additional_properties: dict[str, Any] = {"experimentId": self.__config.run_id}
+            # Add the run_name and (for the Event nodes) the embedding.
+            additional_properties: dict[str, Any] = {"runName": self.__config.run_name}
             if node.type == "Event":
                 # This will raise an exception if the LLM produces an Event node without a message property.
                 additional_properties["embedding"] = self.__embeddings.embed_query(node.properties["eventMessage"])
 
             self.__graph_store.query(
-                "CALL apoc.create.node([$type, 'Run'], $props) YIELD node",
+                "CALL apoc.create.node([$type], $props) YIELD node",
                 params={"type": node.type, "props": {**node.properties, **additional_properties}},
             )
 
@@ -188,7 +186,9 @@ class Dataset(StoreModule):
             k=k,
             fetch_k=fetch_k,
             lambda_mult=lambda_mult,
+            filter={"runName": {"$eq": self.__config.run_name}},
         )
+        print(relevant_docs)
 
         return [
             (

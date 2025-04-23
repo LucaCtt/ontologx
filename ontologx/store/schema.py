@@ -6,6 +6,8 @@ from langchain_neo4j import Neo4jGraph
 from ontologx.config import Config
 from ontologx.store.module import StoreModule
 
+MLSCHEMA_URI = "https://raw.githubusercontent.com/ML-Schema/core/master/MLSchema.ttl"
+
 
 class Schema(StoreModule):
     """Graph store and vector index for the events knowledge graph.
@@ -46,7 +48,9 @@ class Schema(StoreModule):
         self.__graph_store.query("MATCH (s:Study) DETACH DELETE s")
         self.__graph_store.query("MATCH (e:Experiment) DETACH DELETE e")
         self.__graph_store.query("MATCH (r:Run) DETACH DELETE r")
-        self.__graph_store.query("MATCH (r:Dataset) DETACH DELETE r")
+        self.__graph_store.query("MATCH (d:Dataset) DETACH DELETE d")
+        self.__graph_store.query("MATCH (h:HyperParameter) DETACH DELETE h")
+        self.__graph_store.query("MATCH (s:HyperParameterSetting) DETACH DELETE s")
 
     def __initialize_study(self) -> str:
         """Initialize the study node in the graph store.
@@ -69,7 +73,7 @@ class Schema(StoreModule):
 
         uri = self.gen_uri()
         # Create the study node if it does not exist
-        self.__graph_store.query("MERGE (s:Study {uri: $uri})", params={"uri": uri})
+        self.__graph_store.query("CREATE (s:Study {uri: $uri})", params={"uri": uri})
 
         return uri
 
@@ -88,12 +92,12 @@ class Schema(StoreModule):
         # Check if there is an experiment node with the same ontology and examples.
         exp = self.__graph_store.query(
             """
-            MATCH (e:Experiment $details)<-[:hasPart]-(s:Study {uri: $study_uri})
+            MATCH (e:Experiment {name: $name})<-[:hasPart]-(s:Study {uri: $study_uri})
             RETURN e.uri as uri
             LIMIT 1
             """,
             params={
-                "details": {"hasName": self.__config.experiment_name},
+                "name": self.__config.experiment_name,
                 "study_uri": study_uri,
             },
         )
@@ -103,11 +107,14 @@ class Schema(StoreModule):
         # Create the experiment node if it does not exist
         uri = self.gen_uri()
         self.__graph_store.query(
-            "CREATE (e:Experiment $details)<-[:hasPart]-(s:Study {uri: $study_uri})",
+            """
+            MATCH (s:Study {uri: $study_uri})
+            CREATE (e:Experiment $details)<-[:hasPart]-(s)
+            """,
             params={
                 "details": {
                     "uri": uri,
-                    "hasName": self.__config.experiment_name,
+                    "name": self.__config.experiment_name,
                 },
                 "study_uri": study_uri,
             },
@@ -117,10 +124,14 @@ class Schema(StoreModule):
 
     def __initialize_run(self, experiment_uri: str) -> None:
         # Create the run node and attach it to the experiment node
-        run_uri = self.gen_uri(self.__config.run_id)
+        run_uri = self.gen_uri(self.__config.run_name)
 
+        # Create run
         self.__graph_store.query(
-            "CREATE (r:Run $details)<-[:hasPart]-(e:Experiment {uri: $experiment_uri})",
+            """
+            MATCH (e:Experiment {uri: $experiment_uri})
+            CREATE (r:Run $details)<-[:hasPart]-(e)
+            """,
             params={
                 "details": {"uri": run_uri},
                 "experiment_uri": experiment_uri,
@@ -131,23 +142,23 @@ class Schema(StoreModule):
         for name, value in self.__config.hyperparameters().items():
             param = self.__graph_store.query(
                 """
-                MATCH (h:HyperParameter $details)
-                WHERE h.hasName = $name
+                MATCH (h:HyperParameter {name: $name})
                 RETURN h
                 LIMIT 1
                 """,
+                params={"name": name},
             )
 
             if not param:
                 self.__graph_store.query(
-                    "CREATE (h:HyperParameter {hasName: $name})",
+                    "CREATE (h:HyperParameter {name: $name, uri: $uri})",
                     params={"name": name, "uri": self.gen_uri()},
                 )
 
             self.__graph_store.query(
                 """
-                MATCH (r:Run {uri: $run_uri})-[:hasInput]->(s:HyperParameterSetting {hasValue: $value})
-                -[:specifiedBy]->(h:HyperParameter {hasName: $name})
+                MATCH (r:Run {uri: $run_uri}), (h:HyperParameter {name: $name})
+                CREATE (r)-[:hasInput]->(s:HyperParameterSetting {hasValue: $value})-[:specifiedBy]->(h)
                 """,
                 params={"name": name, "value": value, "run_uri": run_uri},
             )
@@ -155,7 +166,8 @@ class Schema(StoreModule):
         # Create Dataset node
         self.__graph_store.query(
             """
-            CREATE (d:Dataset $details)<-[:hasInput]-(r:Run {uri: $run_uri})
+            MATCH (r:Run {uri: $run_uri})
+            CREATE (d:Dataset $details)<-[:hasInput]-(r)
             """,
             params={
                 "details": {

@@ -17,16 +17,16 @@ class Store(StoreModule):
             password=config.neo4j_password,
         )
 
-        self.schema = Schema(config, self.__graph_store)
         self.ontology = Ontology(config, self.__graph_store)
+        self.schema = Schema(config, self.__graph_store)
         self.dataset = Dataset(config, self.__graph_store, self.__embeddings)
 
     def initialize(self) -> None:
-        self.schema.initialize()
         self.ontology.initialize()
+        self.schema.initialize()
         self.dataset.initialize()
 
     def clear(self) -> None:
-        self.schema.clear()
         self.ontology.clear()
+        self.schema.clear()
         self.dataset.clear()
