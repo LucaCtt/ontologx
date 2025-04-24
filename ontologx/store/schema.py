@@ -83,7 +83,7 @@ class Schema(StoreModule):
         # Check if there is an experiment node with the same ontology and examples.
         exp = self.__graph_store.query(
             """
-            MATCH (e:Experiment {name: $name})<-[:hasPart]-(s:Study {uri: $study_uri})
+            MATCH (e:Experiment {name: $name})<-[:hasPart]-(s:Study {uri: $study_uri, name: 'OntoLogX'})
             RETURN e.uri as uri
             LIMIT 1
             """,

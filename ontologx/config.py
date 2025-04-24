@@ -43,9 +43,6 @@ class Config:
     the criterion for grouping is up to the user.
     """
 
-    run_name = os.getenv("RUN_NAME", str(uuid.uuid4()))
-    """ The name of the run. A run is a single execution of the ontologx pipeline."""
-
     ontology_path = os.getenv("ONTOLOGY_PATH", "resources/ontologies/logs.ttl")
     """The path to the ontology file."""
 
@@ -55,17 +52,22 @@ class Config:
     examples_path = os.getenv("EXAMPLES_PATH", "resources/data/train.ttl")
     """ The path to the examples log graphs file. Used to retrieve the examples."""
 
-    examples_uri = os.getenv("EXAMPLES_URI", "https://cyberseclab.unibs.it/ontologx/log/examples")
+    examples_uri = os.getenv("EXAMPLES_URI", "https://cyberseclab.unibs.it/ontologx/log/examples/1.0")
     """The URI of the examples."""
 
     tests_path = os.getenv("TESTS_PATH", "resources/data/test.lc.ttl")
     """The input path to the logs to parse."""
 
-    tests_uri = os.getenv("TESTS_URI", "https://cyberseclab.unibs.it/ontologx/log/tests")
+    tests_uri = os.getenv("TESTS_URI", "https://cyberseclab.unibs.it/ontologx/log/tests/lc/1.0")
     """The URI of the tests."""
 
-    run_uri = os.getenv("RUN_URI", "https://cyberseclab.unibs.it/ontologx/log/run")
+    run_name = os.getenv("RUN_NAME", str(uuid.uuid4()))
+    """ The name of the run. A run is a single execution of the ontologx pipeline."""
+
+    run_uri = os.getenv("RUN_URI", "https://cyberseclab.unibs.it/ontologx/log/run/" + run_name)
     """The URI of the nodes generated in the run."""
+
+    out_uri = os.getenv("OUT_URI", "https://cyberseclab.unibs.it/ontologx/log/out/" + run_name)
 
     shacl_path = os.getenv("CONSTRAINTS_PATH", "resources/ontologies/logs_shacl.ttl")
     """The path to the SHACL constraints file for the ontology."""

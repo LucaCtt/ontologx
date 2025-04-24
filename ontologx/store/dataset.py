@@ -56,12 +56,11 @@ class Dataset(StoreModule):
         )
         self.__graph_store.query(
             """
-            MATCH (d:Dataset {type: 'examples'}), (r:Run {runName: $run_name})
-            WHERE d.runName IS NULL
-            SET d.runName = $run_name
+            MATCH (d:Dataset), (r:Run {runName: $run_name})
+            WHERE d.uri STARTS WITH $examples_uri
             CREATE (r)-[:hasInput]->(d)
             """,
-            params={"run_name": self.__config.run_name},
+            params={"run_name": self.__config.run_name, "examples_uri": self.__config.examples_uri},
         )
 
         # Create the index for the event messages
@@ -70,8 +69,8 @@ class Dataset(StoreModule):
         # Populate the embeddings for the examples
         to_populate = self.__graph_store.query(
             """
-            MATCH (d:Dataset {type: 'examples', runName: $run_name})-[:hasPart]->(e:Event)
-            WHERE e.embedding IS NULL
+            MATCH (d:Dataset)-[:hasPart]->(e:Event)
+            WHERE e.embedding IS NULL AND d.uri STARTS WITH $examples_uri
             SET e.runName = $run_name
             RETURN elementId(e) AS id, e.eventMessage as eventMessage
             """,
@@ -105,19 +104,19 @@ class Dataset(StoreModule):
         )
         self.__graph_store.query(
             """
-            MATCH (d: Dataset {type: 'tests'}), (r:Run {runName: $run_name})
-            WHERE d.runName IS NULL
-            SET d.runName = $run_name
+            MATCH (d: Dataset), (r:Run {runName: $run_name})
+            WHERE d.runName IS NULL AND d.uri STARTS WITH $tests_uri
             MERGE (r)-[:hasInput]->(d)
             """,
             params={
-                "tests_uri": self.__config.tests_uri,
                 "run_name": self.__config.run_name,
+                "tests_uri": self.__config.tests_uri,
             },
         )
         self.__graph_store.query(
             """
-            MATCH (d:Dataset {type: 'tests', runName: $run_name})-[:hasPart]->(e:Event)
+            MATCH (d:Dataset)-[:hasPart]->(e:Event)
+            WHERE e.embedding IS NULL AND d.uri STARTS WITH $tests_uri
             SET e.runName = $run_name
             SET e.embedding = NULL
             """,
@@ -130,11 +129,12 @@ class Dataset(StoreModule):
     def tests(self) -> list[tuple[str, dict, GraphDocument]]:
         test_nodes = self.__graph_store.query(
             """
-            MATCH (d:Dataset {type: 'tests', runName: $run_name})-[:hasPart]->(e:Event)
+            MATCH (d:Dataset)-[:hasPart]->(e:Event)
+            WHERE d.uri STARTS WITH $tests_uri
             ORDER BY e.uri
             RETURN e.eventMessage as message, e.uri as uri
             """,
-            params={"run_name": self.__config.run_name},
+            params={"run_name": self.__config.run_name, "tests_uri": self.__config.tests_uri},
         )
         tests = []
         for test in test_nodes:
@@ -160,6 +160,22 @@ class Dataset(StoreModule):
             graph (GraphDocument): The event graph to add.
 
         """
+        # Check if result dataset exists, otherwise create it
+        result_dataset = self.__graph_store.query(
+            """
+            MATCH (r:Run {runName: $run_name})-[:hasOutput]->(d:Dataset)
+            RETURN d
+            """,
+        )
+        if not result_dataset:
+            self.__graph_store.query(
+                """
+                MATCH (r:Run {runName: $run_name})
+                CREATE (d:Dataset {uri: $out_dataset_uri})<-[:hasOutput]-(r)
+                """,
+                params={"run_name": self.__config.run_name, "out_dataset_uri": self.__config.out_uri + "/out-dataset"},
+            )
+
         for node in graph.nodes:
             # Add the run_name and (for the Event nodes) the embedding.
             additional_properties: dict[str, Any] = {"runName": self.__config.run_name}
@@ -168,21 +184,23 @@ class Dataset(StoreModule):
                 additional_properties["embedding"] = self.__embeddings.embed_query(node.properties["eventMessage"])
 
             self.__graph_store.query(
-                "CALL apoc.create.node([$type], $props) YIELD node",
-                params={"type": node.type, "props": {**node.properties, **additional_properties}},
+                f"""
+                MATCH (d:Dataset)
+                WHERE d.uri STARTS WITH $out_dataset_uri
+                CREATE (d)-[:hasPart]->(n:{node.type} $props)
+                """,
+                params={"props": {**node.properties, **additional_properties}},
             )
 
         for relationship in graph.relationships:
             self.__graph_store.query(
-                """
-                MATCH (a {uri: $source_uri}), (b {uri: $target_uri})
-                CALL apoc.create.relationship(a, $type, {}, b) YIELD rel
-                RETURN rel
+                f"""
+                MATCH (a {{uri: $source_uri}}), (b {{uri: $target_uri}})
+                CREATE (a)-[:{relationship.type}]->(b)
                 """,
                 params={
                     "source_uri": relationship.source.id,
                     "target_uri": relationship.target.id,
-                    "type": relationship.type,
                 },
             )
 

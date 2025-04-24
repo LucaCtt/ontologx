@@ -44,15 +44,12 @@ def clear() -> None:
 def parse() -> None:
     logger.info("Experiment: %s", config.experiment_name)
     logger.info("Run: %s", config.run_name)
-    logger.info("Using %s backend.", config.backend)
+    logger.info("Backend: %s", config.backend)
     logger.info("Embeddings model: '%s'", config.embeddings_model)
-
-    # Load the parser model
-    llm = backend.llm(
-        model=config.parser_model,
-        temperature=config.parser_temperature,
-    )
     logger.info("Language model: '%s'", config.parser_model)
+
+    # Load the llm
+    llm = backend.llm(model=config.parser_model, temperature=config.parser_temperature)
 
     store.initialize()
     logger.info("Store at '%s' initialized.", config.neo4j_url)
@@ -63,7 +60,7 @@ def parse() -> None:
     parser = Parser(llm, store, config.prompt_build_graph, config.self_reflection_steps)
 
     reports = []
-    for event, context,_ in track(test_events, description="Parsing events"):
+    for event, context, _ in track(test_events, description="Parsing events"):
         logger.debug("Parsing event: '%s'", event)
 
         report = parser.parse(event, context)
