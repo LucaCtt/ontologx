@@ -10,7 +10,6 @@ import typer
 from rich.logging import RichHandler
 from rich.progress import track
 
-from ontologx.accuracy import graph_edit_distance
 from ontologx.backend import BackendFactory
 from ontologx.config import Config
 from ontologx.parser import Parser, RunSummary
@@ -64,8 +63,7 @@ def parse() -> None:
     parser = Parser(llm, store, config.prompt_build_graph, config.self_reflection_steps)
 
     reports = []
-    average_ged = 0
-    for event, context, graph in track(test_events, description="Parsing events"):
+    for event, context in track(test_events, description="Parsing events"):
         logger.debug("Parsing event: '%s'", event)
 
         report = parser.parse(event, context)
@@ -75,12 +73,8 @@ def parse() -> None:
             logger.warning("Event could not be parsed: %s", report.error)
         elif report.graph is not None:
             store.dataset.add_event_graph(report.graph)
-            average_ged += graph_edit_distance(report.graph, graph)
-            logger.debug("GED: %f", graph_edit_distance(report.graph, graph))
         else:
             logger.warning("Event was parsed but no graph was generated.")
-
-    average_ged /= len(test_events)
 
     logger.info("Log parsing done.")
 
@@ -89,7 +83,6 @@ def parse() -> None:
     logger.info("Run summary:")
     logger.info("- Average parse time per event: %f seconds", summary.parse_time_average())
     logger.info("- Success percentage: %f%%", summary.success_percentage() * 100)
-    logger.info("- Average GED: %f", average_ged)
 
 
 def main() -> None:

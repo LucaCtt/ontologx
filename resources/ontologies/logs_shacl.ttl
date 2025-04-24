@@ -220,7 +220,7 @@ log:FileShape rdf:type sh:NodeShape;
   ];
   sh:property [
     sh:path log:fileSize;
-    sh:datatype xsd:string;
+    sh:datatype xsd:integer;
     sh:minCount 0;
     sh:maxCount 1;
     sh:message "File may have at most one size";
@@ -234,7 +234,7 @@ log:FileShape rdf:type sh:NodeShape;
   ];
   sh:property [
     sh:path log:fileLine;
-    sh:datatype xsd:string;
+    sh:datatype xsd:integer;
     sh:minCount 0;
     sh:maxCount 1;
     sh:message "File may have at most one hash";
@@ -300,7 +300,6 @@ log:URLShape rdf:type sh:NodeShape;
     sh:datatype xsd:string;
     sh:minCount 1;
     sh:maxCount 1;
-    sh:pattern "^https?://[\\w.-]+(:\\d+)?(/.*)?$"^^xsd:string;
     sh:message "URL must have an url address";
   ].
 

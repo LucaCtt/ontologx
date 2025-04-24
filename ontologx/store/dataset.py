@@ -20,6 +20,7 @@ class Dataset(StoreModule):
         self.__config = config
         self.__graph_store = graph_store
         self.__embeddings = embeddings
+        self.__index_name = f"events_{self.__config.run_name}"
 
     def initialize(self) -> None:
         # Check if the examples are already loaded
@@ -34,28 +35,42 @@ class Dataset(StoreModule):
         if result:
             return
 
-        # Load the examples
+        # Load the examples and attach them to the current run
         self.__graph_store.query(
             "CALL n10s.rdf.import.inline($examples, 'Turtle')",
             params={"examples": Path(self.__config.examples_path).read_text()},
+        )
+        self.__graph_store.query(
+            """
+            MATCH (d: Dataset), (r:Run {name: $run_name})
+            WHERE NOT (d)<-[:hasInput]-(r) AND d.type = "examples"
+            CREATE (r)-[:hasInput]->(d)
+            """,
+            params={"run_name": self.__config.run_name, "examples_uri": self.__config.examples_uri},
         )
 
         # Create the index for the event messages
         self.__graph_store.query(
             f"""
-            CREATE INDEX {self.__config.events_index_name} IF NOT EXISTS
-            FOR (n:Event) ON (n.embedding)
+            CREATE INDEX {self.__index_name} IF NOT EXISTS
+            FOR (r:Run {{name: $run_name}})-[:hasInput]->(d:Dataset)-[:hasEvent]->(n:Event)
+            ON (n.eventMessage)
             """,
+            params={"run_name": self.__config.run_name},
         )
 
         # Populate the embeddings for the examples
         to_populate = self.__graph_store.query(
             """
-            MATCH (r:Run {name: $run_name})-[:hasInput]->(n:Event)
-            WHERE n.embedding IS null
+            MATCH (r:Run {name: $run_name})-[:hasInput]->(d:Dataset)-[:hasEvent]->(n:Event)
+            WHERE d.type = "Examples" AND n.embedding IS NULL
             RETURN elementId(n) AS id, n.eventMessage as eventMessage
             """,
-            params={"run_name": self.__config.run_name},
+            params={
+                "run_name": self.__config.run_name,
+                "run_uri": self.__config.run_uri,
+                "examples_uri": self.__config.examples_uri,
+            },
         )
         text_embeddings = self.__embeddings.embed_documents([el["eventMessage"] for el in to_populate])
         self.__graph_store.query(
@@ -80,24 +95,13 @@ class Dataset(StoreModule):
             "CALL n10s.rdf.import.inline($tests, 'Turtle')",
             params={"tests": Path(self.__config.tests_path).read_text()},
         )
-
-    def clear(self) -> None:
-        self.__graph_store.query(f"DROP INDEX {self.__config.events_index_name} IF EXISTS")
         self.__graph_store.query(
             """
-            MATCH (n:Resource)
-            WHERE n.uri STARTS WITH $examples_uri OR n.uri STARTS WITH $tests_uri
-            DETACH DELETE n
+            MATCH (d: Dataset), (r:Run {name: $run_name})
+            WHERE NOT (d)<-[:hasInput]-(r) AND d.type = "tests"
+            CREATE (r)-[:hasInput]->(d)
             """,
-            params={"examples_uri": self.__config.examples_uri, "tests_uri": self.__config.tests_uri},
-        )
-        self.__graph_store.query(
-            """
-            MATCH (n)
-            WHERE n.uri STARTS WITH $run_uri
-            DETACH DELETE n
-            """,
-            params={"run_uri": self.__config.run_uri},
+            params={"run_name": self.__config.run_name, "tests_uri": self.__config.tests_uri},
         )
 
     def tests(self) -> list[tuple[str, dict, GraphDocument]]:
@@ -181,14 +185,21 @@ class Dataset(StoreModule):
                 with the nodes they are connected to and their relationships.
 
         """
-        relevant_docs = self.__vector_index.max_marginal_relevance_search(
+        index = Neo4jVector.from_existing_index(
+            embedding=self.__embeddings,
+            index_name=self.__index_name,
+            retrieval_query="""
+            RETURN node.eventMessage AS text,
+            score,
+            {uri: node.uri, experimentId: node.experimentId, _embedding_: node.embedding} AS metadata
+            """,
+        )
+        relevant_docs = index.max_marginal_relevance_search(
             query=event,
             k=k,
             fetch_k=fetch_k,
             lambda_mult=lambda_mult,
-            filter={"runName": {"$eq": self.__config.run_name}},
         )
-        print(relevant_docs)
 
         return [
             (

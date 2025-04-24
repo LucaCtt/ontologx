@@ -58,7 +58,7 @@ class Config:
     examples_uri = os.getenv("EXAMPLES_URI", "https://cyberseclab.unibs.it/ontologx/log/examples")
     """The URI of the examples."""
 
-    tests_path = os.getenv("TESTS_PATH", "resources/data/test.ttl")
+    tests_path = os.getenv("TESTS_PATH", "resources/data/test.lc.ttl")
     """The input path to the logs to parse."""
 
     tests_uri = os.getenv("TESTS_URI", "https://cyberseclab.unibs.it/ontologx/log/tests")

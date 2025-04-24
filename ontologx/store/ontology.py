@@ -75,35 +75,6 @@ class Ontology(StoreModule):
             params={"trigger_name": self.__config.n10s_trigger_name},
         )
 
-    def clear(self) -> None:
-        """Clear the store to its initial state."""
-        self.__graph_store.query("MATCH (n:_GraphConfig) DETACH DELETE n")
-        self.__graph_store.query("MATCH (n:_n10sValidatorConfig) DETACH DELETE n")
-        self.__graph_store.query(
-            """
-            MATCH (n:Resource) WHERE n.uri STARTS WITH $time_uri
-                OR n.uri STARTS WITH $log_uri
-                OR n.uri STARTS WITH $xml_schema_uri
-                OR n.uri STARTS WITH $owl_schema_uri
-            DETACH DELETE n
-            """,
-            params={
-                "time_uri": TIME_ONTOLOGY_URI,
-                "log_uri": self.__config.ontology_uri,
-                "xml_schema_uri": XML_SCHEMA_URI,
-                "owl_schema_uri": OWL_SCHEMA_URI,
-            },
-        )
-        self.__graph_store.query(
-            "DROP CONSTRAINT $constraint_name IF EXISTS",
-            params={"constraint_name": self.__config.n10s_constraint_name},
-        )
-
-        self.__graph_store.query(
-            "USE system CALL apoc.trigger.drop('neo4j',$trigger_name)",
-            params={"trigger_name": self.__config.n10s_trigger_name},
-        )
-
     def graph(self) -> GraphDocument:
         """Return the ontology graph as a GraphDocument.
 

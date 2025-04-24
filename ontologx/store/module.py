@@ -7,10 +7,3 @@ class StoreModule(ABC):
     @abstractmethod
     def initialize(self) -> None:
         """Initialize the store module by creating module-specific nodes."""
-
-    @abstractmethod
-    def clear(self) -> None:
-        """Clear all data in the store module.
-
-        This method should delete only the nodes specific to this module.
-        """

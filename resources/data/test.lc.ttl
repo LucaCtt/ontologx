@@ -3,6 +3,8 @@
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix time: <http://www.w3.org/2006/time#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix mls: <http://www.w3.org/ns/mls#>.
+@prefix dc: <http://purl.org/dc/terms#>.
 
 # mail, mainlog.3.csv, 2022-01-22 13:54:21 1nBGqT-0005kq-CQ Completed
 :datetime-1 rdf:type time:GeneralDateTimeDescription;
@@ -361,8 +363,7 @@
   time:inDateTime :datetime-11.
 
 :application-11 rdf:type log:Application;
-  log:applicationName "shorewall";
-  log:hasProcess :process-11.
+  log:applicationName "shorewall".
 
 :source-11 rdf:type log:Source;
   log:sourceName "shorewall-init.log.1";
@@ -398,8 +399,7 @@
   log:sourceType "application".
 
 :application-12 rdf:type log:Application;
-  log:applicationName "suricata";
-  log:hasProcess :process-12.
+  log:applicationName "suricata".
 
 :event-12 rdf:type log:Event;
   log:eventMessage "20/1/2022 -- 13:12:35 - <Perf> - OTHER toserver: 0 proto groups, 0 unique SGH's, 0 copies";
@@ -475,8 +475,7 @@
   log:userName "twhite".
 
 :application-14 rdf:type log:Application;
-  log:applicationName "openvpn";
-  log:hasProcess :process-14.
+  log:applicationName "openvpn".
 
 :event-14 rdf:type log:Event;
   log:eventMessage "2022-01-23 13:48:11 twhite/192.168.230.95:40288 Outgoing Data Channel: Using 160 bit message hash 'SHA1' for HMAC authentication";
@@ -1596,7 +1595,7 @@
   log:sourceType "application".
 
 :url-47 rdf:type log:URL;
-  log:urlAddress "github.com".
+  log:url "github.com".
 
 :address-47 rdf:type log:Address;
   log:addressIP "140.82.121.2";
@@ -1608,8 +1607,7 @@
   log:hasTimeStamp :timestamp-47;
   log:hasSource :source-47;
   log:hasURL :url-47;
-  log:hasAddress :address-47;
-  log:hasApplication :application-47.
+  log:hasAddress :address-47.
 
 # inet-firewall, shorewall-init.log.1.csv, Jan 20 11:22:30    Table filter Optimized -- Passes =
 :datetime-48 rdf:type time:GeneralDateTimeDescription;
@@ -1734,7 +1732,7 @@
   log:applicationName "bash".
 
 :file-52 rdf:type log:File;
-  log:fileLine "196".
+  log:fileLine 196.
 
 :event-52 rdf:type log:Event;
   log:eventMessage 'bash: 196: Bad file descriptor';
@@ -1858,7 +1856,7 @@
   log:sourceDevice "vpn";
   log:sourceType "application".
 
-:address-14 rdf:type log:Address;
+:address-56 rdf:type log:Address;
   log:addressIP "192.168.230.165";
   log:addressPort 59814.
 
@@ -1993,3 +1991,13 @@
   log:eventSeverity "INFO";
   log:hasSource :source-60;
   log:hasApplication :application-60.
+
+:test-lc-dataset rdf:type mls:Dataset;
+  dc:type "examples";
+  mls:hasPart :event-1, :event-2, :event-3, :event-4, :event-5, :event-6, :event-7, :event-8, :event-9, :event-10,
+              :event-11, :event-12, :event-13, :event-14, :event-15, :event-16, :event-17, :event-18, :event-19,
+              :event-20, :event-21, :event-22, :event-23, :event-24, :event-25, :event-26, :event-27, :event-28,
+              :event-29, :event-30, :event-31, :event-32, :event-33, :event-34, :event-35, :event-36, :event-37,
+              :event-38, :event-39, :event-40, :event-41, :event-42, :event-43, :event-44, :event-45, :event-46,
+              :event-47, :event-48, :event-49, :event-50, :event-51, :event-52, :event-53, :event-54, :event-55,
+              :event-56, :event-57, :event-58, :event-59, :event-60.

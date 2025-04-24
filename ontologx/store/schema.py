@@ -43,15 +43,6 @@ class Schema(StoreModule):
             params = {}
         return self.__graph_store.query(query, params)
 
-    def clear(self) -> None:
-        """Clear any experiment in the graph store."""
-        self.__graph_store.query("MATCH (s:Study) DETACH DELETE s")
-        self.__graph_store.query("MATCH (e:Experiment) DETACH DELETE e")
-        self.__graph_store.query("MATCH (r:Run) DETACH DELETE r")
-        self.__graph_store.query("MATCH (d:Dataset) DETACH DELETE d")
-        self.__graph_store.query("MATCH (h:HyperParameter) DETACH DELETE h")
-        self.__graph_store.query("MATCH (s:HyperParameterSetting) DETACH DELETE s")
-
     def __initialize_study(self) -> str:
         """Initialize the study node in the graph store.
 

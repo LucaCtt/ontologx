@@ -27,6 +27,20 @@ class Store(StoreModule):
         self.dataset.initialize()
 
     def clear(self) -> None:
-        self.ontology.clear()
-        self.schema.clear()
-        self.dataset.clear()
+        # Delete all nodes and relationships in the graph
+        self.__graph_store.query("MATCH (n) DETACH DELETE n")
+
+        # Delete all indexes
+        indexes = self.__graph_store.query("SHOW INDEXES YIELD name RETURN name")
+        for index in indexes:
+            self.__graph_store.query(f"DROP INDEX {index['name']}")
+
+        # Delete all constraints
+        constraints = self.__graph_store.query("SHOW CONSTRAINTS YIELD name RETURN name")
+        for constraint in constraints:
+            self.__graph_store.query(f"DROP CONSTRAINT {constraint['name']}")
+
+        # Delete all triggers
+        triggers = self.__graph_store.query("CALL apoc.trigger.list() YIELD name RETURN name")
+        for trigger in triggers:
+            self.__graph_store.query(f"CALL apoc.trigger.remove('{trigger['name']}')")
