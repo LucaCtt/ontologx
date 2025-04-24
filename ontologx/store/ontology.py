@@ -7,6 +7,7 @@ from ontologx.config import Config
 from ontologx.store.module import StoreModule
 
 TIME_ONTOLOGY_URI = "http://www.w3.org/2006/time"
+MLSCHEMA_ONTOLOGY_URI = "http://www.w3.org/2016/10/mls"
 XML_SCHEMA_URI = "http://www.w3.org/2001/XMLSchema#"
 OWL_SCHEMA_URI = "http://www.w3.org/2002/07/owl#"
 
@@ -45,6 +46,10 @@ class Ontology(StoreModule):
         self.__graph_store.query(
             "CALL n10s.onto.import.fetch($url, 'Turtle')",
             params={"url": TIME_ONTOLOGY_URI},
+        )
+        self.__graph_store.query(
+            "CALL n10s.onto.import.fetch($url, 'Turtle')",
+            params={"url": MLSCHEMA_ONTOLOGY_URI},
         )
 
         # Load the constraints

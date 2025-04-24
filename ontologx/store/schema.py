@@ -62,7 +62,7 @@ class Schema(StoreModule):
         if study:
             return study[0]["uri"]
 
-        uri = self.gen_uri()
+        uri = self.__gen_uri()
         # Create the study node if it does not exist
         self.__graph_store.query("CREATE (s:Study {uri: $uri})", params={"uri": uri})
 
@@ -96,7 +96,7 @@ class Schema(StoreModule):
             return exp[0]["uri"]
 
         # Create the experiment node if it does not exist
-        uri = self.gen_uri()
+        uri = self.__gen_uri()
         self.__graph_store.query(
             """
             MATCH (s:Study {uri: $study_uri})
@@ -115,7 +115,7 @@ class Schema(StoreModule):
 
     def __initialize_run(self, experiment_uri: str) -> None:
         # Create the run node and attach it to the experiment node
-        run_uri = self.gen_uri(self.__config.run_name)
+        run_uri = self.__gen_uri(self.__config.run_name)
 
         # Create run
         self.__graph_store.query(
@@ -124,7 +124,7 @@ class Schema(StoreModule):
             CREATE (r:Run $details)<-[:hasPart]-(e)
             """,
             params={
-                "details": {"uri": run_uri},
+                "details": {"uri": run_uri, "runName": self.__config.run_name},
                 "experiment_uri": experiment_uri,
             },
         )
@@ -143,7 +143,7 @@ class Schema(StoreModule):
             if not param:
                 self.__graph_store.query(
                     "CREATE (h:HyperParameter {name: $name, uri: $uri})",
-                    params={"name": name, "uri": self.gen_uri()},
+                    params={"name": name, "uri": self.__gen_uri()},
                 )
 
             self.__graph_store.query(
@@ -154,23 +154,5 @@ class Schema(StoreModule):
                 params={"name": name, "value": value, "run_uri": run_uri},
             )
 
-        # Create Dataset node
-        self.__graph_store.query(
-            """
-            MATCH (r:Run {uri: $run_uri})
-            CREATE (d:Dataset $details)<-[:hasInput]-(r)
-            """,
-            params={
-                "details": {
-                    "uri": self.gen_uri(),
-                    "examples_path": self.__config.examples_path,
-                    "examples_hash": self.__config.examples_hash(),
-                    "tests_path": self.__config.tests_path,
-                    "tests_hash": self.__config.tests_hash(),
-                },
-                "run_uri": run_uri,
-            },
-        )
-
-    def gen_uri(self, node_id: str = str(uuid.uuid4())) -> str:
+    def __gen_uri(self, node_id: str = str(uuid.uuid4())) -> str:
         return f"{self.__config.run_uri}#{node_id}"

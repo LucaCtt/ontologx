@@ -63,7 +63,7 @@ def parse() -> None:
     parser = Parser(llm, store, config.prompt_build_graph, config.self_reflection_steps)
 
     reports = []
-    for event, context in track(test_events, description="Parsing events"):
+    for event, context,_ in track(test_events, description="Parsing events"):
         logger.debug("Parsing event: '%s'", event)
 
         report = parser.parse(event, context)

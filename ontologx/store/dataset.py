@@ -20,13 +20,27 @@ class Dataset(StoreModule):
         self.__config = config
         self.__graph_store = graph_store
         self.__embeddings = embeddings
-        self.__index_name = f"events_{self.__config.run_name}"
+
+        self.__vector_index = Neo4jVector(
+            embedding=self.__embeddings,
+            username=self.__config.neo4j_username,
+            password=self.__config.neo4j_password,
+            url=self.__config.neo4j_url,
+            index_name=self.__config.events_index_name,
+            node_label="Event",
+            embedding_node_property="embedding",
+            retrieval_query="""
+            RETURN node.eventMessage AS text,
+            score,
+            {uri: node.uri, runName: node.runName, _embedding_: node.embedding} AS metadata
+            """,
+        )
 
     def initialize(self) -> None:
         # Check if the examples are already loaded
         result = self.__graph_store.query(
             """
-            MATCH (r:Run {name: $run_name})-[:hasInput]->(d:Dataset)
+            MATCH (r:Run {runName: $run_name})-[:hasInput]->(d:Dataset)
             RETURN d
             LIMIT 1
             """,
@@ -42,33 +56,27 @@ class Dataset(StoreModule):
         )
         self.__graph_store.query(
             """
-            MATCH (d: Dataset), (r:Run {name: $run_name})
-            WHERE NOT (d)<-[:hasInput]-(r) AND d.type = "examples"
+            MATCH (d:Dataset {type: 'examples'}), (r:Run {runName: $run_name})
+            WHERE d.runName IS NULL
+            SET d.runName = $run_name
             CREATE (r)-[:hasInput]->(d)
-            """,
-            params={"run_name": self.__config.run_name, "examples_uri": self.__config.examples_uri},
-        )
-
-        # Create the index for the event messages
-        self.__graph_store.query(
-            f"""
-            CREATE INDEX {self.__index_name} IF NOT EXISTS
-            FOR (r:Run {{name: $run_name}})-[:hasInput]->(d:Dataset)-[:hasEvent]->(n:Event)
-            ON (n.eventMessage)
             """,
             params={"run_name": self.__config.run_name},
         )
 
+        # Create the index for the event messages
+        self.__vector_index.create_new_index()
+
         # Populate the embeddings for the examples
         to_populate = self.__graph_store.query(
             """
-            MATCH (r:Run {name: $run_name})-[:hasInput]->(d:Dataset)-[:hasEvent]->(n:Event)
-            WHERE d.type = "Examples" AND n.embedding IS NULL
-            RETURN elementId(n) AS id, n.eventMessage as eventMessage
+            MATCH (d:Dataset {type: 'examples', runName: $run_name})-[:hasPart]->(e:Event)
+            WHERE e.embedding IS NULL
+            SET e.runName = $run_name
+            RETURN elementId(e) AS id, e.eventMessage as eventMessage
             """,
             params={
                 "run_name": self.__config.run_name,
-                "run_uri": self.__config.run_uri,
                 "examples_uri": self.__config.examples_uri,
             },
         )
@@ -76,9 +84,9 @@ class Dataset(StoreModule):
         self.__graph_store.query(
             """
             UNWIND $data AS row
-            MATCH (n:Event)
-            WHERE elementId(n) = row.id
-            CALL db.create.setNodeVectorProperty(n, 'embedding', row.embedding)
+            MATCH (e:Event)
+            WHERE elementId(e) = row.id
+            CALL db.create.setNodeVectorProperty(e, 'embedding', row.embedding)
             """,
             params={
                 "data": [
@@ -97,22 +105,36 @@ class Dataset(StoreModule):
         )
         self.__graph_store.query(
             """
-            MATCH (d: Dataset), (r:Run {name: $run_name})
-            WHERE NOT (d)<-[:hasInput]-(r) AND d.type = "tests"
-            CREATE (r)-[:hasInput]->(d)
+            MATCH (d: Dataset {type: 'tests'}), (r:Run {runName: $run_name})
+            WHERE d.runName IS NULL
+            SET d.runName = $run_name
+            MERGE (r)-[:hasInput]->(d)
             """,
-            params={"run_name": self.__config.run_name, "tests_uri": self.__config.tests_uri},
+            params={
+                "tests_uri": self.__config.tests_uri,
+                "run_name": self.__config.run_name,
+            },
+        )
+        self.__graph_store.query(
+            """
+            MATCH (d:Dataset {type: 'tests', runName: $run_name})-[:hasPart]->(e:Event)
+            SET e.runName = $run_name
+            SET e.embedding = NULL
+            """,
+            params={
+                "run_name": self.__config.run_name,
+                "tests_uri": self.__config.tests_uri,
+            },
         )
 
     def tests(self) -> list[tuple[str, dict, GraphDocument]]:
         test_nodes = self.__graph_store.query(
             """
-            MATCH (n:Event)
-            WHERE n.uri STARTS WITH $tests_uri
-            ORDER BY n.uri
-            RETURN n.eventMessage as message, n.uri as uri
+            MATCH (d:Dataset {type: 'tests', runName: $run_name})-[:hasPart]->(e:Event)
+            ORDER BY e.uri
+            RETURN e.eventMessage as message, e.uri as uri
             """,
-            params={"tests_uri": self.__config.tests_uri},
+            params={"run_name": self.__config.run_name},
         )
         tests = []
         for test in test_nodes:
@@ -185,20 +207,12 @@ class Dataset(StoreModule):
                 with the nodes they are connected to and their relationships.
 
         """
-        index = Neo4jVector.from_existing_index(
-            embedding=self.__embeddings,
-            index_name=self.__index_name,
-            retrieval_query="""
-            RETURN node.eventMessage AS text,
-            score,
-            {uri: node.uri, experimentId: node.experimentId, _embedding_: node.embedding} AS metadata
-            """,
-        )
-        relevant_docs = index.max_marginal_relevance_search(
+        relevant_docs = self.__vector_index.max_marginal_relevance_search(
             query=event,
             k=k,
             fetch_k=fetch_k,
             lambda_mult=lambda_mult,
+            filter={"runName": {"$eq": self.__config.run_name}, "embedding": {"$ne": None}},
         )
 
         return [
@@ -223,7 +237,7 @@ class Dataset(StoreModule):
         nodes_subgraphs = self.__graph_store.query(
             """
             MATCH (n {uri: $node_uri})
-            CALL apoc.path.subgraphAll(n, {})
+            CALL apoc.path.subgraphAll(n, {labelFilter: '-Dataset'})
             YIELD nodes, relationships
             RETURN
             [node IN nodes | {
