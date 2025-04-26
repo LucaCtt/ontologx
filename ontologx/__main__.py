@@ -45,9 +45,9 @@ def clear() -> None:
 
 @app.command()
 def parse() -> None:
-    logger.info("Experiment: %s", config.experiment_name)
-    logger.info("Run: %s", config.run_name)
-    logger.info("Backend: %s", config.backend)
+    logger.info("Experiment: '%s'", config.experiment_name)
+    logger.info("Run: '%s'", config.run_name)
+    logger.info("Backend: '%s'", config.backend)
     logger.info("Embeddings model: '%s'", config.embeddings_model)
     logger.info("Language model: '%s'", config.parser_model)
 
@@ -60,7 +60,7 @@ def parse() -> None:
     test_events = store.dataset.tests()
     logger.info("Read %d tests from '%s'", len(test_events), config.tests_path)
 
-    parser = Parser(llm, store, config.prompt_build_graph, config.self_reflection_steps)
+    parser = Parser(llm, store, config.prompt_build_graph, config.correction_steps)
 
     total_time = 0
     total_success = 0
@@ -88,13 +88,7 @@ def parse() -> None:
     pct_success = total_success / len(test_events)
     precision, recall, f1, ela, rla = accuracy.metrics(graphs_pred, graphs_true)
 
-    table = Table("Metric", "Value", title="Run Summary")
-    table.add_row("Experiment", config.experiment_name)
-    table.add_row("Run", config.run_name)
-    table.add_row("Backend", config.backend)
-    table.add_row("Embeddings model", config.embeddings_model)
-    table.add_row("Language model", config.parser_model)
-    table.add_row("Events parsed", str(len(test_events)), end_section=True)
+    table = Table("Metric", "Value", title="Run Metrics")
     table.add_row("Average generation time", f"{avg_time:.2f} seconds")
     table.add_row("Success percentage", f"{pct_success:.2%}")
     table.add_row("Precision", f"{precision:.2%}")

@@ -49,11 +49,15 @@ class Dataset(StoreModule):
         if result:
             return
 
-        # Load the examples and attach them to the current run
+        # Load the examples
+        # Note: n10s will not load the examples if they are already present in the store.
+        # This is ok, as we want to load the examples again only when they change.
         self.__graph_store.query(
             "CALL n10s.rdf.import.inline($examples, 'Turtle')",
             params={"examples": Path(self.__config.examples_path).read_text()},
         )
+
+        # Attach the examples to the current run
         self.__graph_store.query(
             """
             MATCH (d:Dataset), (r:Run {runName: $run_name})
@@ -71,7 +75,7 @@ class Dataset(StoreModule):
             """
             MATCH (d:Dataset)-[:hasPart]->(e:Event)
             WHERE e.embedding IS NULL AND d.uri STARTS WITH $examples_uri
-            SET e.runName = $run_name
+            SET e.runName = ''
             RETURN elementId(e) AS id, e.eventMessage as eventMessage
             """,
             params={
@@ -96,8 +100,7 @@ class Dataset(StoreModule):
         )
 
         # Load the tests
-        # Note: the test events should not have an embedding
-        # so they are not populated in the index.
+        # Note: the test events should not have an embedding.
         self.__graph_store.query(
             "CALL n10s.rdf.import.inline($tests, 'Turtle')",
             params={"tests": Path(self.__config.tests_path).read_text()},
@@ -117,8 +120,8 @@ class Dataset(StoreModule):
             """
             MATCH (d:Dataset)-[:hasPart]->(e:Event)
             WHERE e.embedding IS NULL AND d.uri STARTS WITH $tests_uri
-            SET e.runName = $run_name
-            SET e.embedding = NULL
+            SET e.runName = ''
+            SET e.embedding = ''
             """,
             params={
                 "run_name": self.__config.run_name,
@@ -234,7 +237,12 @@ class Dataset(StoreModule):
             k=k,
             fetch_k=fetch_k,
             lambda_mult=lambda_mult,
-            filter={"runName": {"$eq": self.__config.run_name}, "embedding": {"$ne": None}},
+            filter={
+                "$or": [{"runName": {"$eq": self.__config.run_name}}, {"runName": {"$eq": None}}],
+                "embedding": {"$ne": None},
+            },
+            # Examples will have no run name but an embedding.
+            # Tests will have neither. Generated events will have both.
         )
 
         return [

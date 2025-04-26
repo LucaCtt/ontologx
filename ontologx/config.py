@@ -127,8 +127,8 @@ class Config:
     parser_temperature = float(os.getenv("PARSER_TEMPERATURE", "0.5"))
     """The temperature of the LLM used to parse logs. Must be between 0 and 1."""
 
-    self_reflection_steps = int(os.getenv("SELF_REFLECTION_STEPS", "3"))
-    """The number of self-reflection steps to take. Must be greater or equal to 0."""
+    correction_steps = int(os.getenv("CORRECTION_STEPS", "3"))
+    """The number of correction steps to take. Must be greater or equal to 0."""
 
     events_index_name = os.getenv("EVENTS_INDEX_NAME", "eventMessageIndex")
     """The name of the vector index to use for the events in the graph store."""
@@ -158,7 +158,7 @@ class Config:
             msg = "Parser temperature must be between 0 and 1"
             raise ValueError(msg)
 
-        if self.self_reflection_steps < 0:
+        if self.correction_steps < 0:
             msg = "Self reflection steps must be greater than 0"
             raise ValueError(msg)
 
@@ -179,5 +179,5 @@ class Config:
         """
         return {
             "parser_temperature": str(self.parser_temperature),
-            "self_reflection_steps": str(self.self_reflection_steps),
+            "self_reflection_steps": str(self.correction_steps),
         }

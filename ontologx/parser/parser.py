@@ -17,7 +17,8 @@ from ontologx.store import Store
 logger = logging.getLogger("rich")
 
 
-def _get_message_group(event: str, graph: GraphDocument, context: dict) -> list[BaseMessage]:
+def _example_message_group(event: str, graph: GraphDocument, context: dict) -> list[BaseMessage]:
+    """Create an example message group for the given event and graph."""
     nodes = [
         {
             "id": node.id,
@@ -59,28 +60,28 @@ def _get_message_group(event: str, graph: GraphDocument, context: dict) -> list[
 
 
 class Parser:
-    """The Parser class is responsible for parsing log events and identifying their templates."""
+    """Parser class for parsing log events and constructing knowledge graphs using a LLM."""
 
     def __init__(
         self,
-        parser_model: BaseChatModel,
+        llm: BaseChatModel,
         store: Store,
         prompt_build_graph: str,
-        self_reflection_steps: int,
+        correction_steps: int,
     ) -> None:
         self.store = store
         self.prompt_build_graph = prompt_build_graph
-        self.self_reflection_steps = self_reflection_steps
+        self.correction_steps = correction_steps
 
         try:
-            parser_model.with_structured_output(BaseEventGraph)
+            llm.with_structured_output(BaseEventGraph)
         except NotImplementedError as e:
             msg = "The parser model must support structured output."
             raise ValueError(msg) from e
 
         # Add context enrichment tools.
         # Note: not all models support tools + structured output
-        structured_model = parser_model.bind_tools([fetch_ip_address_info])
+        structured_model = llm.bind_tools([fetch_ip_address_info])
 
         # Add the graph structure to the structured output.
         # Also include raw output to retrieve eventual errors.
@@ -100,7 +101,7 @@ class Parser:
 
         self.chain = gen_graph_prompt | structured_model
 
-    def _get_examples(self, event: str) -> list[BaseMessage]:
+    def __get_examples(self, event: str) -> list[BaseMessage]:
         similar_events = self.store.dataset.events_mmr_search(event, k=2)
 
         messages = []
@@ -112,7 +113,7 @@ class Parser:
                 context["source"] = source_node.properties.get("sourceName", "")
                 context["device"] = source_node.properties.get("sourceDevice", "")
 
-            messages.extend(_get_message_group(similar_event, graph, context))
+            messages.extend(_example_message_group(similar_event, graph, context))
 
         return messages
 
@@ -128,12 +129,12 @@ class Parser:
 
         """
         # Retrieve examples once for all the self-reflection steps
-        examples = self._get_examples(event)
+        examples = self.__get_examples(event)
 
         corrections = []
 
         # Using self_reflection_steps + 1 to account for the initial attempt
-        for current_step in range(self.self_reflection_steps + 1):
+        for current_step in range(self.correction_steps + 1):
             logger.debug("Self-reflection step %d", current_step)
 
             raw_schema = self.chain.invoke(
