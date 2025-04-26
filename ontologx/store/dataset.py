@@ -238,8 +238,8 @@ class Dataset(StoreModule):
             fetch_k=fetch_k,
             lambda_mult=lambda_mult,
             filter={
-                "$or": [{"runName": {"$eq": self.__config.run_name}}, {"runName": {"$eq": None}}],
-                "embedding": {"$ne": None},
+                "$or": [{"runName": {"$eq": self.__config.run_name}}, {"runName": {"$eq": ""}}],
+                "embedding": {"$ne": ""},
             },
             # Examples will have no run name but an embedding.
             # Tests will have neither. Generated events will have both.
