@@ -5,21 +5,14 @@ Environment variables can be set in the shell before running the script, or in a
 in the root directory of the project.
 """
 
-import hashlib
 import os
 import uuid
 from pathlib import Path
 
 from dotenv import load_dotenv
+from rdflib import Graph
 
 load_dotenv()
-
-
-def _compute_file_hash(file_path: str) -> str:
-    """Compute the SHA256 hash of a file."""
-    with Path(file_path).open("rb", buffering=0) as f:
-        return hashlib.file_digest(f, "sha256").hexdigest()
-
 
 DEFAULT_LLM_MODELS = {
     "ollama": "qwen2.5-coder:14b",
@@ -34,6 +27,25 @@ DEFAULT_EMBEDDINGS_MODELS = {
 }
 
 
+def _get_uri_from_ttl(ttl_path: str) -> str:
+    """Get the URI from the TTL file.
+
+    Args:
+        ttl_path (str): The path to the TTL file.
+
+    Returns:
+        str: The URI of the TTL file.
+
+    """
+    graph = Graph()
+    graph.parse(ttl_path)
+    uri = dict(graph.namespace_manager.namespaces()).get("")
+    if uri is None:
+        msg = f"Could not find URI in TTL file {ttl_path}"
+        raise ValueError(msg)
+    return uri.toPython()
+
+
 class Config:
     """Configuration class for setting up variables used in the log graph building."""
 
@@ -43,31 +55,17 @@ class Config:
     the criterion for grouping is up to the user.
     """
 
+    run_name = os.getenv("RUN_NAME", str(uuid.uuid4()))
+    """ The name of the run. A run is a single execution of the ontologx pipeline."""
+
     ontology_path = os.getenv("ONTOLOGY_PATH", "resources/ontologies/logs.ttl")
     """The path to the ontology file."""
-
-    ontology_uri = os.getenv("ONTOLOGY_URI", "https://cyberseclab.unibs.it/ontologx/log/dictionary")
-    """The URI of the ontology."""
 
     examples_path = os.getenv("EXAMPLES_PATH", "resources/data/train.ttl")
     """ The path to the examples log graphs file. Used to retrieve the examples."""
 
-    examples_uri = os.getenv("EXAMPLES_URI", "https://cyberseclab.unibs.it/ontologx/log/examples/1.0")
-    """The URI of the examples."""
-
     tests_path = os.getenv("TESTS_PATH", "resources/data/test.lc.ttl")
     """The input path to the logs to parse."""
-
-    tests_uri = os.getenv("TESTS_URI", "https://cyberseclab.unibs.it/ontologx/log/tests/lc/1.0")
-    """The URI of the tests."""
-
-    run_name = os.getenv("RUN_NAME", str(uuid.uuid4()))
-    """ The name of the run. A run is a single execution of the ontologx pipeline."""
-
-    run_uri = os.getenv("RUN_URI", "https://cyberseclab.unibs.it/ontologx/log/run/" + run_name)
-    """The URI of the nodes generated in the run."""
-
-    out_uri = os.getenv("OUT_URI", "https://cyberseclab.unibs.it/ontologx/log/out/" + run_name)
 
     shacl_path = os.getenv("CONSTRAINTS_PATH", "resources/ontologies/logs_shacl.ttl")
     """The path to the SHACL constraints file for the ontology."""
@@ -138,8 +136,22 @@ class Config:
     n10s_constraint_name = os.getenv("N10S_CONSTRAINT_NAME", "n10s_unique_uri")
     """The name of the neosemantics constraint for unique URIs."""
 
-    n10s_trigger_name = os.getenv("N10S_TRIGGER_NAME", "shacl-validate")
+    n10s_trigger_name = os.getenv("N10S_TRIGGER_NAME", "shacl_validate")
     """The name of the neosemantics trigger for validating the graph."""
+
+    tests_uri = _get_uri_from_ttl(tests_path)
+    """The URI of the tests."""
+
+    ontology_uri = _get_uri_from_ttl(ontology_path)
+    """The URI of the ontology."""
+
+    examples_uri = _get_uri_from_ttl(examples_path)
+    """The URI of the examples."""
+
+    run_uri = "https://cyberseclab.unibs.it/ontologx/log/run/" + run_name
+    """The URI of the nodes generated in the run."""
+
+    out_uri = "https://cyberseclab.unibs.it/ontologx/log/out/" + run_name
 
     def __init__(self):
         if self.parser_temperature < 0 or self.parser_temperature > 1:
@@ -157,15 +169,6 @@ class Config:
         if self.backend == "google-ai" and self.google_ai_api_key is None:
             msg = "GOOGLE_API_KEY must be set in the environment when using the Google AI backend"
             raise ValueError(msg)
-
-    def ontology_hash(self) -> str:
-        return _compute_file_hash(self.ontology_path)
-
-    def examples_hash(self) -> str:
-        return _compute_file_hash(self.examples_path)
-
-    def tests_hash(self) -> str:
-        return _compute_file_hash(self.tests_path)
 
     def hyperparameters(self) -> dict[str, str]:
         """Return the hyperparameters used in the experiment.

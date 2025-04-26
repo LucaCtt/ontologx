@@ -1,5 +1,5 @@
+import uuid
 from pathlib import Path
-from typing import Any
 
 import neo4j
 from langchain_core.embeddings import Embeddings
@@ -177,11 +177,15 @@ class Dataset(StoreModule):
             )
 
         for node in graph.nodes:
+            node_id = f"{self.__config.out_uri}/{uuid.uuid4()}"
+            node.id = node_id
+            node.properties["uri"] = node_id
+
             # Add the run_name and (for the Event nodes) the embedding.
-            additional_properties: dict[str, Any] = {"runName": self.__config.run_name}
+            node.properties["runName"] = self.__config.run_name
             if node.type == "Event":
                 # This will raise an exception if the LLM produces an Event node without a message property.
-                additional_properties["embedding"] = self.__embeddings.embed_query(node.properties["eventMessage"])
+                node.properties["embedding"] = self.__embeddings.embed_query(node.properties["eventMessage"])
 
             self.__graph_store.query(
                 f"""
@@ -189,7 +193,7 @@ class Dataset(StoreModule):
                 WHERE d.uri STARTS WITH $out_dataset_uri
                 CREATE (d)-[:hasPart]->(n:{node.type} $props)
                 """,
-                params={"props": {**node.properties, **additional_properties}},
+                params={"props": node.properties},
             )
 
         for relationship in graph.relationships:
