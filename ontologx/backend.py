@@ -48,7 +48,7 @@ class BackendFactory:
 
         Args:
             backend_type (str): The type of backend to create.
-            Supported types include "huggingface", "ollama", and "google-ai".
+            Supported types include "huggingface", "ollama", "google-ai", and "vllm".
 
         Returns:
             Backend: An instance of the specified backend type.
@@ -65,6 +65,9 @@ class BackendFactory:
 
         if backend_type == "google-ai":
             return GoogleAIBackend()
+
+        if backend_type == "vllm":
+            return VllmBackend()
 
         msg = f"Unsupported backend type: {backend_type}"
         raise ValueError(msg)

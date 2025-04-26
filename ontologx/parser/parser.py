@@ -11,9 +11,8 @@ from langchain_neo4j.graphs.graph_document import GraphDocument
 from pydantic import ValidationError
 
 from ontologx.parser.models import BaseEventGraph, build_dynamic_model
-from ontologx.parser.reports import ParserReport
+from ontologx.parser.tools import fetch_ip_address_info
 from ontologx.store import Store
-from ontologx.tools import fetch_ip_address_info
 
 logger = logging.getLogger("rich")
 
@@ -117,7 +116,7 @@ class Parser:
 
         return messages
 
-    def parse(self, event: str, context: dict) -> ParserReport:
+    def parse(self, event: str, context: dict) -> GraphDocument | None:
         """Parse the given event and construct a knowledge graph.
 
         Args:
@@ -128,8 +127,6 @@ class Parser:
             A report containing the stats of the parsing process.
 
         """
-        report = ParserReport()
-
         # Retrieve examples once for all the self-reflection steps
         examples = self._get_examples(event)
 
@@ -190,6 +187,6 @@ class Parser:
             output_graph: GraphDocument = raw_schema["parsed"].graph()
 
             logger.debug("Graph constructed successfully.")
-            return report.success(output_graph)
+            return output_graph
 
-        return report.failure("No valid output was produced within the self-reflection steps.")
+        return None

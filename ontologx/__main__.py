@@ -5,14 +5,17 @@ the reading of the logs, and the construction of the knowledge graph.
 """
 
 import logging
+import time
 
 import typer
 from rich.logging import RichHandler
 from rich.progress import track
+from rich.table import Table
 
+from ontologx import accuracy
 from ontologx.backend import BackendFactory
 from ontologx.config import Config
-from ontologx.parser import Parser, RunSummary
+from ontologx.parser import Parser
 from ontologx.store import Store
 
 config = Config()
@@ -59,27 +62,48 @@ def parse() -> None:
 
     parser = Parser(llm, store, config.prompt_build_graph, config.self_reflection_steps)
 
-    reports = []
-    for event, context, _ in track(test_events, description="Parsing events"):
+    total_time = 0
+    total_success = 0
+    graphs_pred = []
+    graphs_true = []
+
+    for event, context, graph_true in track(test_events, description="Parsing events"):
         logger.debug("Parsing event: '%s'", event)
+        start_time = time.time()
 
-        report = parser.parse(event, context)
-        reports.append(report)
+        graph_pred = parser.parse(event, context)
+        total_time += (time.time() - start_time) / len(test_events)
+        graphs_pred.append(graph_pred)
+        graphs_true.append(graph_true)
 
-        if report.error is not None:
-            logger.warning("Event could not be parsed: %s", report.error)
-        elif report.graph is not None:
-            store.dataset.add_event_graph(report.graph)
+        if graph_pred is None:
+            logger.warning("Event '%s' could not be parsed", event)
         else:
-            logger.warning("Event was parsed but no graph was generated.")
+            store.dataset.add_event_graph(graph_pred)
+            total_success += 1
 
     logger.info("Log parsing done.")
 
-    summary = RunSummary(reports)
+    avg_time = total_time / len(test_events)
+    pct_success = total_success / len(test_events)
+    precision, recall, f1, ela, rla = accuracy.metrics(graphs_pred, graphs_true)
 
-    logger.info("Run summary:")
-    logger.info("- Average parse time per event: %f seconds", summary.parse_time_average())
-    logger.info("- Success percentage: %f%%", summary.success_percentage() * 100)
+    table = Table("Metric", "Value", title="Run Summary")
+    table.add_row("Experiment", config.experiment_name)
+    table.add_row("Run", config.run_name)
+    table.add_row("Backend", config.backend)
+    table.add_row("Embeddings model", config.embeddings_model)
+    table.add_row("Language model", config.parser_model)
+    table.add_row("Events parsed", str(len(test_events)), end_section=True)
+    table.add_row("Average generation time", f"{avg_time:.2f} seconds")
+    table.add_row("Success percentage", f"{pct_success:.2%}")
+    table.add_row("Precision", f"{precision:.2%}")
+    table.add_row("Recall", f"{recall:.2%}")
+    table.add_row("F1 score", f"{f1:.2%}")
+    table.add_row("Entity linking accuracy", f"{ela:.2%}")
+    table.add_row("Relationship linking accuracy", f"{rla:.2%}")
+
+    logger.info(table)
 
 
 def main() -> None:

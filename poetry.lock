@@ -1938,7 +1938,7 @@ version = "3.4.2"
 description = "Python package for creating and manipulating graphs and networks"
 optional = false
 python-versions = ">=3.10"
-groups = ["main", "huggingface"]
+groups = ["huggingface"]
 files = [
     {file = "networkx-3.4.2-py3-none-any.whl", hash = "sha256:df5d4365b724cf81b8c6a7312509d0c22386097011ad1abe274afd5e9d3bbc5f"},
     {file = "networkx-3.4.2.tar.gz", hash = "sha256:307c3669428c5362aab27c8a1260aa8f47c4e91d3891f48be0141738d8d053e1"},
@@ -4391,4 +4391,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<4.0"
-content-hash = "a664ce4b2968377cb558e7c1b3db953d722502d012aa4b9a083a50f629f5f628"
+content-hash = "33b87aa11bf3d7b77cdae1c0c245e9091528bfe40eca841c956a0bb49f2fc841"
