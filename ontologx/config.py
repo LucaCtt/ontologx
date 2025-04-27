@@ -49,14 +49,17 @@ def _get_uri_from_ttl(ttl_path: str) -> str:
 class Config:
     """Configuration class for setting up variables used in the log graph building."""
 
-    experiment_name: str = os.getenv("EXPERIMENT_NAME", "Default")
+    parser_type = os.getenv("PARSER_TYPE", "main")
+    """The type of parser to use. Supported values are 'main', 'tools', and 'baseline'"""
+
+    experiment_name: str = os.getenv("EXPERIMENT_NAME", str(uuid.uuid4()))
     """
     The name of the current experiment. Experiments are used to group runs together,
     the criterion for grouping is up to the user.
     """
 
-    run_name = os.getenv("RUN_NAME", str(uuid.uuid4()))
-    """ The name of the run. A run is a single execution of the ontologx pipeline."""
+    n_runs = int(os.getenv("N_RUNS", "10"))
+    """The number of runs to execute in the experiment."""
 
     ontology_path = os.getenv("ONTOLOGY_PATH", "resources/ontologies/logs.ttl")
     """The path to the ontology file."""
@@ -148,10 +151,14 @@ class Config:
     examples_uri = _get_uri_from_ttl(examples_path)
     """The URI of the examples."""
 
+    run_name = str(uuid.uuid4())
+    """ The name of the run. A run is a single execution of the ontologx pipeline."""
+
     run_uri = "https://cyberseclab.unibs.it/ontologx/log/run/" + run_name
-    """The URI of the nodes generated in the run."""
+    """The URI of the run node."""
 
     out_uri = "https://cyberseclab.unibs.it/ontologx/log/out/" + run_name
+    """The URI of the output nodes."""
 
     def __init__(self):
         if self.parser_temperature < 0 or self.parser_temperature > 1:
@@ -169,6 +176,12 @@ class Config:
         if self.backend == "google-ai" and self.google_ai_api_key is None:
             msg = "GOOGLE_API_KEY must be set in the environment when using the Google AI backend"
             raise ValueError(msg)
+
+    def new_run(self) -> None:
+        """Create a new run by generating a new UUID and updating the run name."""
+        self.run_name = str(uuid.uuid4())
+        self.run_uri = "https://cyberseclab.unibs.it/ontologx/log/run/" + self.run_name
+        self.out_uri = "https://cyberseclab.unibs.it/ontologx/log/out/" + self.run_name
 
     def hyperparameters(self) -> dict[str, str]:
         """Return the hyperparameters used in the experiment.

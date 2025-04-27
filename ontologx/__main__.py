@@ -15,18 +15,21 @@ from rich.table import Table
 from ontologx import accuracy
 from ontologx.backend import BackendFactory
 from ontologx.config import Config
-from ontologx.parser import Parser
+from ontologx.parser import ParserFactory
 from ontologx.store import Store
-
-config = Config()
 
 # Set up logging format
 logging.basicConfig(format="%(message)s", handlers=[RichHandler(omit_repeated_times=False)])
 logger = logging.getLogger("rich")
 logger.setLevel(logging.DEBUG)
 
+config = Config()
+
 # Set the backend
 backend = BackendFactory.create(config.backend)
+
+# Load the llm
+llm = backend.llm(model=config.parser_model, temperature=config.parser_temperature)
 
 # Load the embeddings model
 embeddings = backend.embeddings(model=config.embeddings_model)
@@ -44,60 +47,66 @@ def clear() -> None:
 
 
 @app.command()
-def parse() -> None:
+def run() -> None:
     logger.info("Experiment: '%s'", config.experiment_name)
-    logger.info("Run: '%s'", config.run_name)
     logger.info("Backend: '%s'", config.backend)
     logger.info("Embeddings model: '%s'", config.embeddings_model)
     logger.info("Language model: '%s'", config.parser_model)
 
-    # Load the llm
-    llm = backend.llm(model=config.parser_model, temperature=config.parser_temperature)
+    for _ in range(config.n_runs):
+        config.new_run()
+        logger.info("Run: '%s'", config.run_name)
 
-    store.initialize()
-    logger.info("Store at '%s' initialized.", config.neo4j_url)
+        store.initialize()
+        logger.info("Store at '%s' initialized.", config.neo4j_url)
 
-    test_events = store.dataset.tests()
-    logger.info("Read %d tests from '%s'", len(test_events), config.tests_path)
+        test_events = store.dataset.tests()
+        logger.info("Read %d tests from '%s'", len(test_events), config.tests_path)
 
-    parser = Parser(llm, store, config.prompt_build_graph, config.correction_steps)
+        parser = ParserFactory.create(
+            config.parser_type,
+            llm,
+            store,
+            config.prompt_build_graph,
+            config.correction_steps,
+        )
 
-    total_time = 0
-    total_success = 0
-    graphs_pred = []
-    graphs_true = []
+        total_time = 0
+        total_success = 0
+        graphs_pred = []
+        graphs_true = []
 
-    for event, context, graph_true in track(test_events, description="Parsing events"):
-        logger.debug("Parsing event: '%s'", event)
-        start_time = time.time()
+        for event, context, graph_true in track(test_events, description="Parsing events"):
+            logger.debug("Parsing event: '%s'", event)
+            start_time = time.time()
 
-        graph_pred = parser.parse(event, context)
-        total_time += (time.time() - start_time) / len(test_events)
-        graphs_pred.append(graph_pred)
-        graphs_true.append(graph_true)
+            graph_pred = parser.parse(event, context)
+            total_time += (time.time() - start_time) / len(test_events)
+            graphs_pred.append(graph_pred)
+            graphs_true.append(graph_true)
 
-        if graph_pred is None:
-            logger.warning("Event '%s' could not be parsed", event)
-        else:
-            store.dataset.add_event_graph(graph_pred)
-            total_success += 1
+            if graph_pred is None:
+                logger.warning("Event '%s' could not be parsed", event)
+            else:
+                store.dataset.add_event_graph(graph_pred)
+                total_success += 1
 
-    logger.info("Log parsing done.")
+        logger.info("Log parsing done.")
 
-    avg_time = total_time / len(test_events)
-    pct_success = total_success / len(test_events)
-    precision, recall, f1, ela, rla = accuracy.metrics(graphs_pred, graphs_true)
+        avg_time = total_time / len(test_events)
+        pct_success = total_success / len(test_events)
+        precision, recall, f1, ela, rla = accuracy.metrics(graphs_pred, graphs_true)
 
-    table = Table("Metric", "Value", title="Run Metrics")
-    table.add_row("Average generation time", f"{avg_time:.2f} seconds")
-    table.add_row("Success percentage", f"{pct_success:.2%}")
-    table.add_row("Precision", f"{precision:.2%}")
-    table.add_row("Recall", f"{recall:.2%}")
-    table.add_row("F1 score", f"{f1:.2%}")
-    table.add_row("Entity linking accuracy", f"{ela:.2%}")
-    table.add_row("Relationship linking accuracy", f"{rla:.2%}")
+        table = Table("Metric", "Value", title="Run Metrics")
+        table.add_row("Average generation time", f"{avg_time:.2f} seconds")
+        table.add_row("Success percentage", f"{pct_success:.2%}")
+        table.add_row("Precision", f"{precision:.2%}")
+        table.add_row("Recall", f"{recall:.2%}")
+        table.add_row("F1 score", f"{f1:.2%}")
+        table.add_row("Entity linking accuracy", f"{ela:.2%}")
+        table.add_row("Relationship linking accuracy", f"{rla:.2%}")
 
-    logger.info(table)
+        logger.info(table)
 
 
 def main() -> None:
