@@ -2,6 +2,30 @@
 
 from langchain_neo4j.graphs.graph_document import GraphDocument, Node, Relationship
 
+type Triple = tuple[str, str, str]
+
+
+def __triples(graph: GraphDocument) -> Triple:
+    """Get the triples from a graph.
+
+    Args:
+        graph (GraphDocument): The graph to extract triples from.
+
+    Returns:
+        list[tuple[str,str,str]]: A list of triples in the form (subject, predicate, object).
+
+    """
+    triples = []
+    for node in graph.nodes:
+        for prop, value in node.properties.items():
+            if prop in ("id", "uri", "runName"):
+                continue
+            triples.append((node.id, prop, value))
+
+    triples.extend([(rel.source.id, rel.type, rel.target.id) for rel in graph.relationships])
+
+    return triples
+
 
 def __node_match(node1: Node, node2: Node) -> bool:
     """Check if two nodes are equal.
@@ -59,37 +83,45 @@ def metrics(y_pred: list[GraphDocument], y_true: list[GraphDocument]) -> tuple[f
         float: Relationship linking accuracy score.
 
     """
-    nodes_correct = 0
-    nodes_total = 0
+    triples_pred = [__triples(graph) for graph in y_pred]
+    triples_true = [__triples(graph) for graph in y_true]
 
+    tp = 0  # triples found that are in the true set
+    fp = 0  # triples found that are not in the true set
+    fn = 0  # triples not found that are in the true set
+
+    for triple_pred in triples_pred:
+        if triple_pred not in triples_true:
+            fp += 1
+            continue
+
+        tp += 1
+        triples_true.remove(triple_pred)
+
+    fn += len(triples_true)
+
+    entities_pred = [node.type for graph in y_pred for node in graph.nodes]
+    entities_true = [node.type for graph in y_true for node in graph.nodes]
+    entities_total = len(entities_true)
+    entities_correct = 0
+    for entity_pred in entities_pred:
+        if entity_pred in entities_true:
+            entities_correct += 1
+            entities_true.remove(entity_pred)
+
+    relationships_pred = [rel.type for graph in y_pred for rel in graph.relationships]
+    relationships_true = [rel.type for graph in y_true for rel in graph.relationships]
+    relationships_total = len(relationships_true)
     relationships_correct = 0
-    relationships_total = 0
+    for relationship_pred in relationships_pred:
+        if relationship_pred in relationships_true:
+            relationships_correct += 1
+            relationships_true.remove(relationship_pred)
 
-    all_correct = 0
-
-    for pred, true in zip(y_pred, y_true, strict=True):
-        nodes_total += len(pred.nodes)
-        nodes_correct += sum(
-            1 for pred_node in pred.nodes if any(__node_match(pred_node, true_node) for true_node in true.nodes)
-        )
-
-        relationships_total += len(pred.relationships)
-        relationships_correct += sum(
-            1 for pred_edge in pred.edges if any(__relationship_match(pred_edge, true_edge) for true_edge in true.edges)
-        )
-
-        if (
-            len(pred.nodes) == len(true.nodes)
-            and len(pred.edges) == len(true.edges)
-            and nodes_correct == len(pred.nodes)
-            and relationships_correct == len(pred.edges)
-        ):
-            all_correct += 1
-
-    precision = all_correct / len(y_pred)
-    recall = all_correct / len(y_true)
+    precision = tp / (tp + fp) if tp + fp > 0 else 0
+    recall = tp / (tp + fn) if tp + fn > 0 else 0
     f1 = 2 * (precision * recall) / (precision + recall) if precision + recall > 0 else 0
-    ela = nodes_correct / nodes_total if nodes_total > 0 else 0
+    ela = entities_correct / entities_total if entities_total > 0 else 0
     rla = relationships_correct / relationships_total if relationships_total > 0 else 0
 
     return precision, recall, f1, ela, rla
