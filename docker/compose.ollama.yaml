@@ -1,0 +1,57 @@
+services:
+  ontologx:
+    build:
+      context: .
+      dockerfile: ontologx.dockerfile
+    command: olx parse
+    restart: always
+    depends_on:
+      - ollama
+      - neo4j
+    networks:
+      - ontologx-docker
+      
+  ollama:
+    volumes:
+      - ./ollama/ollama:/root/.ollama
+    container_name: ollama
+    pull_policy: always
+    tty: true
+    restart: always
+    image: docker.io/ollama/ollama:latest
+    ports:
+      - 7869:11434
+    environment:
+      - OLLAMA_KEEP_ALIVE=24h
+    networks:
+      - ontologx-docker
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    
+  neo4j:
+    image: neo4j:2025.03.0
+    container_name: neo4j
+    volumes:
+      - ./neo4j/data:/data
+      - ./neo4j/logs:/logs
+      - ./neo4j/plugins:/plugins
+    environment:
+      - NEO4J_AUTH=neo4j/password
+      - NEO4j_PLUGINS=["apoc", "n10s"]
+    ports:
+      - "7687:7687"  # Bolt
+      - "7474:7474" # HTTP
+    networks:
+      - ontologx-docker
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:7474/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    restart: always

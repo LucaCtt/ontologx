@@ -85,10 +85,16 @@ class Config:
     neo4j_password = os.getenv("NEO4J_PASSWORD", "password")
     """The password to use for the Neo4j database."""
 
-    backend = os.getenv("BACKEND", "ollama")
+    embeddings_backend = os.getenv("EMBEDDINGS_BACKEND", "ollama")
     """
-    The backend to use for the LLM.
+    The backend to use for the embeddings.
     Must be one of "ollama", "huggingface", or "google-ai".
+    """
+
+    llm_backend = os.getenv("LLM_BACKEND", "ollama")
+    """
+    The backend to use for the llm.
+    Must be one of "ollama", "huggingface", "google-ai", or "bedrock".
     """
 
     huggingfacehub_api_token = os.getenv("HUGGINGFACEHUB_API_TOKEN", None)

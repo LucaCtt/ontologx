@@ -13,7 +13,7 @@ from rich.progress import track
 from rich.table import Table
 
 from ontologx import accuracy
-from ontologx.backend import BackendFactory
+from ontologx.backend import EmbeddingsFactory, LLMFactory
 from ontologx.config import Config
 from ontologx.parser import ParserFactory
 from ontologx.store import Store
@@ -25,14 +25,11 @@ logger.setLevel(logging.DEBUG)
 
 config = Config()
 
-# Set the backend
-backend = BackendFactory.create(config.backend)
+# Load the embeddings model
+embeddings = EmbeddingsFactory.create(backend=config.embeddings_backend, model=config.embeddings_model)
 
 # Load the llm
-llm = backend.llm(model=config.parser_model, temperature=config.parser_temperature)
-
-# Load the embeddings model
-embeddings = backend.embeddings(model=config.embeddings_model)
+llm = LLMFactory.create(backend=config.llm_backend, model=config.parser_model, temperature=config.parser_temperature)
 
 # Create the vector store
 store = Store(config=config, embeddings=embeddings)
@@ -68,7 +65,7 @@ def run() -> None:
             llm,
             store,
             config.prompt_build_graph,
-            config.correction_steps,
+            correction_steps=config.correction_steps,
         )
 
         total_time = 0
