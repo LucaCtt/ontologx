@@ -131,19 +131,21 @@ class Schema(StoreModule):
 
         # Create hyperparameter nodes
         for name, value in self.__config.hyperparameters().items():
+            name_camel = "".join(x.capitalize() for x in name.lower().split("_"))
+
             param = self.__graph_store.query(
                 """
                 MATCH (h:HyperParameter {name: $name})
                 RETURN h
                 LIMIT 1
                 """,
-                params={"name": name},
+                params={"name": name_camel},
             )
 
             if not param:
                 self.__graph_store.query(
                     "CREATE (h:HyperParameter {name: $name, uri: $uri})",
-                    params={"name": name, "uri": self.__gen_uri()},
+                    params={"name": name_camel, "uri": self.__gen_uri()},
                 )
 
             self.__graph_store.query(
@@ -151,7 +153,7 @@ class Schema(StoreModule):
                 MATCH (r:Run {uri: $run_uri}), (h:HyperParameter {name: $name})
                 CREATE (r)-[:hasInput]->(s:HyperParameterSetting {hasValue: $value})-[:specifiedBy]->(h)
                 """,
-                params={"name": name, "value": value, "run_uri": run_uri},
+                params={"name": name_camel, "value": value, "run_uri": run_uri},
             )
 
     def __gen_uri(self, node_id: str = str(uuid.uuid4())) -> str:

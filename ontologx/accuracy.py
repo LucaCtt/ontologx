@@ -5,7 +5,7 @@ from langchain_neo4j.graphs.graph_document import GraphDocument, Node, Relations
 type Triple = tuple[str, str, str]
 
 
-def __triples(graph: GraphDocument) -> Triple:
+def __triples(graph: GraphDocument) -> list[Triple]:
     """Get the triples from a graph.
 
     Args:
@@ -68,7 +68,7 @@ def __relationship_match(rel1: Relationship, rel2: Relationship) -> bool:
     )
 
 
-def metrics(y_pred: list[GraphDocument], y_true: list[GraphDocument]) -> tuple[float, float, float]:
+def metrics(y_pred: list[GraphDocument], y_true: list[GraphDocument]) -> tuple[float, float, float, float, float]:
     """Calculate evalutation metrics for the predictions.
 
     Args:

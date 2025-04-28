@@ -189,7 +189,7 @@ class Config:
         self.run_uri = "https://cyberseclab.unibs.it/ontologx/log/run/" + self.run_name
         self.out_uri = "https://cyberseclab.unibs.it/ontologx/log/out/" + self.run_name
 
-    def hyperparameters(self) -> dict[str, str]:
+    def hyperparameters(self) -> dict[str, str | int | float]:
         """Return the hyperparameters used in the experiment.
 
         Returns:
@@ -197,6 +197,9 @@ class Config:
 
         """
         return {
-            "parser_temperature": str(self.parser_temperature),
-            "self_reflection_steps": str(self.correction_steps),
+            "parser_type": self.parser_type,
+            "embeddings_model": self.embeddings_model,
+            "parser_model": self.parser_model,
+            "parser_temperature": self.parser_temperature,
+            "correction_steps": self.correction_steps,
         }

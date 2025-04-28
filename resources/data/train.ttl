@@ -7,19 +7,11 @@
 @prefix dc: <http://purl.org/dc/terms#>.
 
 # inet-dns, syslog.1.csv, Jan 25 06:17:01 inet-dns CRON[16314]: (root) CMD (   cd / && run-parts --report /etc/cron.hourly)
-:datetime-1 rdf:type time:GeneralDateTimeDescription;
-  time:month 1;
-  time:day 25;
-  time:hour 6;
-  time:minute 17;
-  time:second 1.
-
 :timestamp-1 rdf:type log:TimeStamp;
   time:inXSDDate "2022-01-25"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-25T06:17:01"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
-  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth;
-  time:inDateTime :datetime-1.
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
 
 :source-1 rdf:type log:Source;
   log:sourceName "syslog.1";
@@ -46,19 +38,11 @@
   log:hasTimeStamp :timestamp-1.
 
 # cloud_share, suricata.log.csv, 20/1/2022 -- 13:16:23 - <Perf> - using shared mpm ctx' for http_stat_msg
-:datetime-2 rdf:type time:GeneralDateTimeDescription;
-  time:month 1;
-  time:day 20;
-  time:hour 13;
-  time:minute 16;
-  time:second 23.
-
 :timestamp-2 rdf:type log:TimeStamp;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T13:16:23"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
-  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth;
-  time:inDateTime :datetime-2.
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
 
 :application-2 rdf:type log:Application;
   log:applicationName "suricata".
@@ -76,19 +60,11 @@
   log:hasSource :source-2.
 
 # inet-dns, dnsmasq.log.csv, Jan 20 13:47:21 dnsmasq[3326]: query[AAAA] d1zkz3k4cclnv6.cloudfront.net from 192.168.231.180
-:datetime-3 rdf:type time:GeneralDateTimeDescription;
-  time:month 1;
-  time:day 20;
-  time:hour 13;
-  time:minute 47;
-  time:second 21.
-
 :timestamp-3 rdf:type log:TimeStamp;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T13:47:21"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
-  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth;
-  time:inDateTime :datetime-3.
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
 
 :process-3 rdf:type log:Process;
   log:processPID 3326.
@@ -115,19 +91,11 @@
   log:hasSource :source-3.
 
 # mail, mail.log.csv, Jan 23 08:06:19 mail dovecot: imap(traci.stevenson): Logged out in=70 out=599
-:datetime-4 rdf:type time:GeneralDateTimeDescription;
-  time:month 1;
-  time:day 23;
-  time:hour 8;
-  time:minute 6;
-  time:second 19.
-
 :timestamp-4 rdf:type log:TimeStamp;
   time:inXSDDate "2022-01-23"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-23T08:06:19"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
-  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth;
-  time:inDateTime :datetime-4.
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
 
 :application-4 rdf:type log:Application;
   log:applicationName "dovecot".
@@ -149,19 +117,11 @@
   log:hasSource :source-4.
 
 # vpn, syslog.3.csv, Jan 22 19:12:09 vpn systemd[1]: Starting Daily apt download activities...
-:datetime-5 rdf:type time:GeneralDateTimeDescription;
-  time:month 1;
-  time:day 22;
-  time:hour 19;
-  time:minute 12;
-  time:second 9.
-
 :timestamp-5 rdf:type log:TimeStamp;
   time:inXSDDate "2022-01-22"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-22T19:12:09"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
-  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth;
-  time:inDateTime :datetime-5.
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
 
 :process-5 rdf:type log:Process;
   log:processPID 1.
@@ -183,19 +143,11 @@
   log:hasSource :source-5.
 
 # mail, stats.log.csv, "Date: 1/23/2022 -- 06:42:05 (uptime: 2d, 17h 25m 39s)"
-:datetime-6 rdf:type time:GeneralDateTimeDescription;
-  time:month 1;
-  time:day 23;
-  time:hour 6;
-  time:minute 42;
-  time:second 5.
-
 :timestamp-6 rdf:type log:TimeStamp;
   time:inXSDDate "2022-01-23"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-23T06:42:05"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
-  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth;
-  time:inDateTime :datetime-6.
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
 
 :source-6 rdf:type log:Source;
   log:sourceName "stats.log";
@@ -209,19 +161,11 @@
   log:hasSource :source-6.
 
 # morris_mail, syslog.csv, Jan 25 06:57:57 morris-mail systemd[1993]: Closed GnuPG cryptographic agent (access for web browsers).
-:datetime-7 rdf:type time:GeneralDateTimeDescription;
-  time:month 1;
-  time:day 25;
-  time:hour 6;
-  time:minute 57;
-  time:second 57.
-
 :timestamp-7 rdf:type log:TimeStamp;
   time:inXSDDate "2022-01-25"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-25T06:57:57"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
-  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth;
-  time:inDateTime :datetime-7.
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
 
 :process-7 rdf:type log:Process;
   log:processPID 1993.
@@ -246,19 +190,11 @@
   log:hasSource :source-7.
 
 # inet-dns, syslog.4.csv, Jan 20 11:12:22 inet-dns kernel: [    3.552456] raid6: using avx2x2 recovery algorithm
-:datetime-8 rdf:type time:GeneralDateTimeDescription;
-  time:month 1;
-  time:day 20;
-  time:hour 11;
-  time:minute 12;
-  time:second 22.
-
 :timestamp-8 rdf:type log:TimeStamp;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T11:12:22"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
-  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth;
-  time:inDateTime :datetime-8.
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
 
 :application-8 rdf:type log:Application;
   log:applicationName "kernel".
@@ -276,19 +212,11 @@
   log:hasSource :source-8.
 
 # webserver, syslog.1.csv, "Jan 24 22:48:53 webserver systemd-timesyncd[30824]: Network configuration changed, trying to establish connection."
-:datetime-9 rdf:type time:GeneralDateTimeDescription;
-  time:month 1;
-  time:day 24;
-  time:hour 22;
-  time:minute 48;
-  time:second 53.
-
 :timestamp-9 rdf:type log:TimeStamp;
   time:inXSDDate "2022-01-24"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-24T22:48:53"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
-  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth;
-  time:inDateTime :datetime-9.
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
 
 :process-9 rdf:type log:Process;
   log:processPID 30824.
@@ -332,6 +260,7 @@
   log:hasAddress :address-10;
   log:hasSource :source-10.
 
+# Dataset
 :examples-dataset rdf:type mls:Dataset;
   dc:type "examples";
   mls:hasPart :event-1, :event-2, :event-3, :event-4, :event-5, :event-6, :event-7, :event-8, :event-9, :event-10.

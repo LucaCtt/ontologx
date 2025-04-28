@@ -46,7 +46,7 @@ class ParserFactory:
         llm: BaseChatModel,
         store: Store,
         prompt_build_graph: str,
-        **kwargs: dict,
+        correction_steps: int = 0,
     ) -> Parser:
         """Create a Parser instance.
 
@@ -64,11 +64,11 @@ class ParserFactory:
         """
         match parser_type:
             case "baseline":
-                return BaselineParser(llm, store, prompt_build_graph, **kwargs)
+                return BaselineParser(llm, store, prompt_build_graph)
             case "tools":
-                return ToolsParser(llm, store, prompt_build_graph, **kwargs)
+                return ToolsParser(llm, store, prompt_build_graph)
             case "main":
-                return MainParser(llm, store, prompt_build_graph, **kwargs)
+                return MainParser(llm, store, prompt_build_graph, correction_steps)
             case _:
                 msg = f"Unknown parser type: {parser_type}"
                 raise ValueError(msg)
