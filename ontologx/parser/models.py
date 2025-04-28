@@ -42,20 +42,44 @@ class BaseEventGraph(BaseModel):
         return GraphDocument(nodes=list(nodes_dict.values()), relationships=relationships)
 
 
+class _OntologyValidValues:
+    """Class to hold the valid values for the ontology."""
+
+    def __init__(self, ontology: GraphDocument):
+        self.ontology = ontology
+
+    @property
+    def node_types(self) -> list[str]:
+        return [node.type for node in self.ontology.nodes]
+
+    @property
+    def relationship_types(self) -> list[str]:
+        return [rel.type for rel in self.ontology.relationships]
+
+    @property
+    def triples(self) -> list[tuple[str, str, str]]:
+        return [(rel.source.type, rel.type, rel.target.type) for rel in self.ontology.relationships]
+
+    @property
+    def properties_per_node(self) -> dict[str, list[str]]:
+        return {node.type: [*list(node.properties.keys()), "uri"] for node in self.ontology.nodes}
+
+    @property
+    def properties(self) -> list[str]:
+        return list({prop for props in self.properties_per_node.values() for prop in props})
+
+    @property
+    def properties_schema(self) -> list[str]:
+        return [f"{node}:{props}" for node, props in self.properties_per_node.items()]
+
+
 def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
     """Build a dynamic event graph model based on the ontology."""
-    valid_node_types = [node.type for node in ontology.nodes]
+    valid = _OntologyValidValues(ontology)
 
-    valid_relationship_types = [rel.type for rel in ontology.relationships]
-    valid_triples = [(rel.source.type, rel.type, rel.target.type) for rel in ontology.relationships]
-
-    valid_properties_per_node = {node.type: [*list(node.properties.keys()), "uri"] for node in ontology.nodes}
-    valid_properties: list[str] = list({prop for props in valid_properties_per_node.values() for prop in props})
-    valid_properties_schema = [f"{node}:{props}" for node, props in valid_properties_per_node.items()]
-
-    NodeType = Enum("NodeType", {node: node for node in valid_node_types}, type=str)  # noqa: N806
-    PropertyType = Enum("PropertyType", {prop: prop for prop in valid_properties}, type=str)  # noqa: N806
-    RelationshipType = Enum("RelationshipType", {rel: rel for rel in valid_relationship_types}, type=str)  # noqa: N806
+    NodeType = Enum("NodeType", {node: node for node in valid.node_types}, type=str)  # noqa: N806
+    PropertyType = Enum("PropertyType", {prop: prop for prop in valid.properties}, type=str)  # noqa: N806
+    RelationshipType = Enum("RelationshipType", {rel: rel for rel in valid.relationship_types}, type=str)  # noqa: N806
 
     # Note: The following class names clash with the ones from langchain_neo4j.
     # These names will be passed to the LLM, so it's (probably) better to keep them
@@ -65,7 +89,7 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
         """A property of a node in the event knowledge graph."""
 
         type: PropertyType = Field(  # type: ignore[valid-type]
-            description=f"Type of the property. Must be one of: {valid_properties}",
+            description=f"Type of the property. Must be one of: {valid.properties}",
         )
         value: str | int | float = Field(description="Extracted value of the property.")
 
@@ -74,14 +98,14 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
 
         id: str = Field(description="Unique identifier for the node.")
         type: NodeType = Field(  # type: ignore[valid-type]
-            description=f"Type of the node. Must be one of: {valid_node_types}",
+            description=f"Type of the node. Must be one of: {valid.node_types}",
         )
         properties: list[Property] | None = Field(default=None, description="List of properties of the node.")
 
         __doc__ = (
             "A node in the event graph. "
             "Each node type has a specific set of allowed properties. "
-            f"The allowed properties for each node type are: {valid_properties_schema} "
+            f"The allowed properties for each node type are: {valid.properties_schema} "
         )
 
     class Relationship(BaseModel):
@@ -90,14 +114,14 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
         source_id: str = Field(description="Unique identifier of source node.")
         target_id: str = Field(description="Unique identifier of target node.")
         type: RelationshipType = Field(  # type: ignore[valid-type]
-            description=f"Type of the relationship. Must be one of: {valid_relationship_types}",
+            description=f"Type of the relationship. Must be one of: {valid.relationship_types}",
         )
 
         __doc__ = (
             "A relationship between two nodes in the event graph. "
             "Each relationship type has a predefined source and target node type. "
             "The allowed relationships, formatted as (source type, relationship type, target type), are: "
-            f"{valid_triples}."
+            f"{valid.triples}."
         )
 
     class EventGraph(BaseEventGraph):
@@ -127,3 +151,15 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
             return self
 
     return EventGraph
+
+
+def build_baseline_prompt(ontology: GraphDocument, base_prompt: str) -> str:
+    """Build a baseline prompt for the LLM to generate an event graph."""
+    valid = _OntologyValidValues(ontology)
+
+    base_prompt.replace("{{node_types}}", str(valid.node_types))
+    base_prompt.replace("{{relationship_types}}", str(valid.relationship_types))
+    base_prompt.replace("{{properties}}", str(valid.properties))
+    base_prompt.replace("{{properties_schema}}", str(valid.properties_schema))
+    base_prompt.replace("{{triples}}", str(valid.triples))
+    return base_prompt

@@ -117,7 +117,7 @@ class Config:
 
     embeddings_model = os.getenv(
         "EMBEDDINGS_MODEL",
-        DEFAULT_EMBEDDINGS_MODELS[backend],
+        DEFAULT_EMBEDDINGS_MODELS[embeddings_backend],
     )
     """
     The model used to embed logs. Must be a valid model for the backend used,
@@ -126,7 +126,7 @@ class Config:
 
     parser_model = os.getenv(
         "PARSER_MODEL",
-        DEFAULT_LLM_MODELS[backend],
+        DEFAULT_LLM_MODELS[llm_backend],
     )
     """
     The model used to parse logs. Must be a valid model for the backend used,
@@ -175,11 +175,18 @@ class Config:
             msg = "Self reflection steps must be greater than 0"
             raise ValueError(msg)
 
-        if self.backend not in ["ollama", "huggingface", "google-ai"]:
-            msg = f"backend must be one of 'ollama', 'huggingface', or 'google-ai', but got '{self.backend}'"
+        if self.llm_backend not in ["ollama", "huggingface", "google-ai", "bedrock"]:
+            msg = f"LLM backend must be one of 'ollama', 'huggingface', or 'google-ai', but got '{self.llm_backend}'"
             raise ValueError(msg)
 
-        if self.backend == "google-ai" and self.google_ai_api_key is None:
+        if self.embeddings_backend not in ["ollama", "huggingface", "google-ai"]:
+            msg = f"Embeddings backend must be one of 'ollama', 'huggingface', or 'google-ai', \
+                but got '{self.embeddings_backend}'"
+            raise ValueError(msg)
+
+        if (
+            self.embeddings_backend == "google-ai" or self.llm_backend == "google-ai"
+        ) and self.google_ai_api_key is None:
             msg = "GOOGLE_API_KEY must be set in the environment when using the Google AI backend"
             raise ValueError(msg)
 

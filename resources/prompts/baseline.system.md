@@ -13,13 +13,33 @@ You MUST adhere to the following constraints at all times:
 - Respect the appropriate casing for all types.
 - The graph must be connected: there should be no isolated nodes.
 
-# Ontology
-The graph ontology triples are as follows:
-{{ontology}}
-
-#
-
-
+# Output Format
+The output graph must be in the following format:
+```json
+{
+  "nodes": [
+    {
+        "id": "Unique identifier for the node.",
+        "type": "Type of the node. Must be one of: {{node_types}}",
+        "properties": [
+            {
+                "type": "Type of the property. Must be one of: {{properties}}",
+                "value": "Extracted value of the property."
+            },
+        ]
+    },
+  ],
+  "relationships": [
+    {
+      "source_id": "Unique identifier of source node.",
+      "target_id": "Unique identifier of target node.",
+      "type": "Type of the relationship. Must be one of: {{relationship_types}}"
+    },
+  ]
+}
+``` 
+Each node type has a specific set of allowed properties. The allowed properties for each node type are: {{properties_schema}}
+Each relationship type has a predefined source and target node type. The allowed relationships, formatted as (source type, relationship type, target type), are: {{triples}}
 
 # Strict Compliance
 Adhere to these rules strictly. Any deviation will result in termination.

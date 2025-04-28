@@ -4,6 +4,7 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_neo4j.graphs.graph_document import GraphDocument, Node, Relationship
 
+from ontologx.parser.models import build_baseline_prompt
 from ontologx.parser.parser import Parser
 from ontologx.store import Store
 
@@ -14,9 +15,11 @@ class BaselineParser(Parser):
     def __init__(self, llm: BaseChatModel, store: Store, prompt_build_graph: str) -> None:
         super().__init__(llm, store, prompt_build_graph)
 
+        prompt = build_baseline_prompt(self.store.ontology.graph(), prompt_build_graph)
+
         gen_graph_prompt = ChatPromptTemplate.from_messages(
             [
-                ("system", self.prompt_build_graph),
+                ("system", prompt),
                 ("human", "Event: '{event}'\nContext: '{context}'"),
             ],
         )
@@ -37,7 +40,7 @@ class BaselineParser(Parser):
         out = self.chain.invoke({"event": event, "context": context})
 
         # If not using tools, the output is hopefully in json format
-        raw_schema = json.loads(out)
+        raw_schema = json.loads(out.content if isinstance(out.content, str) else json.dumps(out.content))
 
         if "nodes" not in raw_schema or not isinstance(raw_schema["nodes"], list):
             return None
@@ -45,23 +48,20 @@ class BaselineParser(Parser):
         output_graph = GraphDocument(
             nodes=[],
             relationships=[],
-            raw_output=raw_schema,
         )
-        nodes_dict = {}
 
+        nodes_dict = {}
         for node in raw_schema["nodes"]:
             if not isinstance(node, dict):
                 continue
 
+            node_id = node.get("id", None)
             node_type = node.get("type", None)
             node_properties = node.get("properties", {})
-            node_uri = node_properties.get("uri", None)
-            if not node_uri or not node_type:
+            if not node_id or not node_type:
                 continue
 
-            nodes_dict.add(Node(node_type, node_type, node_properties))
-
-        output_graph.nodes = list(nodes_dict.values())
+            nodes_dict[node_id] = Node(id=node_type, type=node_type, properties=node_properties)
 
         if "relationships" not in raw_schema or not isinstance(raw_schema["relationships"], list):
             return output_graph
@@ -70,8 +70,8 @@ class BaselineParser(Parser):
             if not isinstance(relationship, dict):
                 continue
 
-            start_node_id = relationship.get("startNode", None)
-            end_node_id = relationship.get("endNode", None)
+            start_node_id = relationship.get("source_id", None)
+            end_node_id = relationship.get("target_id", None)
             rel_type = relationship.get("type", None)
 
             if not start_node_id or not end_node_id or not rel_type:
@@ -82,11 +82,11 @@ class BaselineParser(Parser):
             if not start_node or not end_node:
                 continue
 
-            output_graph.add_relationship(
+            output_graph.relationships.append(
                 Relationship(
-                    start_node,
-                    end_node,
-                    rel_type,
+                    source=start_node,
+                    target=end_node,
+                    type=rel_type,
                 ),
             )
 

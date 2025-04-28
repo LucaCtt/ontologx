@@ -46,7 +46,6 @@ def clear() -> None:
 @app.command()
 def run() -> None:
     logger.info("Experiment: '%s'", config.experiment_name)
-    logger.info("Backend: '%s'", config.backend)
     logger.info("Embeddings model: '%s'", config.embeddings_model)
     logger.info("Language model: '%s'", config.parser_model)
 
