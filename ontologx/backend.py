@@ -1,5 +1,6 @@
 """Backend implementations for generating embeddings and parsing text."""
 
+import os
 from typing import Any
 
 from langchain_core.embeddings import Embeddings
@@ -22,13 +23,6 @@ def google_ai_embeddings(model: str) -> Embeddings:
     from langchain_google_genai.embeddings import GoogleGenerativeAIEmbeddings  # type: ignore[import]
 
     return GoogleGenerativeAIEmbeddings(model=model)
-
-
-def bedrock_embeddings(model: str) -> Embeddings:
-    from langchain_aws.embeddings import BedrockEmbeddings  # type: ignore[import]
-
-    return BedrockEmbeddings(model_id=model, region_name="us-east-1", credentials_profile_name="bedrock-admin")
-
 
 class EmbeddingsFactory:
     @staticmethod
@@ -89,13 +83,27 @@ def google_ai_llm(model: str, temperature: float) -> BaseChatModel:
 
 
 def bedrock_llm(model: str, temperature: float) -> BaseChatModel:
-    from langchain_aws import BedrockChatModel  # type: ignore[import]
+    import boto3
+    from langchain_aws import ChatBedrockConverse  # type: ignore[import]
 
-    return BedrockChatModel(
+    sts_client = boto3.client("sts")
+
+    # Assume the role
+    response = sts_client.assume_role(
+        RoleArn="arn:aws:sts::816558913136:role/Bedrock",
+        RoleSessionName="langchain-bedrock-session",
+    )
+
+    # Extract the temporary credentials
+    credentials = response["Credentials"]
+    os.environ["AWS_ACCESS_KEY_ID"] = credentials["AccessKeyId"]
+    os.environ["AWS_SECRET_ACCESS_KEY"] = credentials["SecretAccessKey"]
+    os.environ["AWS_SESSION_TOKEN"] = credentials["SessionToken"]
+
+    return ChatBedrockConverse(
         model=model,
-        region="us-east-1",
+        region_name="us-east-1",
         temperature=temperature,
-        model_kwargs={"trust_remote_code": True},
     )
 
 

@@ -40,7 +40,13 @@ class BaselineParser(Parser):
         out = self.chain.invoke({"event": event, "context": context})
 
         # If not using tools, the output is hopefully in json format
-        raw_schema = json.loads(out.content if isinstance(out.content, str) else json.dumps(out.content))
+        try:
+            raw_schema = json.loads(
+                out.content.replace("\n", "") if isinstance(out.content, str) else json.dumps(out.content),
+            )
+        except json.JSONDecodeError:
+            # If the output is not in json format, return None
+            return None
 
         if "nodes" not in raw_schema or not isinstance(raw_schema["nodes"], list):
             return None
@@ -57,11 +63,18 @@ class BaselineParser(Parser):
 
             node_id = node.get("id", None)
             node_type = node.get("type", None)
-            node_properties = node.get("properties", {})
+            node_properties = node.get("properties", [])
+            node_properties = (
+                {prop["type"]: prop.get("value") for prop in node_properties if prop.get("type") is not None}
+                if node_properties
+                else {}
+            )
             if not node_id or not node_type:
                 continue
 
             nodes_dict[node_id] = Node(id=node_type, type=node_type, properties=node_properties)
+
+        output_graph.nodes.extend(nodes_dict.values())
 
         if "relationships" not in raw_schema or not isinstance(raw_schema["relationships"], list):
             return output_graph

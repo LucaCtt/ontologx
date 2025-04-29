@@ -58,27 +58,6 @@ class Ontology(StoreModule):
             params={"constraints": Path(self.__config.shacl_path).read_text()},
         )
 
-        # Add transaction validator
-        self.__graph_store.query(
-            """
-            USE system
-            CALL apoc.trigger.install(
-                'neo4j',
-                $trigger_name,
-                'call n10s.validation.shacl.validateTransaction(
-                    $createdNodes,
-                    $createdRelationships,
-                    $assignedLabels,
-                    $removedLabels,
-                    $assignedNodeProperties,
-                    $removedNodeProperties,
-                    $deletedRelationships,
-                    $deletedNodes)',
-                { labels: ['Run']},
-                {phase:'before'})
-            """,
-            params={"trigger_name": self.__config.n10s_trigger_name},
-        )
 
     def graph(self) -> GraphDocument:
         """Return the ontology graph as a GraphDocument.

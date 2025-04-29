@@ -18,6 +18,7 @@ DEFAULT_LLM_MODELS = {
     "ollama": "qwen2.5-coder:14b",
     "huggingface": "Qwen/Qwen2.5-Coder-14B-Instruct",
     "google-ai": "gemini-2.0-flash",
+    "bedrock": "meta.llama3-3-70b-instruct-v1:0",
 }
 
 DEFAULT_EMBEDDINGS_MODELS = {
@@ -73,7 +74,7 @@ class Config:
     shacl_path = os.getenv("CONSTRAINTS_PATH", "resources/ontologies/logs_shacl.ttl")
     """The path to the SHACL constraints file for the ontology."""
 
-    prompt_build_graph = os.getenv("PROMPT_BUILD_GRAPH", Path("resources/prompts/build_graph.system.md").read_text())
+    prompt_path = os.getenv("PROMPT_PATH", "resources/prompts/build_graph.system.md")
     """The prompt used to build the graph."""
 
     neo4j_url = os.getenv("NEO4J_URL", "bolt://localhost:7687")
@@ -133,7 +134,7 @@ class Config:
     e.g. a model from the HuggingFace model hub if using the HuggingFace backend.
     """
 
-    parser_temperature = float(os.getenv("PARSER_TEMPERATURE", "0.5"))
+    parser_temperature = float(os.getenv("PARSER_TEMPERATURE", "0.7"))
     """The temperature of the LLM used to parse logs. Must be between 0 and 1."""
 
     correction_steps = int(os.getenv("CORRECTION_STEPS", "3"))
@@ -147,6 +148,9 @@ class Config:
 
     n10s_trigger_name = os.getenv("N10S_TRIGGER_NAME", "shacl_validate")
     """The name of the neosemantics trigger for validating the graph."""
+
+    prompt_build_graph = Path(prompt_path).read_text()
+    """The prompt used to build the graph."""
 
     tests_uri = _get_uri_from_ttl(tests_path)
     """The URI of the tests."""

@@ -142,10 +142,11 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
 
             if missing_nodes:
                 msg = "Relationships mention node ids that are not present in the nodes list: {missing_nodes}"
+                err_type = "InvalidRelationships"
                 raise PydanticCustomError(
-                    error_type="InvalidRelationships",
-                    message_template=msg,
-                    context={"missing_nodes": missing_nodes},
+                    err_type,
+                    msg,
+                    {"missing_nodes": missing_nodes},
                 )
 
             return self
@@ -157,9 +158,8 @@ def build_baseline_prompt(ontology: GraphDocument, base_prompt: str) -> str:
     """Build a baseline prompt for the LLM to generate an event graph."""
     valid = _OntologyValidValues(ontology)
 
-    base_prompt.replace("{{node_types}}", str(valid.node_types))
-    base_prompt.replace("{{relationship_types}}", str(valid.relationship_types))
-    base_prompt.replace("{{properties}}", str(valid.properties))
-    base_prompt.replace("{{properties_schema}}", str(valid.properties_schema))
-    base_prompt.replace("{{triples}}", str(valid.triples))
-    return base_prompt
+    prompt = base_prompt.replace("{{node_types}}", str(valid.node_types))
+    prompt = prompt.replace("{{relationship_types}}", str(valid.relationship_types))
+    prompt = prompt.replace("{{properties}}", str(valid.properties))
+    prompt = prompt.replace("{{properties_schema}}", str(valid.properties_schema))
+    return prompt.replace("{{triples}}", str(valid.triples))

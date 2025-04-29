@@ -12,34 +12,36 @@ You MUST adhere to the following constraints at all times:
 - Use the appropriate node prefix for properties, e.g. "userUID" instead of "uid".
 - Respect the appropriate casing for all types.
 - The graph must be connected: there should be no isolated nodes.
+- Output only the graph in JSON format, without any additional text or explanation. The JSON must be valid and parsable, without any "\n" or other escape characters.
 
 # Output Format
-The output graph must be in the following format:
-```json
-{
+The output graph must be in the following JSON format:
+{{
   "nodes": [
-    {
+    {{
         "id": "Unique identifier for the node.",
         "type": "Type of the node. Must be one of: {{node_types}}",
         "properties": [
-            {
+            {{
                 "type": "Type of the property. Must be one of: {{properties}}",
                 "value": "Extracted value of the property."
-            },
+            }},
         ]
-    },
+    }},
   ],
   "relationships": [
-    {
+    {{
       "source_id": "Unique identifier of source node.",
       "target_id": "Unique identifier of target node.",
       "type": "Type of the relationship. Must be one of: {{relationship_types}}"
-    },
+    }},
   ]
-}
-``` 
+}}
+
 Each node type has a specific set of allowed properties. The allowed properties for each node type are: {{properties_schema}}
 Each relationship type has a predefined source and target node type. The allowed relationships, formatted as (source type, relationship type, target type), are: {{triples}}
+
+It is crucial that the output contains only the JSON graph. No other text, comments, or explanations should be included. The output must be valid JSON and parsable, without any escape characters or newlines. The JSON must be formatted correctly, with all necessary commas and brackets in place.
 
 # Strict Compliance
 Adhere to these rules strictly. Any deviation will result in termination.

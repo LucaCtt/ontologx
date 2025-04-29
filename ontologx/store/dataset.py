@@ -169,6 +169,7 @@ class Dataset(StoreModule):
             MATCH (r:Run {runName: $run_name})-[:hasOutput]->(d:Dataset)
             RETURN d
             """,
+            params={"run_name": self.__config.run_name},
         )
         if not result_dataset:
             self.__graph_store.query(
@@ -196,7 +197,7 @@ class Dataset(StoreModule):
                 WHERE d.uri STARTS WITH $out_dataset_uri
                 CREATE (d)-[:hasPart]->(n:{node.type} $props)
                 """,
-                params={"props": node.properties},
+                params={"props": node.properties, "out_dataset_uri": self.__config.out_uri + "/out-dataset"},
             )
 
         for relationship in graph.relationships:

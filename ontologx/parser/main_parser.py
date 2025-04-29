@@ -57,6 +57,7 @@ def _example_message_group(event: str, graph: GraphDocument, context: dict) -> l
             ],
         ),
         ToolMessage("", tool_call_id=tool_call_id),
+        AIMessage("Done"),
     ]
 
 

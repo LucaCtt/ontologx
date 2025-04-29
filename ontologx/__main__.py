@@ -8,9 +8,9 @@ import logging
 import time
 
 import typer
+from langchain_neo4j.graphs.graph_document import GraphDocument
 from rich.logging import RichHandler
 from rich.progress import track
-from rich.table import Table
 
 from ontologx import accuracy
 from ontologx.backend import EmbeddingsFactory, LLMFactory
@@ -77,15 +77,19 @@ def run() -> None:
             start_time = time.time()
 
             graph_pred = parser.parse(event, context)
-            total_time += (time.time() - start_time) / len(test_events)
-            graphs_pred.append(graph_pred)
-            graphs_true.append(graph_true)
+            total_time += time.time() - start_time
 
             if graph_pred is None:
                 logger.warning("Event '%s' could not be parsed", event)
+                # Add an empty graph to the list of predicted graphs
+                # so the metrics will be calculated correctly
+                graphs_pred.append(GraphDocument(nodes=[], relationships=[]))
             else:
+                graphs_pred.append(graph_pred)
                 store.dataset.add_event_graph(graph_pred)
                 total_success += 1
+
+            graphs_true.append(graph_true)
 
         logger.info("Log parsing done.")
 
@@ -93,16 +97,25 @@ def run() -> None:
         pct_success = total_success / len(test_events)
         precision, recall, f1, ela, rla = accuracy.metrics(graphs_pred, graphs_true)
 
-        table = Table("Metric", "Value", title="Run Metrics")
-        table.add_row("Average generation time", f"{avg_time:.2f} seconds")
-        table.add_row("Success percentage", f"{pct_success:.2%}")
-        table.add_row("Precision", f"{precision:.2%}")
-        table.add_row("Recall", f"{recall:.2%}")
-        table.add_row("F1 score", f"{f1:.2%}")
-        table.add_row("Entity linking accuracy", f"{ela:.2%}")
-        table.add_row("Relationship linking accuracy", f"{rla:.2%}")
+        store.schema.add_results(
+            {
+                "average_generation_time": avg_time,
+                "success_percentage": pct_success,
+                "precision": precision,
+                "recall": recall,
+                "f1_score": f1,
+                "entity_linking_accuracy": ela,
+                "relationship_linking_accuracy": rla,
+            },
+        )
 
-        logger.info(table)
+        logger.info("Average generation time: %f seconds", avg_time)
+        logger.info("Success percentage: %f", pct_success)
+        logger.info("Precision: %f", precision)
+        logger.info("Recall: %f", recall)
+        logger.info("F1 score: %f", f1)
+        logger.info("Entity linking accuracy: %f", ela)
+        logger.info("Relationship linking accuracy: %f", rla)
 
 
 def main() -> None:

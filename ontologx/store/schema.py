@@ -47,6 +47,8 @@ class Schema(StoreModule):
 
         """
         for measure, evaluation in results.items():
+            measure_camel = "".join(x.capitalize() for x in measure.lower().split("_"))
+
             # Check if measure already exists
             measure_node = self.__graph_store.query(
                 """
@@ -54,7 +56,7 @@ class Schema(StoreModule):
                 RETURN m
                 LIMIT 1
                 """,
-                params={"name": measure},
+                params={"name": measure_camel},
             )
             if not measure_node:
                 # Create the measure node if it does not exist
@@ -62,7 +64,7 @@ class Schema(StoreModule):
                     """
                     CREATE (m:EvaluationMeasure {hasName: $name, uri: $uri})
                     """,
-                    params={"name": measure, "uri": self.__gen_uri()},
+                    params={"name": measure_camel, "uri": self.__gen_uri()},
                 )
 
             # Create the evaluation node
@@ -72,7 +74,7 @@ class Schema(StoreModule):
                 CREATE (r)-[:hasOutput]->(e:ModelEvaluation {hasValue: $value})-[:specifiedBy]->(m)
                 """,
                 params={
-                    "name": measure,
+                    "name": measure_camel,
                     "value": evaluation,
                     "run_name": self.__config.run_name,
                 },
