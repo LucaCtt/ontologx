@@ -262,7 +262,7 @@ class Dataset(StoreModule):
         if props_to_remove is None:
             props_to_remove = []
 
-        props_to_remove = [*props_to_remove, "embedding"]
+        props_to_remove = [*props_to_remove, "runName", "embedding"]
 
         # Ugly but quite efficient. Also filters out the embedding property and the Resource label.
         nodes_subgraphs = self.__graph_store.query(

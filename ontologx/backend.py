@@ -24,6 +24,7 @@ def google_ai_embeddings(model: str) -> Embeddings:
 
     return GoogleGenerativeAIEmbeddings(model=model)
 
+
 class EmbeddingsFactory:
     @staticmethod
     def create(backend: str, model: str, **kwargs: dict[str, Any]) -> Embeddings:
@@ -92,6 +93,7 @@ def bedrock_llm(model: str, temperature: float) -> BaseChatModel:
     response = sts_client.assume_role(
         RoleArn="arn:aws:sts::816558913136:role/Bedrock",
         RoleSessionName="langchain-bedrock-session",
+        DurationSeconds=60 * 60 * 3,  # 3 hours
     )
 
     # Extract the temporary credentials

@@ -1,0 +1,272 @@
+@prefix : <https://cyberseclab.unibs.it/ontologx/log/tests/lc/1.0#>.
+@prefix log: <https://cyberseclab.unibs.it/ontologx/log/dictionary#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix time: <http://www.w3.org/2006/time#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix mls: <http://www.w3.org/ns/mls#>.
+@prefix dc: <http://purl.org/dc/terms#>.
+
+# mail, mainlog.3.csv, 2022-01-22 13:54:21 1nBGqT-0005kq-CQ Completed
+:timestamp-1 rdf:type log:TimeStamp;
+  time:inXSDDate "2022-01-22"^^xsd:date;
+  time:inXSDDateTimeStamp "2022-01-22T13:54:21"^^xsd:dateTime;
+  time:inXSDgYear "2022"^^xsd:gYear;
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
+
+:source-1 rdf:type log:Source;
+  log:sourceName "mainlog.3";
+  log:sourceDevice "mail";
+  log:sourceType "application".
+
+:event-1 rdf:type log:Event;
+  log:eventMessage "2022-01-22 13:54:21 1nBGqT-0005kq-CQ Completed";
+  log:eventSeverity "INFO";
+  log:hasTimeStamp :timestamp-1;
+  log:hasSource :source-1.
+
+# internal_share, suricata-start.log.csv, 20/1/2022 -- 13:16:23 - <Info> - Found an MTU of 1450 for 'ens3'
+:timestamp-2 rdf:type log:TimeStamp;
+  time:inXSDDate "2022-01-20"^^xsd:date;
+  time:inXSDDateTimeStamp "2022-01-20T13:16:23"^^xsd:dateTime;
+  time:inXSDgYear "2022"^^xsd:gYear;
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
+
+:source-2 rdf:type log:Source;
+  log:sourceName "suricata-start.log";
+  log:sourceDevice "internal_share";
+  log:sourceType "application".
+
+:application-2 rdf:type log:Application;
+  log:applicationName "suricata".
+
+:event-2 rdf:type log:Event;
+  log:eventMessage "20/1/2022 -- 13:16:23 - <Info> - Found an MTU of 1450 for 'ens3'";
+  log:eventSeverity "INFO";
+  log:hasTimeStamp :timestamp-2;
+  log:hasApplication :application-2;
+  log:hasSource :source-2.
+
+# morris_mail, syslog.4.csv, Jan 20 12:20:53 morris-mail exim4[30354]: Stopping MTA: exim4_listener.
+:timestamp-3 rdf:type log:TimeStamp;
+  time:inXSDDate "2022-01-20"^^xsd:date;
+  time:inXSDDateTimeStamp "2022-01-20T12:20:53"^^xsd:dateTime;
+  time:inXSDgYear "2022"^^xsd:gYear;
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
+
+:source-3 rdf:type log:Source;
+  log:sourceName "syslog.4";
+  log:sourceDevice "morris_mail";
+  log:sourceType "application".
+
+:process-3 rdf:type log:Process;
+  log:processPID 30354.
+
+:application-3 rdf:type log:Application;
+  log:applicationName "exim4";
+  log:hasProcess :process-3.
+
+:event-3 rdf:type log:Event;
+  log:eventMessage "Jan 20 12:20:53 morris-mail exim4[30354]: Stopping MTA: exim4_listener.";
+  log:eventSeverity "INFO";
+  log:hasTimeStamp :timestamp-3;
+  log:hasSource :source-3;
+  log:hasApplication :application-3.
+
+# mail, audit.log.csv, type=LOGIN msg=audit(1642770541.877:2345): pid=12030 uid=0 old-auid=4294967295 auid=0 tty=(none) old-ses=4294967295 ses=102 res=1
+:timestamp-4 rdf:type log:TimeStamp;
+  time:inXSDDate "2022-01-20"^^xsd:date;
+  time:inXSDDateTimeStamp "2022-01-20T12:20:53"^^xsd:dateTime;
+  time:inXSDgYear "2022"^^xsd:gYear;
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
+
+:process-4 rdf:type log:Process;
+  log:processPID 12030.
+
+:application-4 rdf:type log:Application;
+  log:applicationName "auditctl";
+  log:hasProcess :process-4.
+
+:user-4-1 rdf:type log:User;
+  log:userName "root";
+  log:userUID 0;
+  log:userAUID 0.
+
+:user-4-2 rdf:type log:User;
+  log:userAUID 4294967295.
+
+:source-4 rdf:type log:Source;
+  log:sourceName "audit.log";
+  log:sourceDevice "mail";
+  log:sourceType "audit".
+
+:event-4 rdf:type log:Event;
+  log:eventMessage "type=LOGIN msg=audit(1642770541.877:2345): pid=12030 uid=0 old-auid=4294967295 auid=0 tty=(none) old-ses=4294967295 ses=102 res=1";
+  log:eventSeverity "INFO";
+  log:hasTimeStamp :timestamp-4;
+  log:hasApplication :application-4;
+  log:hasSource :source-4;
+  log:hasUser :user-4-1, :user-4-2.
+
+# cloud_share, redis.log.csv, 25792:M 22 Jan 17:41:56.137 * Background saving terminated with success
+:timestamp-5 rdf:type log:TimeStamp;
+  time:inXSDDate "2022-01-22"^^xsd:date;
+  time:inXSDDateTimeStamp "2022-01-22T17:41:56"^^xsd:dateTime;
+  time:inXSDgYear "2022"^^xsd:gYear;
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
+
+:source-5 rdf:type log:Source;
+  log:sourceName "redis.log";
+  log:sourceDevice "cloud_share";
+  log:sourceType "application".
+
+:event-5 rdf:type log:Event;
+  log:eventMessage "25792:M 22 Jan 17:41:56.137 * Background saving terminated with success";
+  log:eventSeverity "INFO";
+  log:hasTimeStamp :timestamp-5;
+  log:hasSource :source-5.
+
+# davey_mail, user.log.1.csv, Jan 20 11:14:02 davey-mail ec2: 256 SHA256:wZvMsGOInOVqvsOlhNmCH7PNFaKk0EZfNcFDcFLShk8 root@davey-mail (ED25519)
+:timestamp-6 rdf:type log:TimeStamp;
+  time:inXSDDate "2022-01-20"^^xsd:date;
+  time:inXSDDateTimeStamp "2022-01-20T11:14:02"^^xsd:dateTime;
+  time:inXSDgYear "2022"^^xsd:gYear;
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
+
+:source-6 rdf:type log:Source;
+  log:sourceName "user.log.1";
+  log:sourceDevice "davey_mail";
+  log:sourceType "syslog".
+
+:file-6 rdf:type log:File;
+  log:fileHash "SHA256:wZvMsGOInOVqvsOlhNmCH7PNFaKk0EZfNcFDcFLShk8";
+  log:fileHashType "SHA256".
+
+:user-6 rdf:type log:User;
+  log:userName "root".
+
+:event-6 rdf:type log:Event;
+  log:eventMessage "Jan 20 11:14:02 davey-mail ec2: 256 SHA256:wZvMsGOInOVqvsOlhNmCH7PNFaKk0EZfNcFDcFLShk8 root@davey-mail (ED25519)";
+  log:eventSeverity "INFO";
+  log:hasTimeStamp :timestamp-6;
+  log:hasSource :source-6;
+  log:hasFile :file-6;
+  log:hasUser :user-6.
+
+# cloud_share, suricata.log.csv, 20/1/2022 -- 13:16:28 - <Config> - Loading rule file: /etc/suricata/rules/ciarmy.rules
+:timestamp-7 rdf:type log:TimeStamp;
+  time:inXSDDate "2022-01-20"^^xsd:date;
+  time:inXSDDateTimeStamp "2022-01-20T13:16:28"^^xsd:dateTime;
+  time:inXSDgYear "2022"^^xsd:gYear;
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
+
+:source-7 rdf:type log:Source;
+  log:sourceName "suricata.log";
+  log:sourceDevice "cloud_share";
+  log:sourceType "application".
+
+:file-7 rdf:type log:File;
+  log:filePath "/etc/suricata/rules/ciarmy.rules".
+
+:event-7 rdf:type log:Event;
+  log:eventMessage "20/1/2022 -- 13:16:28 - <Config> - Loading rule file: /etc/suricata/rules/ciarmy.rules";
+  log:eventSeverity "INFO";
+  log:hasTimeStamp :timestamp-7;
+  log:hasSource :source-7;
+  log:hasFile :file-7.
+
+# davey_mail, syslog.csv, Jan 25 06:57:58 davey-mail systemd[1]: Starting User Manager for UID 1001...
+:timestamp-8 rdf:type log:TimeStamp;
+  time:inXSDDate "2022-01-25"^^xsd:date;
+  time:inXSDDateTimeStamp "2022-01-25T06:57:58"^^xsd:dateTime;
+  time:inXSDgYear "2022"^^xsd:gYear;
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
+
+:source-8 rdf:type log:Source;
+  log:sourceName "syslog";
+  log:sourceDevice "davey_mail";
+  log:sourceType "syslog".
+
+:process-8 rdf:type log:Process;
+  log:processPID 1.
+
+:application-8 rdf:type log:Application;
+  log:applicationName "systemd";
+  log:hasProcess :process-8.
+
+:user-8 rdf:type log:User;
+  log:userUID 1001.
+
+:event-8 rdf:type log:Event;
+  log:eventMessage "Jan 25 06:57:58 davey-mail systemd[1]: Starting User Manager for UID 1001...";
+  log:eventSeverity "INFO";
+  log:hasTimeStamp :timestamp-8;
+  log:hasSource :source-8;
+  log:hasApplication :application-8;
+  log:hasUser :user-8.
+
+# morris_mail, mainlog.4.csv, 2022-01-20 13:20:54 End queue run: pid=30959
+:timestamp-9 rdf:type log:TimeStamp;
+  time:inXSDDate "2022-01-20"^^xsd:date;
+  time:inXSDDateTimeStamp "2022-01-20T13:20:54"^^xsd:dateTime;
+  time:inXSDgYear "2022"^^xsd:gYear;
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
+
+:source-9 rdf:type log:Source;
+  log:sourceName "mainlog.4";
+  log:sourceDevice "morris_mail";
+  log:sourceType "application".
+
+:process-9 rdf:type log:Process;
+  log:processPID 30959.
+
+:application-9 rdf:type log:Application;
+  log:hasProcess :process-9.
+
+:event-9 rdf:type log:Event;
+  log:eventMessage "2022-01-20 13:20:54 End queue run: pid=30959";
+  log:eventSeverity "INFO";
+  log:hasTimeStamp :timestamp-9;
+  log:hasSource :source-9;
+  log:hasApplication :application-9.
+
+# webserver, error.log.2.csv, [Sun Jan 23 06:25:13.804652 2022] [core:notice] [pid 29640] AH00094: Command line: '/usr/sbin/apache2'
+:timestamp-10 rdf:type log:TimeStamp;
+  time:inXSDDate "2022-01-23"^^xsd:date;
+  time:inXSDDateTimeStamp "2022-01-23T06:25:13"^^xsd:dateTime;
+  time:inXSDgYear "2022"^^xsd:gYear;
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
+
+:source-10 rdf:type log:Source;
+  log:sourceName "error.log.2";
+  log:sourceDevice "webserver";
+  log:sourceType "application".
+
+:process-10 rdf:type log:Process;
+  log:processPID 29640.
+
+:application-10 rdf:type log:Application;
+  log:applicationName "apache2";
+  log:hasProcess :process-10.
+
+:event-10 rdf:type log:Event;
+  log:eventMessage "[Sun Jan 23 06:25:13.804652 2022] [core:notice] [pid 29640] AH00094: Command line: '/usr/sbin/apache2'";
+  log:eventCommand "/usr/sbin/apache2";
+  log:eventSeverity "ERROR";
+  log:hasTimeStamp :timestamp-10;
+  log:hasSource :source-10;
+  log:hasApplication :application-10.
+
+# Dataset
+:validation-lc-dataset rdf:type mls:Dataset;
+  dc:type "validation";
+  mls:hasPart :event-1,
+    :event-2,
+    :event-3,
+    :event-4,
+    :event-5,
+    :event-6,
+    :event-7,
+    :event-8,
+    :event-9,
+    :event-10.
+
