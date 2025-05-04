@@ -9,6 +9,7 @@ import time
 
 import typer
 from langchain_neo4j.graphs.graph_document import GraphDocument
+from neo4j.exceptions import ClientError
 from rich.logging import RichHandler
 from rich.progress import track
 
@@ -69,6 +70,7 @@ def run() -> None:
 
         total_time = 0
         total_success = 0
+        total_shacl_violations = 0
         graphs_pred = []
         graphs_true = []
 
@@ -86,8 +88,12 @@ def run() -> None:
                 graphs_pred.append(GraphDocument(nodes=[], relationships=[]))
             else:
                 graphs_pred.append(graph_pred)
-                store.dataset.add_event_graph(graph_pred)
                 total_success += 1
+
+                try:
+                    store.dataset.add_event_graph(graph_pred)
+                except ClientError:
+                    total_shacl_violations += 1
 
             graphs_true.append(graph_true)
 
@@ -95,12 +101,14 @@ def run() -> None:
 
         avg_time = total_time / len(test_events)
         pct_success = total_success / len(test_events)
+        pct_violations = total_shacl_violations / len(test_events)
         precision, recall, f1, ela, rla = accuracy.metrics(graphs_pred, graphs_true)
 
         store.schema.add_results(
             {
                 "average_generation_time": avg_time,
-                "success_percentage": pct_success,
+                "generation_success_percentage": pct_success,
+                "shacl_violations_percentage": pct_violations,
                 "precision": precision,
                 "recall": recall,
                 "f1_score": f1,
@@ -111,6 +119,7 @@ def run() -> None:
 
         logger.info("Average generation time: %f seconds", avg_time)
         logger.info("Success percentage: %f", pct_success)
+        logger.info("SHACL violations percentage: %f", pct_violations)
         logger.info("Precision: %f", precision)
         logger.info("Recall: %f", recall)
         logger.info("F1 score: %f", f1)

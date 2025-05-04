@@ -38,7 +38,6 @@ class ToolsParser(Parser):
         structured_model = structured_model.with_structured_output(  # type: ignore[attr-defined]
             build_dynamic_model(store.ontology.graph()),
             include_raw=True,
-            use_tools=True,
         )
         self.chain = gen_graph_prompt | structured_model
 
@@ -54,6 +53,7 @@ class ToolsParser(Parser):
 
         """
         out = self.chain.invoke({"event": event, "context": context})
+
         raw_schema = cast(dict, out)
 
         # Error handling for when the output is not parsed correctly

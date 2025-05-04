@@ -151,6 +151,28 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
 
             return self
 
+        @model_validator(mode="after")
+        def validate_event(self) -> "EventGraph":
+            """Validate the event graph.
+
+            This method is a placeholder for any additional validation logic that may be needed.
+            """
+            event_node = next(
+                (node for node in self.nodes if node.type == "Event"),
+                None,
+            )
+            if event_node is None:
+                msg = "The event graph must contain an 'Event' node."
+                err_type = "MissingEventNode"
+                raise PydanticCustomError(err_type, msg)
+
+            if not event_node.properties or not any(prop.type == "eventMessage" for prop in event_node.properties):
+                msg = "The 'Event' node must have a property of type 'eventMessage'."
+                err_type = "MissingEventProperty"
+                raise PydanticCustomError(err_type, msg)
+
+            return self
+
     return EventGraph
 
 

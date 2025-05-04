@@ -13,9 +13,5 @@ You MUST adhere to the following constraints at all times:
 - Respect the appropriate casing for all types.
 - The graph must be connected: there should be no isolated nodes.
 
-# Tools
-You have access to enrich the knowledge graph:
-- **IP Address Lookup**: retrieve additional metadata for any IP addresses found in the event. 
-
 # Strict Compliance
 Adhere to these rules strictly. Any deviation will result in termination.

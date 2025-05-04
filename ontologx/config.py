@@ -98,24 +98,6 @@ class Config:
     Must be one of "ollama", "huggingface", "google-ai", or "bedrock".
     """
 
-    huggingfacehub_api_token = os.getenv("HUGGINGFACEHUB_API_TOKEN", None)
-    """
-    The HuggingFace hub api token to use for downloading models,
-    generated from https://huggingface.co/docs/hub/security-tokens.
-    Only useful with the HuggingFace backend and when using private models.
-    For public models, this can be left unset.
-    This variable is not used anywhere in the project,
-    it's just to remind that it can be set in the environment.
-    """
-
-    google_ai_api_key = os.getenv("GOOGLE_API_KEY", None)
-    """
-    The Google AI api key, can be generated from https://ai.google.dev/gemini-api/docs/api-key.
-    Required when using the Google AI backend.
-    This variable is not used anywhere in the project,
-    it's just to remind that it must be set in the environment if using the Google AI backend.
-    """
-
     embeddings_model = os.getenv(
         "EMBEDDINGS_MODEL",
         DEFAULT_EMBEDDINGS_MODELS[embeddings_backend],
@@ -186,12 +168,6 @@ class Config:
         if self.embeddings_backend not in ["ollama", "huggingface", "google-ai"]:
             msg = f"Embeddings backend must be one of 'ollama', 'huggingface', or 'google-ai', \
                 but got '{self.embeddings_backend}'"
-            raise ValueError(msg)
-
-        if (
-            self.embeddings_backend == "google-ai" or self.llm_backend == "google-ai"
-        ) and self.google_ai_api_key is None:
-            msg = "GOOGLE_API_KEY must be set in the environment when using the Google AI backend"
             raise ValueError(msg)
 
     def new_run(self) -> None:

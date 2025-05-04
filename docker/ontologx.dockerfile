@@ -6,3 +6,13 @@ RUN apt-get update && \
         build-essential && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+RUN pip install poetry
+
+WORKDIR /app
+
+COPY pyproject.toml poetry.lock ./
+COPY ontologx ./ontologx
+RUN touch README.md
+
+RUN poetry install --without-dev --with ollama

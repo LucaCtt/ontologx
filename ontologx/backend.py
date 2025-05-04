@@ -1,7 +1,6 @@
 """Backend implementations for generating embeddings and parsing text."""
 
 import os
-from typing import Any
 
 from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel
@@ -27,13 +26,12 @@ def google_ai_embeddings(model: str) -> Embeddings:
 
 class EmbeddingsFactory:
     @staticmethod
-    def create(backend: str, model: str, **kwargs: dict[str, Any]) -> Embeddings:
+    def create(backend: str, model: str) -> Embeddings:
         """Create an embeddings instance based on the specified backend type.
 
         Args:
             backend(str): The backend to use for creating embeddings.
             model (str): The name or identifier of the model to use.
-            **kwargs: Additional keyword arguments for the embeddings instance.
 
         Returns:
             Embeddings: An instance of the specified backend type.
@@ -44,13 +42,13 @@ class EmbeddingsFactory:
         """
         match backend:
             case "huggingface":
-                return hf_embeddings(model, **kwargs)
+                return hf_embeddings(model)
 
             case "ollama":
-                return ollama_embeddings(model, **kwargs)
+                return ollama_embeddings(model)
 
             case "google-ai":
-                return google_ai_embeddings(model, **kwargs)
+                return google_ai_embeddings(model)
 
             case _:
                 msg = f"Unsupported backend type: {backend}"
@@ -85,9 +83,10 @@ def google_ai_llm(model: str, temperature: float) -> BaseChatModel:
 
 def bedrock_llm(model: str, temperature: float) -> BaseChatModel:
     import boto3
+    from botocore.config import Config
     from langchain_aws import ChatBedrockConverse  # type: ignore[import]
 
-    sts_client = boto3.client("sts")
+    sts_client = boto3.client("sts", config=Config(read_timeout=300))
 
     # Assume the role
     response = sts_client.assume_role(

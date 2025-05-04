@@ -169,7 +169,7 @@ class MainParser(Parser):
                 msg = "Your answer does not respect the expected format. Please try again."
 
                 # If there are parsing errors, use them as corrections
-                if raw_schema.get("parsing_error"):
+                if raw_schema.get("parsing_error") and getattr(raw_schema["parsing_error"], "errors", None):
                     parsing_error = cast(ValidationError, raw_schema["parsing_error"])
                     errors = [
                         {
