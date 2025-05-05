@@ -72,7 +72,7 @@ def hf_llm(model: str, temperature: float) -> BaseChatModel:
 def ollama_llm(model: str, temperature: float) -> BaseChatModel:
     from langchain_ollama.chat_models import ChatOllama  # type: ignore[import]
 
-    return ChatOllama(model=model, temperature=temperature, num_ctx=1024 * 12)
+    return ChatOllama(model=model, temperature=temperature)
 
 
 def google_ai_llm(model: str, temperature: float) -> BaseChatModel:
