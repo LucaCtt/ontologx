@@ -233,13 +233,19 @@ class Dataset(StoreModule):
                 with the nodes they are connected to and their relationships.
 
         """
+        run_name_filter = (
+            [{"runName": {"$eq": ""}}]
+            if self.__config.examples_only
+            else [{"runName": {"$eq": self.__config.run_name}}, {"runName": {"$eq": ""}}]
+        )
+
         relevant_docs = self.__vector_index.max_marginal_relevance_search(
             query=event,
             k=k,
             fetch_k=fetch_k,
             lambda_mult=lambda_mult,
             filter={
-                "$or": [{"runName": {"$eq": self.__config.run_name}}, {"runName": {"$eq": ""}}],
+                "$or": run_name_filter,
                 "embedding": {"$ne": ""},
             },
             # Examples will have no run name but an embedding.

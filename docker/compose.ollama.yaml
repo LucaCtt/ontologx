@@ -1,10 +1,12 @@
 services:
   ontologx:
     build:
-      context: .
-      dockerfile: ontologx.dockerfile
-    command: olx parse
+      context: ..
+      dockerfile: docker/ontologx.dockerfile
+    command: olx clear && olx run
     restart: always
+    env_file:
+      - ../.env
     depends_on:
       - ollama
       - neo4j
@@ -21,10 +23,19 @@ services:
     image: docker.io/ollama/ollama:latest
     ports:
       - 11434:11434
-    environment:
-      - OLLAMA_KEEP_ALIVE=24h
+    env_file:
+      - ../.env
     networks:
       - ontologx-docker
+    post_start:
+      - command: |
+          ollama pull $PARSER_MODEL && ollama pull $EMBEDDINGS_MODEL
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:11434/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     deploy:
       resources:
         reservations:
@@ -34,18 +45,17 @@ services:
               capabilities: [gpu]
     
   neo4j:
-    image: neo4j:2025.03.0
+    build:
+      context: .
+      dockerfile: neo4j.dockerfile
     container_name: neo4j
     volumes:
       - ./neo4j/data:/data
       - ./neo4j/logs:/logs
       - ./neo4j/plugins:/plugins
-    environment:
-      - NEO4J_AUTH=neo4j/password
-      - NEO4j_PLUGINS=["apoc", "n10s"]
     ports:
-      - "7687:7687"  # Bolt
-      - "7474:7474" # HTTP
+      - 7687:7687
+      - 7474:7474
     networks:
       - ontologx-docker
     healthcheck:
@@ -55,3 +65,7 @@ services:
       retries: 5
       start_period: 30s
     restart: always
+
+networks:
+  ontologx-docker:
+    driver: bridge

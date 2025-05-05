@@ -15,4 +15,4 @@ COPY pyproject.toml poetry.lock ./
 COPY ontologx ./ontologx
 RUN touch README.md
 
-RUN poetry install --without-dev --with ollama
+RUN poetry install --with ollama

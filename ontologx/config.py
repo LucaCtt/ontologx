@@ -53,6 +53,9 @@ class Config:
     parser_type = os.getenv("PARSER_TYPE", "main")
     """The type of parser to use. Supported values are 'main', 'tools', and 'baseline'"""
 
+    examples_only = bool(int(os.getenv("EXAMPLES_ONLY", "0")))
+    """If True, only the examples will be used in the RAG."""
+
     experiment_name: str = os.getenv("EXPERIMENT_NAME", str(uuid.uuid4()))
     """
     The name of the current experiment. Experiments are used to group runs together,
