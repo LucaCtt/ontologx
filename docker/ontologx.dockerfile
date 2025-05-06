@@ -7,12 +7,23 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-RUN pip install poetry
+RUN pip install poetry==2.1.0
+
+ENV POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_VIRTUALENVS_CREATE=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
 
 WORKDIR /app
 
 COPY pyproject.toml poetry.lock ./
-COPY ontologx ./ontologx
 RUN touch README.md
 
-RUN poetry install --with ollama
+RUN poetry install --with vllm, ollama && rm -rf ${POETRY_CACHE_DIR}
+
+COPY ontologx ./ontologx
+
+RUN poetry run python -m olx clear
+
+ENTRYPOINT ["poetry", "run", "python", "-m", "olx", "run"]
+

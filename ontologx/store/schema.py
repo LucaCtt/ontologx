@@ -101,7 +101,7 @@ class Schema(StoreModule):
 
         uri = self.__gen_uri()
         # Create the study node if it does not exist
-        self.__graph_store.query("CREATE (s:Study {uri: $uri})", params={"uri": uri})
+        self.__graph_store.query("CREATE (s:Study {uri: $uri, name: 'OntoLogX'})", params={"uri": uri})
 
         return uri
 
@@ -120,7 +120,8 @@ class Schema(StoreModule):
         # Check if there is an experiment node with the same ontology and examples.
         exp = self.__graph_store.query(
             """
-            MATCH (e:Experiment {name: $name})<-[:hasPart]-(s:Study {uri: $study_uri, name: 'OntoLogX'})
+            MATCH (e:Experiment)<-[:hasPart]-(s:Study {uri: $study_uri})
+            WHERE s.name = $name
             RETURN e.uri as uri
             LIMIT 1
             """,

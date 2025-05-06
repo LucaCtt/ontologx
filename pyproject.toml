@@ -47,11 +47,11 @@ optional = true
 [tool.poetry.group.aws.dependencies]
 langchain-aws = "^0.2.22"
 
-[tool.poetry.group.google-ai]
+[tool.poetry.group.vllm]
 optional = true
 
-[tool.poetry.group.google-ai.dependencies]
-langchain-google-genai = "^2.1.2"
+[tool.poetry.group.vllm.dependencies]
+langchain-openai = "^0.3.16"
 
 [build-system]
 requires = ["poetry-core"]

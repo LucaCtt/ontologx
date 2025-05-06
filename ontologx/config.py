@@ -17,14 +17,14 @@ load_dotenv()
 DEFAULT_LLM_MODELS = {
     "ollama": "qwen2.5-coder:14b",
     "huggingface": "Qwen/Qwen2.5-Coder-14B-Instruct",
-    "google-ai": "gemini-2.0-flash",
+    "vllm": "Qwen/Qwen2.5-Coder-14B-Instruct",
     "bedrock": "meta.llama3-3-70b-instruct-v1:0",
 }
 
 DEFAULT_EMBEDDINGS_MODELS = {
     "ollama": "snowflake-arctic-embed:110m",
     "huggingface": "Snowflake/snowflake-arctic-embed-m",
-    "google-ai": "models/text-embedding-004",
+    "vllm": "Snowflake/snowflake-arctic-embed-m",
 }
 
 
@@ -95,11 +95,17 @@ class Config:
     Must be one of "ollama", "huggingface", or "google-ai".
     """
 
+    embeddings_backend_url = os.getenv("EMBEDDINGS_BACKEND_URL", "http://localhost:11434")
+    """The URL of the embeddings backend. Used only if the backend is 'ollama' or 'vllm'."""
+
     llm_backend = os.getenv("LLM_BACKEND", "ollama")
     """
     The backend to use for the llm.
     Must be one of "ollama", "huggingface", "google-ai", or "bedrock".
     """
+
+    llm_backend_url = os.getenv("LLM_BACKEND_URL", "http://localhost:11434")
+    """The URL of the llm backend. Used only if the backend is 'ollama' or 'vllm'."""
 
     embeddings_model = os.getenv(
         "EMBEDDINGS_MODEL",
@@ -164,12 +170,12 @@ class Config:
             msg = "Self reflection steps must be greater than 0"
             raise ValueError(msg)
 
-        if self.llm_backend not in ["ollama", "huggingface", "google-ai", "bedrock"]:
-            msg = f"LLM backend must be one of 'ollama', 'huggingface', or 'google-ai', but got '{self.llm_backend}'"
+        if self.llm_backend not in DEFAULT_LLM_MODELS:
+            msg = f"LLM backend must be one of {DEFAULT_LLM_MODELS.keys()}, but got '{self.llm_backend}'"
             raise ValueError(msg)
 
-        if self.embeddings_backend not in ["ollama", "huggingface", "google-ai"]:
-            msg = f"Embeddings backend must be one of 'ollama', 'huggingface', or 'google-ai', \
+        if self.embeddings_backend not in DEFAULT_EMBEDDINGS_MODELS:
+            msg = f"Embeddings backend must be one of {DEFAULT_EMBEDDINGS_MODELS.keys()}, \
                 but got '{self.embeddings_backend}'"
             raise ValueError(msg)
 

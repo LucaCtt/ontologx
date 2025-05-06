@@ -12,26 +12,30 @@ def hf_embeddings(model: str) -> Embeddings:
     return HuggingFaceEmbeddings(model_name=model, model_kwargs={"trust_remote_code": True})
 
 
-def ollama_embeddings(model: str) -> Embeddings:
+def ollama_embeddings(model: str, url: str) -> Embeddings:
     from langchain_ollama.embeddings import OllamaEmbeddings  # type: ignore[import]
 
-    return OllamaEmbeddings(model=model)
+    return OllamaEmbeddings(model=model, base_url=url)
 
 
-def google_ai_embeddings(model: str) -> Embeddings:
-    from langchain_google_genai.embeddings import GoogleGenerativeAIEmbeddings  # type: ignore[import]
+def vllm_embeddings(model: str, url: str) -> Embeddings:
+    from langchain_openai.embeddings import OpenAIEmbeddings  # type: ignore[import]
 
-    return GoogleGenerativeAIEmbeddings(model=model)
+    return OpenAIEmbeddings(
+        model=model,
+        base_url=url,
+    )
 
 
 class EmbeddingsFactory:
     @staticmethod
-    def create(backend: str, model: str) -> Embeddings:
+    def create(backend: str, model: str, url: str) -> Embeddings:
         """Create an embeddings instance based on the specified backend type.
 
         Args:
             backend(str): The backend to use for creating embeddings.
             model (str): The name or identifier of the model to use.
+            url (str): The URL for the backend.
 
         Returns:
             Embeddings: An instance of the specified backend type.
@@ -45,10 +49,7 @@ class EmbeddingsFactory:
                 return hf_embeddings(model)
 
             case "ollama":
-                return ollama_embeddings(model)
-
-            case "google-ai":
-                return google_ai_embeddings(model)
+                return ollama_embeddings(model, url)
 
             case _:
                 msg = f"Unsupported backend type: {backend}"
@@ -69,21 +70,25 @@ def hf_llm(model: str, temperature: float) -> BaseChatModel:
     return ChatHuggingFace(llm=parser_pipeline)
 
 
-def ollama_llm(model: str, temperature: float) -> BaseChatModel:
+def ollama_llm(model: str, temperature: float, url: str) -> BaseChatModel:
     from langchain_ollama.chat_models import ChatOllama  # type: ignore[import]
 
-    return ChatOllama(model=model, temperature=temperature)
+    return ChatOllama(model=model, url=url, temperature=temperature, num_ctx=1024 * 12)
 
 
-def google_ai_llm(model: str, temperature: float) -> BaseChatModel:
-    from langchain_google_genai import ChatGoogleGenerativeAI  # type: ignore[import]
+def vllm_llm(model: str, temperature: float, url: str) -> BaseChatModel:
+    from langchain_openai import ChatOpenAI  # type: ignore[import]
 
-    return ChatGoogleGenerativeAI(model=model, temperature=temperature)
+    return ChatOpenAI(
+        model=model,
+        base_url=url,
+        temperature=temperature,
+    )
 
 
 def bedrock_llm(model: str, temperature: float) -> BaseChatModel:
-    import boto3
-    from botocore.config import Config
+    import boto3  # type: ignore[attr-defined]
+    from botocore.config import Config  # type: ignore[attr-defined]
     from langchain_aws import ChatBedrockConverse  # type: ignore[import]
 
     sts_client = boto3.client("sts", config=Config(read_timeout=300))
@@ -112,13 +117,14 @@ class LLMFactory:
     """Factory class for creating backend instances based on the specified backend type."""
 
     @staticmethod
-    def create(backend: str, model: str, temperature: float) -> BaseChatModel:
+    def create(backend: str, model: str, temperature: float, url: str) -> BaseChatModel:
         """Create an LLM instance based on the specified backend type.
 
         Args:
             backend (str): The backend to use for creating the LLM.
             model (str): The name or identifier of the model to use.
             temperature (float): The temperature setting for the LLM.
+            url (str): The URL for the backend.
 
         Returns:
             BaseChatModel: An instance of the specified backend type.
@@ -131,10 +137,10 @@ class LLMFactory:
             return hf_llm(model, temperature)
 
         if backend == "ollama":
-            return ollama_llm(model, temperature)
+            return ollama_llm(model, temperature, url)
 
-        if backend == "google-ai":
-            return google_ai_llm(model, temperature)
+        if backend == "vllm-ai":
+            return vllm_llm(model, temperature, url)
 
         if backend == "bedrock":
             return bedrock_llm(model, temperature)

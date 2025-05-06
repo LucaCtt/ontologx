@@ -1,0 +1,76 @@
+services:
+  ontologx:
+    build:
+      context: ..
+      dockerfile: docker/ontologx.dockerfile
+    restart: always
+    environment:
+      - LLM_BACKEND=vllm
+      - LLM_BACKEND_URL=http://llm:8000
+      - EMBEDDINGS_BACKEND=vllm
+      - EMBEDDINGS_BACKEND_URL=http://embeddings:8000
+      - NEO4J_URL=bolt://neo4j:7687
+    depends_on:
+      - ollama
+      - neo4j
+    networks:
+      - ontologx-docker
+
+  llm:
+    image: vllm/vllm-openai:0.8.5
+    volumes:
+      - .vllm/models:/root/.cache/huggingface # Models permanence
+    container_name: llm-vllm
+    runtime: nvidia
+    ipc: host # Allow the container access to the host's shared memory
+    restart: always
+    networks:
+      - ontologx-docker
+    entrypoint: python3
+    command: -m vllm.entrypoints.openai.api_server --model ${PARSER_MODEL}
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [ gpu ]
+
+  embeddings:
+    image: vllm/vllm-openai:0.8.5
+    volumes:
+      - .vllm/models:/root/.cache/huggingface # Models permanence
+    container_name: llm-vllm
+    runtime: nvidia
+    ipc: host # Allow the container access to the host's shared memory
+    restart: always
+    networks:
+      - ontologx-docker
+    entrypoint: python3
+    command: -m vllm.entrypoints.openai.api_server --model ${EMBEDDINGS_MODEL} --task embed
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [ gpu ]
+
+  neo4j:
+    build:
+      context: .
+      dockerfile: neo4j.dockerfile
+    container_name: neo4j
+    volumes:
+      - ./neo4j/data:/data
+      - ./neo4j/logs:/logs
+      - ./neo4j/plugins:/plugins
+    networks:
+      - ontologx-docker
+    restart: always
+
+networks:
+  ontologx-docker:
+    driver: bridge
