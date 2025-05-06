@@ -1,12 +1,5 @@
 FROM python:3.13-slim
 
-RUN apt-get update && \
-    apt-get install --no-install-recommends -y \
-        curl \
-        build-essential && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
 RUN pip install poetry==2.1.0
 
 ENV POETRY_NO_INTERACTION=1 \
@@ -19,11 +12,14 @@ WORKDIR /app
 COPY pyproject.toml poetry.lock ./
 RUN touch README.md
 
-RUN poetry install --with vllm, ollama && rm -rf ${POETRY_CACHE_DIR}
+RUN poetry install --with vllm,ollama --no-root && rm -rf ${POETRY_CACHE_DIR}
 
 COPY ontologx ./ontologx
+COPY resources ./resources
 
 RUN poetry run python -m olx clear
+
+RUN poetry install
 
 ENTRYPOINT ["poetry", "run", "python", "-m", "olx", "run"]
 

@@ -18,10 +18,9 @@ services:
       - ontologx-docker
 
   llm:
-    image: vllm/vllm-openai:0.8.5
+    image: vllm/vllm-openai:v0.8.5
     volumes:
       - .vllm/models:/root/.cache/huggingface # Models permanence
-    container_name: llm-vllm
     runtime: nvidia
     ipc: host # Allow the container access to the host's shared memory
     restart: always
@@ -39,10 +38,9 @@ services:
               capabilities: [ gpu ]
 
   embeddings:
-    image: vllm/vllm-openai:0.8.5
+    image: vllm/vllm-openai:v0.8.5
     volumes:
       - .vllm/models:/root/.cache/huggingface # Models permanence
-    container_name: llm-vllm
     runtime: nvidia
     ipc: host # Allow the container access to the host's shared memory
     restart: always

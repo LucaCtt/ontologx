@@ -27,10 +27,19 @@ logger.setLevel(logging.DEBUG)
 config = Config()
 
 # Load the embeddings model
-embeddings = EmbeddingsFactory.create(backend=config.embeddings_backend, model=config.embeddings_model)
+embeddings = EmbeddingsFactory.create(
+    backend=config.embeddings_backend,
+    model=config.embeddings_model,
+    url=config.embeddings_backend_url,
+)
 
 # Load the llm
-llm = LLMFactory.create(backend=config.llm_backend, model=config.parser_model, temperature=config.parser_temperature)
+llm = LLMFactory.create(
+    backend=config.llm_backend,
+    model=config.parser_model,
+    temperature=config.parser_temperature,
+    url=config.llm_backend_url,
+)
 
 # Create the vector store
 store = Store(config=config, embeddings=embeddings)
