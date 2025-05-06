@@ -11,7 +11,8 @@ services:
       - EMBEDDINGS_BACKEND_URL=http://embeddings:8000
       - NEO4J_URL=bolt://neo4j:7687
     depends_on:
-      - ollama
+      - llm
+      - embeddings
       - neo4j
     networks:
       - ontologx-docker
