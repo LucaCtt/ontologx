@@ -22,10 +22,10 @@ from ontologx.store import Store
 config = Config()
 
 
-if config.is_develoment:
+logger = logging.getLogger("rich")
+logging.basicConfig(format="%(message)s", handlers=[RichHandler(omit_repeated_times=False)])
+if config.debug:
     # Set up dev logging format
-    logging.basicConfig(format="%(message)s", handlers=[RichHandler(omit_repeated_times=False)])
-    logger = logging.getLogger("rich")
     logger.setLevel(logging.DEBUG)
 
 # Load the embeddings model

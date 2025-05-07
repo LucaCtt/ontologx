@@ -4,7 +4,7 @@ services:
       context: ..
       dockerfile: docker/ontologx.dockerfile
     restart: unless-stopped
-    container_name: ${COMPOSE_PROJECT_NAME}-ontologx
+    container_name: ${COMPOSE_PROJECT_NAME}-olx
     environment:
       - LLM_BACKEND=vllm
       - LLM_BACKEND_URL=http://llm:8000/v1
@@ -27,7 +27,7 @@ services:
 
   llm:
     image: vllm/vllm-openai:v0.8.5
-    container_name: ${COMPOSE_PROJECT_NAME}-ontologx-llm
+    container_name: ${COMPOSE_PROJECT_NAME}-llm
     volumes:
       - ./${COMPOSE_PROJECT_NAME}/vllm/llms:/root/.cache/huggingface # Models permanence
     runtime: nvidia
@@ -55,7 +55,7 @@ services:
 
   embeddings:
     image: vllm/vllm-openai:v0.8.5
-    container_name: ${COMPOSE_PROJECT_NAME}-ontologx-embeddings
+    container_name: ${COMPOSE_PROJECT_NAME}-embs
     volumes:
       - ./${COMPOSE_PROJECT_NAME}/vllm/embeddings:/root/.cache/huggingface # Models permanence
     runtime: nvidia
@@ -83,7 +83,7 @@ services:
 
   neo4j:
     image: neo4j:5.20.0
-    container_name: ${COMPOSE_PROJECT_NAME}-ontologx-neo4j
+    container_name: ${COMPOSE_PROJECT_NAME}-neo4j
     environment:
       - NEO4J_PLUGINS=["apoc", "n10s"]
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*,n10s.*
