@@ -21,4 +21,4 @@ ENV NEO4J_apoc_trigger_enabled=true
 COPY ./neo4j-start.sh /neo4j-start.sh
 RUN chmod +x /neo4j-start.sh
 
-CMD ["./neo4j-start.sh"]
+CMD ["/neo4j-start.sh"]

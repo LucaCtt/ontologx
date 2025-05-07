@@ -21,11 +21,7 @@ def ollama_embeddings(model: str, url: str) -> Embeddings:
 def vllm_embeddings(model: str, url: str) -> Embeddings:
     from langchain_openai.embeddings import OpenAIEmbeddings  # type: ignore[import]
 
-    return OpenAIEmbeddings(
-        model=model,
-        base_url=url,
-        model_kwargs={"trust_remote_code": True},
-    )
+    return OpenAIEmbeddings(model=model, base_url=url)
 
 
 class EmbeddingsFactory:
