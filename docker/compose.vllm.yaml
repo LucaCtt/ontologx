@@ -35,7 +35,7 @@ services:
     networks:
       - ontologx-docker
     entrypoint: python3
-    command: -m vllm.entrypoints.openai.api_server --model ${PARSER_MODEL}
+    command: -m vllm.entrypoints.openai.api_server --model ${PARSER_MODEL} --trust-remote-code
     environment:
       NVIDIA_VISIBLE_DEVICES: all
     healthcheck:
@@ -61,7 +61,7 @@ services:
     networks:
       - ontologx-docker
     entrypoint: python3
-    command: -m vllm.entrypoints.openai.api_server --model ${EMBEDDINGS_MODEL} --task embed
+    command: -m vllm.entrypoints.openai.api_server --model ${EMBEDDINGS_MODEL} --task embed --trust-remote-code
     environment:
       NVIDIA_VISIBLE_DEVICES: all
     healthcheck:
