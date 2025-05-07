@@ -17,9 +17,7 @@ RUN poetry install --with vllm,ollama --no-root && rm -rf ${POETRY_CACHE_DIR}
 COPY ontologx ./ontologx
 COPY resources ./resources
 
-RUN poetry run python -m olx clear
-
 RUN poetry install
 
-ENTRYPOINT ["poetry", "run", "python", "-m", "olx", "run"]
+ENTRYPOINT ["poetry", "run", "olx", "run"]
 
