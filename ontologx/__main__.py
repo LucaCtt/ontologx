@@ -19,12 +19,14 @@ from ontologx.config import Config
 from ontologx.parser import ParserFactory
 from ontologx.store import Store
 
-# Set up logging format
-logging.basicConfig(format="%(message)s", handlers=[RichHandler(omit_repeated_times=False)])
-logger = logging.getLogger("rich")
-logger.setLevel(logging.DEBUG)
-
 config = Config()
+
+
+if config.is_develoment:
+    # Set up dev logging format
+    logging.basicConfig(format="%(message)s", handlers=[RichHandler(omit_repeated_times=False)])
+    logger = logging.getLogger("rich")
+    logger.setLevel(logging.DEBUG)
 
 # Load the embeddings model
 embeddings = EmbeddingsFactory.create(

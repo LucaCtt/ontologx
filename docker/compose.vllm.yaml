@@ -43,7 +43,7 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 10s
       timeout: 10s
-      retries: 30
+      retries: 100 # A lot of retries because big models may take a while to load
       start_period: 30s
       start_interval: 10s
     deploy:

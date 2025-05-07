@@ -50,6 +50,12 @@ def _get_uri_from_ttl(ttl_path: str) -> str:
 class Config:
     """Configuration class for setting up variables used in the log graph building."""
 
+    is_develoment = bool(int(os.getenv("DEVELOPMENT", "0")))
+    """
+    Wheter the code is running in development mode or not.
+    Pretty print and debug logs are enabled in development mode.
+    """
+
     parser_type = os.getenv("PARSER_TYPE", "main")
     """The type of parser to use. Supported values are 'main', 'tools', and 'baseline'"""
 
