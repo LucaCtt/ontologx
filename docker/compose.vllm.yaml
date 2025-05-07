@@ -43,8 +43,9 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 10s
       timeout: 10s
-      retries: 5
+      retries: 10
       start_period: 10s
+      start_interval: 10s
     deploy:
       resources:
         reservations:
@@ -70,8 +71,9 @@ services:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 10s
       timeout: 10s
-      retries: 5
+      retries: 10
       start_period: 10s
+      start_interval: 10s
     deploy:
       resources:
         reservations:
@@ -95,8 +97,9 @@ services:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:7474"] # The neo4j image has wget only, not curl
       interval: 10s
       timeout: 10s
-      retries: 5
+      retries: 10
       start_period: 10s
+      start_interval: 10s
 
 networks:
   ontologx-docker:
