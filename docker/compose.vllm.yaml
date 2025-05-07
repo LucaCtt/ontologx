@@ -28,7 +28,7 @@ services:
     image: vllm/vllm-openai:v0.8.5
     container_name: ${COMPOSE_PROJECT_NAME}-ontologx-llm
     volumes:
-      - .vllm/llms:/root/.cache/huggingface # Models permanence
+      - ./${COMPOSE_PROJECT_NAME}/vllm/llms:/root/.cache/huggingface # Models permanence
     runtime: nvidia
     ipc: host # Allow the container access to the host's shared memory
     restart: unless-stopped
@@ -54,7 +54,7 @@ services:
     image: vllm/vllm-openai:v0.8.5
     container_name: ${COMPOSE_PROJECT_NAME}-ontologx-embeddings
     volumes:
-      - .vllm/embeddings:/root/.cache/huggingface # Models permanence
+      - ./${COMPOSE_PROJECT_NAME}/vllm/embeddings:/root/.cache/huggingface # Models permanence
     runtime: nvidia
     ipc: host # Allow the container access to the host's shared memory
     restart: unless-stopped
@@ -82,9 +82,9 @@ services:
       dockerfile: neo4j.dockerfile
     container_name: ${COMPOSE_PROJECT_NAME}-ontologx-neo4j
     volumes:
-      - ./neo4j/data:/data
-      - ./neo4j/logs:/logs
-      - ./neo4j/plugins:/plugins
+      - ./${COMPOSE_PROJECT_NAME}/neo4j/data:/data
+      - ./${COMPOSE_PROJECT_NAME}/neo4j/logs:/logs
+      - ./${COMPOSE_PROJECT_NAME}/neo4j/plugins:/plugins
     networks:
       - ontologx-docker
     restart: unless-stopped
@@ -93,7 +93,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
-      start_period: 3s
+      start_period: 10s
 
 networks:
   ontologx-docker:
