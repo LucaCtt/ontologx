@@ -6,8 +6,7 @@ services:
     restart: unless-stopped
     container_name: ${COMPOSE_PROJECT_NAME}-ontologx
     environment:
-      - LLM_BACKEND=ollama
-      - LLM_BACKEND_URL=http://llm:11434
+      - LLM_BACKEND=bedrock
       - EMBEDDINGS_BACKEND=ollama
       - EMBEDDINGS_BACKEND_URL=http://embeddings:11434
       - NEO4J_URL=bolt://neo4j:7687

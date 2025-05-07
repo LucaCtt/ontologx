@@ -24,6 +24,7 @@ def vllm_embeddings(model: str, url: str) -> Embeddings:
     return OpenAIEmbeddings(
         model=model,
         base_url=url,
+        model_kwargs={"trust_remote_code": True},
     )
 
 
@@ -50,6 +51,9 @@ class EmbeddingsFactory:
 
             case "ollama":
                 return ollama_embeddings(model, url)
+
+            case "vllm":
+                return vllm_embeddings(model, url)
 
             case _:
                 msg = f"Unsupported backend type: {backend}"
@@ -139,7 +143,7 @@ class LLMFactory:
         if backend == "ollama":
             return ollama_llm(model, temperature, url)
 
-        if backend == "vllm-ai":
+        if backend == "vllm":
             return vllm_llm(model, temperature, url)
 
         if backend == "bedrock":

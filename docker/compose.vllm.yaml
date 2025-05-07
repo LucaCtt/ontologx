@@ -3,7 +3,8 @@ services:
     build:
       context: ..
       dockerfile: docker/ontologx.dockerfile
-    restart: always
+    restart: unless-stopped
+    container_name: ${COMPOSE_PROJECT_NAME}-ontologx
     environment:
       - LLM_BACKEND=vllm
       - LLM_BACKEND_URL=http://llm:8000
@@ -11,25 +12,37 @@ services:
       - EMBEDDINGS_BACKEND_URL=http://embeddings:8000
       - NEO4J_URL=bolt://neo4j:7687
     depends_on:
-      - llm
-      - embeddings
-      - neo4j
+      llm:
+        condition: service_healthy
+        restart: true
+      embeddings:
+        condition: service_healthy
+        restart: true
+      neo4j:
+        condition: service_healthy
+        restart: true
     networks:
       - ontologx-docker
 
   llm:
     image: vllm/vllm-openai:v0.8.5
+    container_name: ${COMPOSE_PROJECT_NAME}-ontologx-llm
     volumes:
-      - .vllm/models:/root/.cache/huggingface # Models permanence
+      - .vllm/llms:/root/.cache/huggingface # Models permanence
     runtime: nvidia
     ipc: host # Allow the container access to the host's shared memory
-    restart: always
+    restart: unless-stopped
     networks:
       - ontologx-docker
     entrypoint: python3
     command: -m vllm.entrypoints.openai.api_server --model ${PARSER_MODEL}
     environment:
       NVIDIA_VISIBLE_DEVICES: all
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
     deploy:
       resources:
         reservations:
@@ -39,17 +52,23 @@ services:
 
   embeddings:
     image: vllm/vllm-openai:v0.8.5
+    container_name: ${COMPOSE_PROJECT_NAME}-ontologx-embeddings
     volumes:
-      - .vllm/models:/root/.cache/huggingface # Models permanence
+      - .vllm/embeddings:/root/.cache/huggingface # Models permanence
     runtime: nvidia
     ipc: host # Allow the container access to the host's shared memory
-    restart: always
+    restart: unless-stopped
     networks:
       - ontologx-docker
     entrypoint: python3
     command: -m vllm.entrypoints.openai.api_server --model ${EMBEDDINGS_MODEL} --task embed
     environment:
       NVIDIA_VISIBLE_DEVICES: all
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
     deploy:
       resources:
         reservations:
@@ -61,14 +80,20 @@ services:
     build:
       context: .
       dockerfile: neo4j.dockerfile
-    container_name: neo4j
+    container_name: ${COMPOSE_PROJECT_NAME}-ontologx-neo4j
     volumes:
       - ./neo4j/data:/data
       - ./neo4j/logs:/logs
       - ./neo4j/plugins:/plugins
     networks:
       - ontologx-docker
-    restart: always
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7474"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 3s
 
 networks:
   ontologx-docker:
