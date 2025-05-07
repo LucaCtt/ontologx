@@ -11,6 +11,7 @@ services:
       - EMBEDDINGS_BACKEND=vllm
       - EMBEDDINGS_BACKEND_URL=http://embeddings:8000
       - NEO4J_URL=bolt://neo4j:7687
+      - OPENAI_API_KEY=Empty
     depends_on:
       llm:
         condition: service_healthy
@@ -43,6 +44,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
+      start_period: 10s
     deploy:
       resources:
         reservations:
@@ -69,6 +71,7 @@ services:
       interval: 10s
       timeout: 10s
       retries: 5
+      start_period: 10s
     deploy:
       resources:
         reservations:
@@ -89,7 +92,7 @@ services:
       - ontologx-docker
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7474"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:7474"] # The neo4j image has wget only, not curl
       interval: 10s
       timeout: 10s
       retries: 5
