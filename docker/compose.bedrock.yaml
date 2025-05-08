@@ -4,14 +4,14 @@ services:
       context: ..
       dockerfile: docker/ontologx.dockerfile
     restart: unless-stopped
-    container_name: ${COMPOSE_PROJECT_NAME}-ontologx
+    container_name: ${COMPOSE_PROJECT_NAME}-olx
     environment:
       - LLM_BACKEND=bedrock
-      - EMBEDDINGS_BACKEND=ollama
-      - EMBEDDINGS_BACKEND_URL=http://embeddings:11434
+      - EMBEDDINGS_BACKEND=vllm
+      - EMBEDDINGS_BACKEND_URL=http://embeddings:8000/v1
       - NEO4J_URL=bolt://neo4j:7687
     depends_on:
-      ollama:
+      embs:
         condition: service_healthy
         restart: true
       neo4j:
@@ -20,49 +20,60 @@ services:
     networks:
       - ontologx-docker
   
-  ollama:
-    image: ollama/ollama:0.6.8
+  embeddings:
+    image: vllm/vllm-openai:v0.8.5
+    container_name: ${COMPOSE_PROJECT_NAME}-embs
     volumes:
-      - ./ollama/ollama:/root/.ollama
-    container_name: ${COMPOSE_PROJECT_NAME}-ontologx-ollama
+      - ./${COMPOSE_PROJECT_NAME}/vllm/embeddings:/root/.cache/huggingface # Models permanence
+    runtime: nvidia
+    ipc: host # Allow the container access to the host's shared memory
     restart: unless-stopped
-    post_start:
-      - command: |
-          ollama pull $PARSER_MODEL && ollama pull $EMBEDDINGS_MODEL
     networks:
       - ontologx-docker
+    entrypoint: python3
+    command: -m vllm.entrypoints.openai.api_server --model ${EMBEDDINGS_MODEL} --task embed --trust-remote-code ${VLLM_EMBEDDINGS_ADDITIONAL_ARGS} # Ad-hoc vllm arguments are likely to be needed
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:11434/"]
-      interval: 30s
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 20s
       timeout: 10s
-      retries: 5
+      retries: 30
       start_period: 30s
+      start_interval: 10s
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
-              count: 1
-              capabilities: [gpu]
+              capabilities: [ gpu ]
 
   neo4j:
-    build:
-      context: .
-      dockerfile: neo4j.dockerfile
-    container_name: ${COMPOSE_PROJECT_NAME}-ontologx-neo4j
+    image: neo4j:5.20.0
+    container_name: ${COMPOSE_PROJECT_NAME}-neo4j
+    environment:
+      - NEO4J_PLUGINS=["apoc", "n10s"]
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*,n10s.*
+      - NEO4J_dbms_security_procedures_allowlist=apoc.*,n10s.*
+      - NEO4J_AUTH=neo4j/password
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
+      - NEO4J_apoc_trigger_enabled=true
     volumes:
-      - ./neo4j/data:/data
-      - ./neo4j/logs:/logs
-      - ./neo4j/plugins:/plugins
+      - ./${COMPOSE_PROJECT_NAME}/neo4j/data:/data
+      - ./${COMPOSE_PROJECT_NAME}/neo4j/logs:/logs
+      - ./${COMPOSE_PROJECT_NAME}/neo4j/plugins:/plugins
     networks:
       - ontologx-docker
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7474"]
-      interval: 10s
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:7474"] # The neo4j image has wget only, not curl
+      interval: 20s
       timeout: 10s
-      retries: 5
-      start_period: 3s
+      retries: 30
+      start_period: 30s
+      start_interval: 10s
 
 networks:
   ontologx-docker:

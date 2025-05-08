@@ -4,7 +4,7 @@ services:
       context: ..
       dockerfile: docker/ontologx.dockerfile
     restart: unless-stopped
-    container_name: ${COMPOSE_PROJECT_NAME}-ontologx
+    container_name: ${COMPOSE_PROJECT_NAME}-olx
     environment:
       - LLM_BACKEND=ollama
       - LLM_BACKEND_URL=http://llm:11434
@@ -25,13 +25,16 @@ services:
     image: ollama/ollama:0.6.8
     volumes:
       - ./ollama/ollama:/root/.ollama
-    container_name: ${COMPOSE_PROJECT_NAME}-ontologx-ollama
+    container_name: ${COMPOSE_PROJECT_NAME}-ollama
     restart: unless-stopped
+    runtime: nvidia # See https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
     post_start:
       - command: |
           ollama pull $PARSER_MODEL && ollama pull $EMBEDDINGS_MODEL
     networks:
       - ontologx-docker
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:11434/"]
       interval: 30s
@@ -47,23 +50,31 @@ services:
               capabilities: [gpu]
 
   neo4j:
-    build:
-      context: .
-      dockerfile: neo4j.dockerfile
-    container_name: ${COMPOSE_PROJECT_NAME}-ontologx-neo4j
+    image: neo4j:5.20.0
+    container_name: ${COMPOSE_PROJECT_NAME}-neo4j
+    environment:
+      - NEO4J_PLUGINS=["apoc", "n10s"]
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*,n10s.*
+      - NEO4J_dbms_security_procedures_allowlist=apoc.*,n10s.*
+      - NEO4J_AUTH=neo4j/password
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
+      - NEO4J_apoc_trigger_enabled=true
     volumes:
-      - ./neo4j/data:/data
-      - ./neo4j/logs:/logs
-      - ./neo4j/plugins:/plugins
+      - ./${COMPOSE_PROJECT_NAME}/neo4j/data:/data
+      - ./${COMPOSE_PROJECT_NAME}/neo4j/logs:/logs
+      - ./${COMPOSE_PROJECT_NAME}/neo4j/plugins:/plugins
     networks:
       - ontologx-docker
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:7474"]
-      interval: 10s
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:7474"] # The neo4j image has wget only, not curl
+      interval: 20s
       timeout: 10s
-      retries: 5
-      start_period: 3s
+      retries: 30
+      start_period: 30s
+      start_interval: 10s
 
 networks:
   ontologx-docker:

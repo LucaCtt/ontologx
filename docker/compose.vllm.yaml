@@ -11,7 +11,7 @@ services:
       - EMBEDDINGS_BACKEND=vllm
       - EMBEDDINGS_BACKEND_URL=http://embeddings:8000/v1
       - NEO4J_URL=bolt://neo4j:7687
-      - OPENAI_API_KEY=Empty
+      - OPENAI_API_KEY=Empty # Required by OpenAI client API
     depends_on:
       llm:
         condition: service_healthy
@@ -29,20 +29,19 @@ services:
     image: vllm/vllm-openai:v0.8.5
     container_name: ${COMPOSE_PROJECT_NAME}-llm
     volumes:
-      - ./${COMPOSE_PROJECT_NAME}/vllm/llms:/root/.cache/huggingface # Models permanence
-    runtime: nvidia
+      - ./${COMPOSE_PROJECT_NAME}/vllm/llms:/root/.cache/huggingface # Save models so they are not downloaded every time
+    runtime: nvidia # See https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
     ipc: host # Allow the container access to the host's shared memory
     restart: unless-stopped
     networks:
       - ontologx-docker
     entrypoint: python3
-    command: -m vllm.entrypoints.openai.api_server --model ${PARSER_MODEL} --task generate --trust-remote-code --max-model-len ${MAX_MODEL_LEN}
+    command: -m vllm.entrypoints.openai.api_server --model ${PARSER_MODEL} --task generate --trust-remote-code ${VLLM_LLM_ADDITIONAL_ARGS} # Ad-hoc vllm arguments are likely to be needed
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
-      - VLLM_USE_V1=0
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 10s
+      interval: 20s
       timeout: 10s
       retries: 100 # A lot of retries because big models may take a while to load
       start_period: 30s
@@ -65,13 +64,12 @@ services:
     networks:
       - ontologx-docker
     entrypoint: python3
-    command: -m vllm.entrypoints.openai.api_server --model ${EMBEDDINGS_MODEL} --task embed --trust-remote-code
+    command: -m vllm.entrypoints.openai.api_server --model ${EMBEDDINGS_MODEL} --task embed --trust-remote-code ${VLLM_EMBEDDINGS_ADDITIONAL_ARGS} # Ad-hoc vllm arguments are likely to be needed
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
-      - VLLM_USE_V1=0
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 10s
+      interval: 20s
       timeout: 10s
       retries: 30
       start_period: 30s
@@ -104,7 +102,7 @@ services:
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://localhost:7474"] # The neo4j image has wget only, not curl
-      interval: 10s
+      interval: 20s
       timeout: 10s
       retries: 30
       start_period: 30s
