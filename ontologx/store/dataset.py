@@ -134,8 +134,8 @@ class Dataset(StoreModule):
             """
             MATCH (d:Dataset)-[:hasPart]->(e:Event)
             WHERE d.uri STARTS WITH $tests_uri
-            ORDER BY e.uri
             RETURN e.eventMessage as message, e.uri as uri
+            ORDER BY e.uri
             """,
             params={"run_name": self.__config.run_name, "tests_uri": self.__config.tests_uri},
         )

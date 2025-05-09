@@ -24,9 +24,7 @@ config = Config()
 
 logger = logging.getLogger("rich")
 logging.basicConfig(format="%(message)s", handlers=[RichHandler(omit_repeated_times=False)])
-if config.debug:
-    # Set up dev logging format
-    logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.DEBUG if config.debug else logging.INFO)
 
 # Load the embeddings model
 embeddings = EmbeddingsFactory.create(
@@ -86,7 +84,7 @@ def run() -> None:
         graphs_true = []
 
         for event, context, graph_true in track(test_events, description="Parsing events"):
-            logger.debug("Parsing event: '%s'", event)
+            logger.info("Parsing event: '%s'", event)
             start_time = time.time()
 
             graph_pred = parser.parse(event, context)

@@ -73,7 +73,7 @@ def hf_llm(model: str, temperature: float) -> BaseChatModel:
 def ollama_llm(model: str, temperature: float, url: str) -> BaseChatModel:
     from langchain_ollama.chat_models import ChatOllama  # type: ignore[import]
 
-    return ChatOllama(model=model, url=url, temperature=temperature, num_ctx=1024 * 12)
+    return ChatOllama(model=model, base_url=url, temperature=temperature)
 
 
 def vllm_llm(model: str, temperature: float, url: str) -> BaseChatModel:
@@ -91,7 +91,12 @@ def bedrock_llm(model: str, temperature: float) -> BaseChatModel:
     from botocore.config import Config  # type: ignore[attr-defined]
     from langchain_aws import ChatBedrockConverse  # type: ignore[import]
 
-    sts_client = boto3.client("sts", config=Config(read_timeout=300))
+    sts_client = boto3.client(
+        "sts",
+        config=Config(read_timeout=300),
+        aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
+        aws_secret_access_key=os.environ["AWS_SECRET_ACCESS_KEY"],
+    )
 
     # Assume the role
     response = sts_client.assume_role(

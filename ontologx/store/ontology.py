@@ -6,8 +6,8 @@ from langchain_neo4j.graphs.graph_document import GraphDocument, Node, Relations
 from ontologx.config import Config
 from ontologx.store.module import StoreModule
 
-TIME_ONTOLOGY_URI = "http://www.w3.org/2006/time"
-MLSCHEMA_ONTOLOGY_URI = "http://www.w3.org/2016/10/mls"
+TIME_ONTOLOGY_URI = "http://www.w3.org/2006/time#"
+MLSCHEMA_ONTOLOGY_URI = "https://www.w3.org/ns/mls#"
 XML_SCHEMA_URI = "http://www.w3.org/2001/XMLSchema#"
 OWL_SCHEMA_URI = "http://www.w3.org/2002/07/owl#"
 
