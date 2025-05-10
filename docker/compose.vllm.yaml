@@ -40,9 +40,8 @@ services:
     networks:
       - ontologx-docker
     entrypoint: python3
-    command: -m vllm.entrypoints.openai.api_server --model ${PARSER_MODEL} --task generate --trust-remote-code ${VLLM_ADDITIONAL_ARGS-} # Ad-hoc vllm arguments are likely to be needed
+    command: -m vllm.entrypoints.openai.api_server --model ${PARSER_MODEL} --task generate --trust-remote-code --tool-call-parser pythonic ${VLLM_ADDITIONAL_ARGS-} # Ad-hoc vllm arguments are likely to be needed
     environment:
-      - CUDA_VISIBLE_DEVICES=0,2
       - CUDA_DEVICE_ORDER=PCI_BUS_ID
     env_file:
       - ../.env
@@ -61,19 +60,17 @@ services:
               capabilities: [ gpu ]
 
   embs:
-    image: michaelf34/infinity:latest
+    image: michaelf34/infinity:0.0.76
     container_name: ${COMPOSE_PROJECT_NAME-default}-embs
     volumes:
       - ./exps/${COMPOSE_PROJECT_NAME-default}/embs:/app/.cache
     restart: on-failure:3
     runtime: nvidia
-    command: v2 --model-id ${EMBEDDINGS_MODEL} --port 9000
+    command: v2 --model-id ${EMBEDDINGS_MODEL} --dtype float16 --port 9000
     networks:
       - ontologx-docker
     expose:
       - 9000
-    environment:
-      - CUDA_VISIBLE_DEVICES=1
     env_file:
       - ../.env
     healthcheck:

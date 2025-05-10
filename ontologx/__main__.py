@@ -10,8 +10,6 @@ import time
 import typer
 from langchain_neo4j.graphs.graph_document import GraphDocument
 from neo4j.exceptions import ClientError
-from rich.logging import RichHandler
-from rich.progress import track
 
 from ontologx import accuracy
 from ontologx.backend import EmbeddingsFactory, LLMFactory
@@ -21,8 +19,8 @@ from ontologx.store import Store
 
 config = Config()
 
-logger = logging.getLogger("rich")
-logging.basicConfig(format="%(message)s", handlers=[RichHandler(omit_repeated_times=False)])
+logging.basicConfig(format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
+logger = logging.getLogger("ontologx")
 logger.setLevel(logging.DEBUG)
 
 # Load the embeddings model
@@ -58,8 +56,11 @@ def run() -> None:
     logger.info("Embeddings model: '%s'", config.embeddings_model)
     logger.info("Language model: '%s'", config.parser_model)
 
+    global_start_time = time.time()
+
     for _ in range(config.n_runs):
         config.new_run()
+        logger.info("----------------------")
         logger.info("Run: '%s'", config.run_name)
 
         store.initialize()
@@ -82,29 +83,31 @@ def run() -> None:
         graphs_pred = []
         graphs_true = []
 
-        for event, context, graph_true in track(test_events, description="Parsing events"):
-            logger.info("Parsing event: '%s'", event)
-            start_time = time.time()
+        with typer.progressbar(test_events, label="Parsing events") as track:
+            for event, context, graph_true in track:
+                logger.info("Parsing event: '%s'", event)
+                start_time = time.time()
 
-            graph_pred = parser.parse(event, context)
-            total_time += time.time() - start_time
+                graph_pred = parser.parse(event, context)
+                total_time += time.time() - start_time
 
-            if graph_pred is None:
-                logger.warning("Event '%s' could not be parsed", event)
-                # Add an empty graph to the list of predicted graphs
-                # so the metrics will be calculated correctly
-                graphs_pred.append(GraphDocument(nodes=[], relationships=[]))
-            else:
-                graphs_pred.append(graph_pred)
-                total_success += 1
+                if graph_pred is None:
+                    logger.warning("Event '%s' could not be parsed", event)
+                    # Add an empty graph to the list of predicted graphs
+                    # so the metrics will be calculated correctly
+                    graphs_pred.append(GraphDocument(nodes=[], relationships=[]))
+                else:
+                    graphs_pred.append(graph_pred)
+                    total_success += 1
 
-                try:
-                    store.dataset.add_event_graph(graph_pred)
-                except ClientError:
-                    total_shacl_violations += 1
+                    try:
+                        store.dataset.add_event_graph(graph_pred)
+                    except ClientError:
+                        total_shacl_violations += 1
 
-            graphs_true.append(graph_true)
+                graphs_true.append(graph_true)
 
+        logger.info("-------------------------")
         logger.info("Log parsing done.")
 
         avg_time = total_time / len(test_events)
@@ -125,6 +128,7 @@ def run() -> None:
             },
         )
 
+        logger.info("Global run time: %f seconds", time.time() - global_start_time)
         logger.info("Average generation time: %f seconds", avg_time)
         logger.info("Success percentage: %f", pct_success)
         logger.info("SHACL violations percentage: %f", pct_violations)

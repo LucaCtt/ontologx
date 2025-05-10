@@ -11,7 +11,7 @@ services:
       - EMBEDDINGS_BACKEND_URL=http://embs:9000
       - NEO4J_URL=bolt://neo4j:7687
     env_file:
-      - path: ../.env
+      - ../.env
     depends_on:
       embs:
         condition: service_healthy
@@ -34,8 +34,6 @@ services:
       - ontologx-docker
     expose:
       - 9000
-    environment:
-      - CUDA_VISIBLE_DEVICES=1
     env_file:
       - ../.env
     healthcheck:

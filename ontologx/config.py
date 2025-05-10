@@ -22,9 +22,9 @@ DEFAULT_LLM_MODELS = {
 }
 
 DEFAULT_EMBEDDINGS_MODELS = {
-    "ollama": "snowflake-arctic-embed2",
-    "huggingface": "Snowflake/snowflake-arctic-embed-m-v2.0",
-    "infinity": "Snowflake/snowflake-arctic-embed-m-v2.0",
+    "ollama": "nomic-embed-text",
+    "huggingface": "Alibaba-NLP/gte-multilingual-base",
+    "infinity": "Alibaba-NLP/gte-multilingual-base",
 }
 
 

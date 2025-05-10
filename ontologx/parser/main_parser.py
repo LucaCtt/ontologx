@@ -15,7 +15,7 @@ from ontologx.parser.parser import Parser
 from ontologx.parser.tools import fetch_ip_address_info
 from ontologx.store import Store
 
-logger = logging.getLogger("rich")
+logger = logging.getLogger("ontologx")
 
 
 def _example_message_group(event: str, graph: GraphDocument, context: dict) -> list[BaseMessage]:
@@ -87,8 +87,7 @@ class MainParser(Parser):
         # Add the graph structure to the structured output.
         # Also include raw output to retrieve eventual errors.
         structured_model = structured_model.with_structured_output(  # type: ignore[attr-defined]
-            build_dynamic_model(store.ontology.graph()),
-            include_raw=True,
+            build_dynamic_model(store.ontology.graph()), include_raw=True, method="function_calling",
         )
 
         gen_graph_prompt = ChatPromptTemplate.from_messages(
