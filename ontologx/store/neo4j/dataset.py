@@ -256,7 +256,14 @@ class Dataset(StoreModule):
         def subgraph(doc: Document) -> GraphDocument:
             """Get the subgraph of a node in the store."""
             subgraph = self.__get_subgraph_from_node(doc.metadata["uri"])
-            subgraph.source = doc
+
+            source_node = next((node for node in subgraph.nodes if node.type == "Source"), None)
+            context = {}
+            if source_node:
+                context["source"] = source_node.properties.get("sourceName", "")
+                context["device"] = source_node.properties.get("sourceDevice", "")
+
+            subgraph.source = Document(page_content=doc.page_content, metadata=context)
             return subgraph
 
         return [subgraph(doc) for doc in relevant_docs]
@@ -301,17 +308,20 @@ class Dataset(StoreModule):
         # This is a workaround to convert them to strings.
         for node in nodes_subgraph["nodes"]:
             for key, value in node["properties"].items():
-                if isinstance(value, neo4j.time.DateTime):
-                    node["properties"][key] = value.iso_format()
-                if isinstance(value, neo4j.time.Date):
+                if isinstance(value, neo4j.time.DateTime | neo4j.time.Date | neo4j.time.Time):
                     node["properties"][key] = value.iso_format()
 
-        def get_id_from_uri(uri: str) -> str:
-            """Get the id of a node from its uri."""
-            return uri.split("#")[-1]
+        def get_node_id(uri: str) -> str:
+            """Get the node id from the node uri."""
+            final_str = uri.split("/")[-1]
+
+            if "#" in final_str:
+                return final_str.split("#")[-1]
+
+            return final_str
 
         nodes_dict = {
-            node["uri"]: Node(id=get_id_from_uri(node["uri"]), type=node["type"], properties=node["properties"])
+            node["uri"]: Node(id=get_node_id(node["uri"]), type=node["type"], properties=node["properties"])
             for node in nodes_subgraph["nodes"]
         }
 

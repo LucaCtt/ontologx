@@ -5,7 +5,7 @@ import uuid
 from typing import cast
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolCall, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_neo4j.graphs.graph_document import GraphDocument
 from pydantic import ValidationError
@@ -31,7 +31,9 @@ def _example_message_group(event_graph: GraphDocument) -> list[BaseMessage]:
         {
             "id": node.id,
             "type": node.type,
-            "properties": [{"type": key, "value": value} for key, value in node.properties.items()],
+            "properties": [
+                {"type": key, "value": value} for key, value in node.properties.items() if key != "uri"
+            ],  # Exclude 'uri' from properties as it is manually assigned later, no need for the LLM to know about it
         }
         for node in event_graph.nodes
     ]
@@ -45,22 +47,22 @@ def _example_message_group(event_graph: GraphDocument) -> list[BaseMessage]:
         for rel in event_graph.relationships
     ]
 
-    tool_call_id = f"call_{uuid.uuid4()!s}"
+    tool_call_id = str(uuid.uuid4())
 
     return [
         HumanMessage(f"Event: '{event}'\nContext: {context}", name="example_user"),
         AIMessage(
             "",
-            id=f"run_{uuid.uuid4()!s}",
+            id=str(uuid.uuid4()),
             tool_calls=[
-                {
-                    "name": "EventGraph",  # This must be the name of the class returned by structured output
-                    "args": {
+                ToolCall(
+                    name="EventGraph",
+                    args={
                         "nodes": nodes,
                         "relationships": relationships,
                     },
-                    "id": tool_call_id,
-                },
+                    id=tool_call_id,
+                ),
             ],
         ),
         ToolMessage("", tool_call_id=tool_call_id),
@@ -112,19 +114,7 @@ class MainParser(Parser):
 
     def __get_examples(self, event: str) -> list[BaseMessage]:
         similar_events = self.store.search("mmr", event, k=2)
-
-        messages = []
-        for similar_event in similar_events:
-            source_node = next((node for node in similar_event.nodes if node.type == "Source"), None)
-
-            context = {}
-            if source_node:
-                context["source"] = source_node.properties.get("sourceName", "")
-                context["device"] = source_node.properties.get("sourceDevice", "")
-
-            messages.extend(_example_message_group(similar_event))
-
-        return messages
+        return [msg for similar_event in similar_events for msg in _example_message_group(similar_event)]
 
     def parse(self, event: str, context: dict) -> GraphDocument | None:
         """Parse the given event and construct a knowledge graph.
@@ -172,6 +162,7 @@ class MainParser(Parser):
                             AIMessage("Done"),
                         ],
                     )
+                    logger.debug(corrections)
 
                 except KeyError:
                     logger.debug("No raw LLM output found.")

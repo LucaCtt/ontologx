@@ -62,7 +62,7 @@ class _OntologyValidValues:
 
     @property
     def properties_per_node(self) -> dict[str, list[str]]:
-        return {node.type: [*list(node.properties.keys()), "uri"] for node in self.ontology.nodes}
+        return {node.type: list(node.properties.keys()) for node in self.ontology.nodes}
 
     @property
     def properties(self) -> list[str]:
