@@ -1,46 +1,61 @@
-from langchain_core.embeddings import Embeddings
-from langchain_neo4j import Neo4jGraph
+from abc import ABC, abstractmethod
 
-from ontologx.config import Config
-from ontologx.store.dataset import Dataset
-from ontologx.store.module import StoreModule
-from ontologx.store.ontology import Ontology
-from ontologx.store.schema import Schema
+from ontologx.store import GraphDocument
 
 
-class Store(StoreModule):
-    def __init__(self, config: Config, embeddings: Embeddings) -> None:
-        self.__embeddings = embeddings
-        self.__graph_store = Neo4jGraph(
-            url=config.neo4j_url,
-            username=config.neo4j_username,
-            password=config.neo4j_password,
-        )
+class StoreModule(ABC):
+    """Abstract class for store modules."""
 
-        self.ontology = Ontology(config, self.__graph_store)
-        self.schema = Schema(config, self.__graph_store)
-        self.dataset = Dataset(config, self.__graph_store, self.__embeddings)
-
+    @abstractmethod
     def initialize(self) -> None:
-        self.ontology.initialize()
-        self.schema.initialize()
-        self.dataset.initialize()
+        """Initialize the store module by creating module-specific nodes."""
 
+
+class Store(StoreModule, ABC):
+    @abstractmethod
+    def initialize(self) -> None:
+        """Initialize the store module by creating module-specific nodes."""
+
+    @abstractmethod
     def clear(self) -> None:
-        # Delete all nodes and relationships in the graph
-        self.__graph_store.query("MATCH (n) DETACH DELETE n")
+        """Clear the store back to a clean state."""
 
-        # Delete all constraints
-        constraints = self.__graph_store.query("SHOW CONSTRAINTS YIELD name RETURN name")
-        for constraint in constraints:
-            self.__graph_store.query(f"DROP CONSTRAINT {constraint['name']}")
+    @abstractmethod
+    def ontology(self) -> GraphDocument:
+        """Get the log ontology."""
 
-        # Delete all indexes
-        indexes = self.__graph_store.query("SHOW INDEXES YIELD name RETURN name")
-        for index in indexes:
-            self.__graph_store.query(f"DROP INDEX {index['name']}")
+    @abstractmethod
+    def tests(self) -> list[GraphDocument]:
+        """Get the tests set."""
 
-        # Delete all triggers
-        triggers = self.__graph_store.query("CALL apoc.trigger.list() YIELD name RETURN name")
-        for trigger in triggers:
-            self.__graph_store.query(f"USE system CALL apoc.trigger.drop('neo4j', '{trigger['name']}')")
+    @abstractmethod
+    def add_event_graph(self, event_graph: GraphDocument) -> None:
+        """Add an event graph to the store.
+
+        Args:
+            event_graph (GraphDocument): The event graph to add.
+
+        """
+
+    @abstractmethod
+    def search(self, criterion: str, event: str, **kwargs: str | float) -> list[GraphDocument]:
+        """Search for event graphs in the store based on a criterion and event.
+
+        Args:
+            criterion (str): The search criterion.
+            event (str): The event to search for.
+            **kwargs: Additional keyword arguments for the search.
+
+        """
+
+    @abstractmethod
+    def add_evaluation_result(self, measure: str, evaluation: str | float) -> None:
+        """Add the results of the experiment to the graph store.
+
+        The results are added as properties of the run node.
+
+        Args:
+            measure (str): The name of the measure.
+            evaluation (Any): The value of the evaluation.
+
+        """

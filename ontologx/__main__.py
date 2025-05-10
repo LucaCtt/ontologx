@@ -8,14 +8,14 @@ import logging
 import time
 
 import typer
-from langchain_neo4j.graphs.graph_document import GraphDocument
 from neo4j.exceptions import ClientError
 
 from ontologx import accuracy
 from ontologx.backend import EmbeddingsFactory, LLMFactory
 from ontologx.config import Config
 from ontologx.parser import ParserFactory
-from ontologx.store import Store
+from ontologx.store import GraphDocument
+from ontologx.store.neo4j import Neo4jStore
 
 config = Config()
 
@@ -39,7 +39,7 @@ llm = LLMFactory.create(
 )
 
 # Create the vector store
-store = Store(config=config, embeddings=embeddings)
+store = Neo4jStore(config=config, embeddings=embeddings)
 
 app = typer.Typer()
 
@@ -55,8 +55,6 @@ def run() -> None:
     logger.info("Experiment: '%s'", config.experiment_name)
     logger.info("Embeddings model: '%s'", config.embeddings_model)
     logger.info("Language model: '%s'", config.parser_model)
-
-    global_start_time = time.time()
 
     for _ in range(config.n_runs):
         config.new_run()
@@ -84,10 +82,17 @@ def run() -> None:
         graphs_true = []
 
         with typer.progressbar(test_events, label="Parsing events") as track:
-            for event, context, graph_true in track:
-                logger.info("Parsing event: '%s'", event)
-                start_time = time.time()
+            for graph_true in track:
+                if graph_true.source is None:
+                    msg = "Test event graph source is None. This is a bug."
+                    raise ValueError(msg)
 
+                event = graph_true.source.page_content
+                context = graph_true.source.metadata
+
+                logger.info("Parsing event: '%s'", event)
+
+                start_time = time.time()
                 graph_pred = parser.parse(event, context)
                 total_time += time.time() - start_time
 
@@ -110,33 +115,23 @@ def run() -> None:
         logger.info("-------------------------")
         logger.info("Log parsing done.")
 
-        avg_time = total_time / len(test_events)
-        pct_success = total_success / len(test_events)
-        pct_violations = total_shacl_violations / len(test_events)
         precision, recall, f1, ela, rla = accuracy.metrics(graphs_pred, graphs_true)
 
-        store.schema.add_results(
-            {
-                "average_generation_time": avg_time,
-                "generation_success_percentage": pct_success,
-                "shacl_violations_percentage": pct_violations,
-                "precision": precision,
-                "recall": recall,
-                "f1_score": f1,
-                "entity_linking_accuracy": ela,
-                "relationship_linking_accuracy": rla,
-            },
-        )
+        results = [
+            ("total_run_time", total_time),
+            ("average_generation_time", total_time / len(test_events)),
+            ("generation_success_percentage", total_success / len(test_events)),
+            ("SHACL_violations_percentage", total_shacl_violations / len(test_events)),
+            ("precision", precision),
+            ("recall", recall),
+            ("f1_score", f1),
+            ("entity_linking_accuracy", ela),
+            ("relationship_linking_accuracy", rla),
+        ]
 
-        logger.info("Global run time: %f seconds", time.time() - global_start_time)
-        logger.info("Average generation time: %f seconds", avg_time)
-        logger.info("Success percentage: %f", pct_success)
-        logger.info("SHACL violations percentage: %f", pct_violations)
-        logger.info("Precision: %f", precision)
-        logger.info("Recall: %f", recall)
-        logger.info("F1 score: %f", f1)
-        logger.info("Entity linking accuracy: %f", ela)
-        logger.info("Relationship linking accuracy: %f", rla)
+        for name, value in results:
+            logger.info("%s: %f", name.replace("_", " ").capitalize(), value)
+            store.add_evaluation_result(name, value)
 
 
 def main() -> None:

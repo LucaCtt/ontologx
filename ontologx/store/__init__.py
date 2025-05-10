@@ -3,8 +3,8 @@
 The underlying database is neo4j along with the APOC and Neosemantics plugins.
 """
 
-from ontologx.store.dataset import Dataset
-from ontologx.store.ontology import Ontology
-from ontologx.store.store import Store
+from langchain_neo4j.graphs.graph_document import GraphDocument, Node, Relationship
 
-__all__ = ["Dataset", "Ontology", "Store"]
+from ontologx.store.store import Store, StoreModule
+
+__all__ = ["GraphDocument", "Node", "Relationship", "Store", "StoreModule"]

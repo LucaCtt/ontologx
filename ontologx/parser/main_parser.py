@@ -18,15 +18,22 @@ from ontologx.store import Store
 logger = logging.getLogger("ontologx")
 
 
-def _example_message_group(event: str, graph: GraphDocument, context: dict) -> list[BaseMessage]:
+def _example_message_group(event_graph: GraphDocument) -> list[BaseMessage]:
     """Create an example message group for the given event and graph."""
+    if not event_graph.source:
+        msg = "Event graph has no source. This is a bug."
+        raise ValueError(msg)
+
+    event = event_graph.source.page_content
+    context = event_graph.source.metadata
+
     nodes = [
         {
             "id": node.id,
             "type": node.type,
             "properties": [{"type": key, "value": value} for key, value in node.properties.items()],
         }
-        for node in graph.nodes
+        for node in event_graph.nodes
     ]
 
     relationships = [
@@ -35,7 +42,7 @@ def _example_message_group(event: str, graph: GraphDocument, context: dict) -> l
             "target_id": rel.target.id,
             "type": rel.type,
         }
-        for rel in graph.relationships
+        for rel in event_graph.relationships
     ]
 
     tool_call_id = f"call_{uuid.uuid4()!s}"
@@ -87,7 +94,9 @@ class MainParser(Parser):
         # Add the graph structure to the structured output.
         # Also include raw output to retrieve eventual errors.
         structured_model = structured_model.with_structured_output(  # type: ignore[attr-defined]
-            build_dynamic_model(store.ontology.graph()), include_raw=True, method="function_calling",
+            build_dynamic_model(store.ontology()),
+            include_raw=True,
+            method="function_calling",
         )
 
         gen_graph_prompt = ChatPromptTemplate.from_messages(
@@ -102,18 +111,18 @@ class MainParser(Parser):
         self.chain = gen_graph_prompt | structured_model
 
     def __get_examples(self, event: str) -> list[BaseMessage]:
-        similar_events = self.store.dataset.events_mmr_search(event, k=2)
+        similar_events = self.store.search("mmr", event, k=2)
 
         messages = []
-        for similar_event, graph in similar_events:
-            source_node = next((node for node in graph.nodes if node.type == "Source"), None)
+        for similar_event in similar_events:
+            source_node = next((node for node in similar_event.nodes if node.type == "Source"), None)
 
             context = {}
             if source_node:
                 context["source"] = source_node.properties.get("sourceName", "")
                 context["device"] = source_node.properties.get("sourceDevice", "")
 
-            messages.extend(_example_message_group(similar_event, graph, context))
+            messages.extend(_example_message_group(similar_event))
 
         return messages
 
@@ -150,15 +159,20 @@ class MainParser(Parser):
 
             # Error handling for when the output is not parsed correctly
             if not raw_schema.get("parsed"):
-                logger.debug("LLM output not parsed correctly. Checking for corrections.")
+                logger.debug("LLM output invalid. Checking for corrections.")
 
                 try:
                     llm_answer = cast(AIMessage, raw_schema["raw"])
                     # Create a new AIMessage with the same content and tool_calls,
                     # but without all the unnecessary stuff
-                    corrections.append(
-                        AIMessage(llm_answer.content, id=llm_answer.id, tool_calls=llm_answer.tool_calls),
+                    corrections.extend(
+                        [
+                            AIMessage(llm_answer.content, id=llm_answer.id, tool_calls=llm_answer.tool_calls),
+                            *[ToolMessage("", tool_call_id=tool_call["id"]) for tool_call in llm_answer.tool_calls],
+                            AIMessage("Done"),
+                        ],
                     )
+
                 except KeyError:
                     logger.debug("No raw LLM output found.")
 
@@ -179,7 +193,7 @@ class MainParser(Parser):
                     ]
 
                     logger.debug("Parsing errors found: %s", errors)
-                    msg += f" Fix these errors, without modifying anything else: {errors}"
+                    msg += f" Fix these errors, without changing anything else: {errors}"
 
                 corrections.append(HumanMessage(msg))
 

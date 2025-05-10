@@ -36,7 +36,7 @@ class ToolsParser(Parser):
         # Add the graph structure to the structured output.
         # Also include raw output to retrieve eventual errors.
         structured_model = structured_model.with_structured_output(  # type: ignore[attr-defined]
-            build_dynamic_model(store.ontology.graph()),
+            build_dynamic_model(store.ontology()),
             include_raw=True,
         )
         self.chain = gen_graph_prompt | structured_model

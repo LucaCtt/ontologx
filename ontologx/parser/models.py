@@ -89,7 +89,7 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
         """A property of a node in the event knowledge graph."""
 
         type: PropertyType = Field(  # type: ignore[valid-type]
-            description=f"Type of the property. Must be one of: {valid.properties}",
+            description="Type of the property.",
         )
         value: str | int | float = Field(description="Extracted value of the property.")
 
@@ -98,7 +98,7 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
 
         id: str = Field(description="Unique identifier for the node.")
         type: NodeType = Field(  # type: ignore[valid-type]
-            description=f"Type of the node. Must be one of: {valid.node_types}",
+            description="Type of the node.",
         )
         properties: list[Property] | None = Field(default=None, description="List of properties of the node.")
 
@@ -114,7 +114,7 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
         source_id: str = Field(description="Unique identifier of source node.")
         target_id: str = Field(description="Unique identifier of target node.")
         type: RelationshipType = Field(  # type: ignore[valid-type]
-            description=f"Type of the relationship. Must be one of: {valid.relationship_types}",
+            description="Type of the relationship.",
         )
 
         __doc__ = (
@@ -157,15 +157,13 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
 
             This method is a placeholder for any additional validation logic that may be needed.
             """
-            event_node = next(
-                (node for node in self.nodes if node.type == "Event"),
-                None,
-            )
-            if event_node is None:
-                msg = "The event graph must contain an 'Event' node."
-                err_type = "MissingEventNode"
+            event_nodes = [node for node in self.nodes if node.type == "Event"]
+            if len(event_nodes) != 1:
+                msg = "The event graph must contain exactly one 'Event' node."
+                err_type = "IncorrectEventNodes"
                 raise PydanticCustomError(err_type, msg)
 
+            event_node = event_nodes[0]
             if not event_node.properties or not any(prop.type == "eventMessage" for prop in event_node.properties):
                 msg = "The 'Event' node must have a property of type 'eventMessage'."
                 err_type = "MissingEventProperty"

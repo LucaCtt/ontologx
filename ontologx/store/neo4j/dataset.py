@@ -2,12 +2,12 @@ import uuid
 from pathlib import Path
 
 import neo4j
+from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_neo4j import Neo4jGraph, Neo4jVector
-from langchain_neo4j.graphs.graph_document import GraphDocument, Node, Relationship
 
 from ontologx.config import Config
-from ontologx.store.module import StoreModule
+from ontologx.store import GraphDocument, Node, Relationship, StoreModule
 
 
 class Dataset(StoreModule):
@@ -129,7 +129,7 @@ class Dataset(StoreModule):
             },
         )
 
-    def tests(self) -> list[tuple[str, dict, GraphDocument]]:
+    def tests(self) -> list[GraphDocument]:
         test_nodes = self.__graph_store.query(
             """
             MATCH (d:Dataset)-[:hasPart]->(e:Event)
@@ -141,15 +141,16 @@ class Dataset(StoreModule):
         )
         tests = []
         for test in test_nodes:
-            ground_truth = self.__get_subgraph_from_node(test["uri"])
+            graph = self.__get_subgraph_from_node(test["uri"])
 
-            source_node = next((node for node in ground_truth.nodes if node.type == "Source"), None)
+            source_node = next((node for node in graph.nodes if node.type == "Source"), None)
             context = (
                 {"source": source_node.properties["sourceName"], "device": source_node.properties["sourceDevice"]}
                 if source_node
                 else {}
             )
-            tests.append((test["message"], context, ground_truth))
+            graph.source = Document(page_content=test["message"], metadata=context)
+            tests.append(graph)
 
         return tests
 
@@ -218,7 +219,7 @@ class Dataset(StoreModule):
         k: int = 3,
         fetch_k: int = 20,
         lambda_mult: float = 0.5,
-    ) -> list[tuple[str, GraphDocument]]:
+    ) -> list[GraphDocument]:
         """Search for similar events in the store.
 
         Args:
@@ -252,13 +253,13 @@ class Dataset(StoreModule):
             # Tests will have neither. Generated events will have both.
         )
 
-        return [
-            (
-                doc.page_content,
-                self.__get_subgraph_from_node(doc.metadata["uri"]),
-            )
-            for doc in relevant_docs
-        ]
+        def subgraph(doc: Document) -> GraphDocument:
+            """Get the subgraph of a node in the store."""
+            subgraph = self.__get_subgraph_from_node(doc.metadata["uri"])
+            subgraph.source = doc
+            return subgraph
+
+        return [subgraph(doc) for doc in relevant_docs]
 
     def __get_subgraph_from_node(self, node_uri: str, props_to_remove: list[str] | None = None) -> GraphDocument:
         """Get the subgraph of a node in the store.
@@ -305,8 +306,12 @@ class Dataset(StoreModule):
                 if isinstance(value, neo4j.time.Date):
                     node["properties"][key] = value.iso_format()
 
+        def get_id_from_uri(uri: str) -> str:
+            """Get the id of a node from its uri."""
+            return uri.split("#")[-1]
+
         nodes_dict = {
-            node["uri"]: Node(id=node["uri"], type=node["type"], properties=node["properties"])
+            node["uri"]: Node(id=get_id_from_uri(node["uri"]), type=node["type"], properties=node["properties"])
             for node in nodes_subgraph["nodes"]
         }
 

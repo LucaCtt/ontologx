@@ -15,7 +15,7 @@ class BaselineParser(Parser):
     def __init__(self, llm: BaseChatModel, store: Store, prompt_build_graph: str) -> None:
         super().__init__(llm, store, prompt_build_graph)
 
-        prompt = build_baseline_prompt(self.store.ontology.graph(), prompt_build_graph)
+        prompt = build_baseline_prompt(self.store.ontology(), prompt_build_graph)
 
         gen_graph_prompt = ChatPromptTemplate.from_messages(
             [

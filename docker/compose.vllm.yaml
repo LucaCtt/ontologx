@@ -3,7 +3,6 @@ services:
     build:
       context: ..
       dockerfile: docker/ontologx.dockerfile
-    restart: unless-stopped
     container_name: ${COMPOSE_PROJECT_NAME}-olx
     environment:
       - LLM_BACKEND=vllm

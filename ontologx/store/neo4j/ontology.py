@@ -1,10 +1,9 @@
 from pathlib import Path
 
 from langchain_neo4j import Neo4jGraph
-from langchain_neo4j.graphs.graph_document import GraphDocument, Node, Relationship
 
 from ontologx.config import Config
-from ontologx.store.module import StoreModule
+from ontologx.store import GraphDocument, Node, Relationship, StoreModule
 
 TIME_ONTOLOGY_URI = "http://www.w3.org/2006/time#"
 MLSCHEMA_ONTOLOGY_URI = "https://www.w3.org/ns/mls#"

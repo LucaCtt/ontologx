@@ -3,7 +3,7 @@ import uuid
 from langchain_neo4j import Neo4jGraph
 
 from ontologx.config import Config
-from ontologx.store.module import StoreModule
+from ontologx.store import StoreModule
 
 MLSCHEMA_URI = "https://raw.githubusercontent.com/ML-Schema/core/master/MLSchema.ttl"
 
@@ -37,48 +37,40 @@ class Schema(StoreModule):
         experiment_uri = self.__initialize_experiment(study_uri)
         self.__initialize_run(experiment_uri)
 
-    def add_results(self, results: dict[str, str | int | float]) -> None:
-        """Add the results of the experiment to the graph store.
+    def add_evaluation_result(self, measure: str, evaluation: str | float) -> None:
+        """Add the evaluation result to the graph store."""
+        measure_camel = "".join(x.capitalize() for x in measure.lower().split("_"))
 
-        The results are added as properties of the run node.
-
-        Args:
-            results (dict): The results of the experiment.
-
-        """
-        for measure, evaluation in results.items():
-            measure_camel = "".join(x.capitalize() for x in measure.lower().split("_"))
-
-            # Check if measure already exists
-            measure_node = self.__graph_store.query(
-                """
-                MATCH (m:EvaluationMeasure {hasName: $name})
-                RETURN m
-                LIMIT 1
-                """,
-                params={"name": measure_camel},
-            )
-            if not measure_node:
-                # Create the measure node if it does not exist
-                self.__graph_store.query(
-                    """
-                    CREATE (m:EvaluationMeasure {hasName: $name, uri: $uri})
-                    """,
-                    params={"name": measure_camel, "uri": self.__gen_uri()},
-                )
-
-            # Create the evaluation node
+        # Check if measure already exists
+        measure_node = self.__graph_store.query(
+            """
+            MATCH (m:EvaluationMeasure {hasName: $name})
+            RETURN m
+            LIMIT 1
+            """,
+            params={"name": measure_camel},
+        )
+        if not measure_node:
+            # Create the measure node if it does not exist
             self.__graph_store.query(
                 """
-                MATCH (r:Run {runName: $run_name}), (m:EvaluationMeasure {hasName: $name})
-                CREATE (r)-[:hasOutput]->(e:ModelEvaluation {hasValue: $value})-[:specifiedBy]->(m)
+                CREATE (m:EvaluationMeasure {hasName: $name, uri: $uri})
                 """,
-                params={
-                    "name": measure_camel,
-                    "value": evaluation,
-                    "run_name": self.__config.run_name,
-                },
+                params={"name": measure_camel, "uri": self.__gen_uri()},
             )
+
+        # Create the evaluation node
+        self.__graph_store.query(
+            """
+            MATCH (r:Run {runName: $run_name}), (m:EvaluationMeasure {hasName: $name})
+            CREATE (r)-[:hasOutput]->(e:ModelEvaluation {hasValue: $value})-[:specifiedBy]->(m)
+            """,
+            params={
+                "name": measure_camel,
+                "value": evaluation,
+                "run_name": self.__config.run_name,
+            },
+        )
 
     def __initialize_study(self) -> str:
         """Initialize the study node in the graph store.
