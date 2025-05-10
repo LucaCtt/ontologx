@@ -12,16 +12,16 @@ def hf_embeddings(model: str) -> Embeddings:
     return HuggingFaceEmbeddings(model_name=model, model_kwargs={"trust_remote_code": True})
 
 
+def infinity_embeddings(model: str, url: str) -> Embeddings:
+    from langchain_community.embeddings import InfinityEmbeddings  # type: ignore[attr-defined]
+
+    return InfinityEmbeddings(model=model, infinity_api_url=url)
+
+
 def ollama_embeddings(model: str, url: str) -> Embeddings:
     from langchain_ollama.embeddings import OllamaEmbeddings  # type: ignore[import]
 
     return OllamaEmbeddings(model=model, base_url=url)
-
-
-def vllm_embeddings(model: str, url: str) -> Embeddings:
-    from langchain_openai.embeddings import OpenAIEmbeddings  # type: ignore[import]
-
-    return OpenAIEmbeddings(model=model, base_url=url)
 
 
 class EmbeddingsFactory:
@@ -45,11 +45,11 @@ class EmbeddingsFactory:
             case "huggingface":
                 return hf_embeddings(model)
 
+            case "infinity":
+                return infinity_embeddings(model, url)
+
             case "ollama":
                 return ollama_embeddings(model, url)
-
-            case "vllm":
-                return vllm_embeddings(model, url)
 
             case _:
                 msg = f"Unsupported backend type: {backend}"

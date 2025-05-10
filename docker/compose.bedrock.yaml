@@ -3,13 +3,13 @@ services:
     build:
       context: ..
       dockerfile: docker/ontologx.dockerfile
+    restart: unless-stopped
     container_name: ${COMPOSE_PROJECT_NAME-default}-olx
     environment:
       - LLM_BACKEND=bedrock
-      - EMBEDDINGS_BACKEND=ollama
-      - EMBEDDINGS_BACKEND_URL=http://embs:11434
+      - EMBEDDINGS_BACKEND=infinity
+      - EMBEDDINGS_BACKEND_URL=http://embs:9000
       - NEO4J_URL=bolt://neo4j:7687
-      - OPENAI_API_KEY=Empty # Required by OpenAI client API
     env_file:
       - path: ../.env
     depends_on:
@@ -23,25 +23,23 @@ services:
       - ontologx-docker
 
   embs:
-    image: ollama/ollama:0.6.8
+    image: michaelf34/infinity:latest
     container_name: ${COMPOSE_PROJECT_NAME-default}-embs
     volumes:
-      - ./exps/${COMPOSE_PROJECT_NAME-default}/embeddings:/.ollama
+      - ./exps/${COMPOSE_PROJECT_NAME-default}/embs:/app/.cache
     restart: on-failure:3
-    runtime: nvidia # See https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
-    entrypoint: >
-      sh -c "
-        /bin/ollama serve & sleep 5 &&
-        /bin/ollama pull ${EMBEDDINGS_MODEL?} && wait
-      "
+    runtime: nvidia
+    command: v2 --model-id ${EMBEDDINGS_MODEL} --port 9000
     networks:
       - ontologx-docker
     expose:
-      - 11434
+      - 9000
     environment:
-      - NVIDIA_VISIBLE_DEVICES=all
+      - CUDA_VISIBLE_DEVICES=1
+    env_file:
+      - ../.env
     healthcheck:
-      test: [ "CMD", "ollama", "--version" ]
+      test: [ "CMD", "curl", "--fail", "http://localhost:9000/docs" ]
       interval: 20s
       timeout: 10s
       retries: 30

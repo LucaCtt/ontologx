@@ -15,16 +15,16 @@ from rdflib import Graph
 load_dotenv()
 
 DEFAULT_LLM_MODELS = {
-    "ollama": "qwen2.5-coder:14b",
-    "huggingface": "Qwen/Qwen2.5-Coder-14B-Instruct",
-    "vllm": "Qwen/Qwen2.5-Coder-14B-Instruct",
-    "bedrock": "meta.llama3-3-70b-instruct-v1:0",
+    "ollama": "llama3.2:3b",
+    "huggingface": "meta-llama/Llama-3.2-3B-Instruct",
+    "vllm": "meta-llama/Llama-3.2-3B-Instruct",
+    "bedrock": "meta.llama3-2-3b-instruct-v1:0",
 }
 
 DEFAULT_EMBEDDINGS_MODELS = {
-    "ollama": "snowflake-arctic-embed:110m",
-    "huggingface": "Snowflake/snowflake-arctic-embed-m",
-    "vllm": "Snowflake/snowflake-arctic-embed-m",
+    "ollama": "snowflake-arctic-embed2",
+    "huggingface": "Snowflake/snowflake-arctic-embed-m-v2.0",
+    "infinity": "Snowflake/snowflake-arctic-embed-m-v2.0",
 }
 
 
@@ -49,11 +49,6 @@ def _get_uri_from_ttl(ttl_path: str) -> str:
 
 class Config:
     """Configuration class for setting up variables used in the log graph building."""
-
-    debug = bool(int(os.getenv("DEBUG", "0")))
-    """
-    Whether to enable debug mode. If True, the logger will be set to DEBUG level.
-    """
 
     parser_type = os.getenv("PARSER_TYPE", "main")
     """The type of parser to use. Supported values are 'main', 'tools', and 'baseline'"""

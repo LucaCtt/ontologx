@@ -21,10 +21,9 @@ from ontologx.store import Store
 
 config = Config()
 
-
 logger = logging.getLogger("rich")
 logging.basicConfig(format="%(message)s", handlers=[RichHandler(omit_repeated_times=False)])
-logger.setLevel(logging.DEBUG if config.debug else logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 # Load the embeddings model
 embeddings = EmbeddingsFactory.create(
