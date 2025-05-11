@@ -38,12 +38,19 @@ class Store(StoreModule, ABC):
         """
 
     @abstractmethod
-    def search(self, criterion: str, event: str, **kwargs: str | float) -> list[GraphDocument]:
+    def search(
+        self,
+        criterion: str,
+        event: str,
+        context: dict | None = None,
+        **kwargs: str | float,
+    ) -> list[GraphDocument]:
         """Search for event graphs in the store based on a criterion and event.
 
         Args:
             criterion (str): The search criterion.
             event (str): The event to search for.
+            context (dict | None): Optional context for the search.
             **kwargs: Additional keyword arguments for the search.
 
         """

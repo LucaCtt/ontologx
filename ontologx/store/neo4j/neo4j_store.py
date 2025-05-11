@@ -54,9 +54,15 @@ class Neo4jStore(Store):
     def add_event_graph(self, event_graph: GraphDocument) -> None:
         self.dataset.add_event_graph(event_graph)
 
-    def search(self, criterion: str, event: str, **kwargs: str | float) -> list[GraphDocument]:
+    def search(
+        self,
+        criterion: str,
+        event: str,
+        context: dict | None = None,
+        **kwargs: str | float,
+    ) -> list[GraphDocument]:
         if criterion == "mmr":
-            return self.dataset.events_mmr_search(event, **kwargs)  # type: ignore[call-arg]
+            return self.dataset.events_mmr_search(event, context, **kwargs)  # type: ignore[call-arg]
 
         msg = f"Unknown search criterion: {criterion}"
         raise ValueError(msg)

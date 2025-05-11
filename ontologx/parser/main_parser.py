@@ -4,6 +4,7 @@ import logging
 import uuid
 from typing import cast
 
+from langchain_core.documents import Document
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolCall, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate
@@ -112,8 +113,8 @@ class MainParser(Parser):
 
         self.chain = gen_graph_prompt | structured_model
 
-    def __get_examples(self, event: str) -> list[BaseMessage]:
-        similar_events = self.store.search("mmr", event, k=2)
+    def __get_examples(self, event: str, context: dict) -> list[BaseMessage]:
+        similar_events = self.store.search("mmr", event, context, k=2)
         return [msg for similar_event in similar_events for msg in _example_message_group(similar_event)]
 
     def parse(self, event: str, context: dict) -> GraphDocument | None:
@@ -128,7 +129,7 @@ class MainParser(Parser):
 
         """
         # Retrieve examples once for all the self-reflection steps
-        examples = self.__get_examples(event)
+        examples = self.__get_examples(event, context)
 
         corrections = []
 
@@ -191,6 +192,7 @@ class MainParser(Parser):
                 continue
 
             output_graph: GraphDocument = raw_schema["parsed"].graph()
+            output_graph.source = Document(page_content=event, metadata=context)
 
             logger.debug("Graph constructed successfully.")
             return output_graph

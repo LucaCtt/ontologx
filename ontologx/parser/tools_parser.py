@@ -1,5 +1,6 @@
 from typing import cast
 
+from langchain_core.documents import Document
 from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_neo4j.graphs.graph_document import GraphDocument
@@ -61,5 +62,6 @@ class ToolsParser(Parser):
             return None
 
         output_graph: GraphDocument = raw_schema["parsed"].graph()
+        output_graph.source = Document(page_content=event, metadata=context)
 
         return output_graph

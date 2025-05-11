@@ -73,17 +73,22 @@ class Dataset(StoreModule):
         # Populate the embeddings for the examples
         to_populate = self.__graph_store.query(
             """
-            MATCH (d:Dataset)-[:hasPart]->(e:Event)
+            MATCH (d:Dataset)-[:hasPart]->(e:Event)-[:hasSource]->(s:Source)
             WHERE e.embedding IS NULL AND d.uri STARTS WITH $examples_uri
             SET e.runName = ''
-            RETURN elementId(e) AS id, e.eventMessage as eventMessage
+            RETURN elementId(e) AS id, e.eventMessage AS eventMessage, s.sourceName AS sourceName,
+            s.sourceDevice AS sourceDevice
             """,
             params={
                 "run_name": self.__config.run_name,
                 "examples_uri": self.__config.examples_uri,
             },
         )
-        text_embeddings = self.__embeddings.embed_documents([el["eventMessage"] for el in to_populate])
+        texts = [
+            f"event: {el['eventMessage']}, sourceName: {el['sourceName']}, sourceDevice: {el['sourceDevice']}"
+            for el in to_populate
+        ]
+        text_embeddings = self.__embeddings.embed_documents(texts)
         self.__graph_store.query(
             """
             UNWIND $data AS row
@@ -145,7 +150,10 @@ class Dataset(StoreModule):
 
             source_node = next((node for node in graph.nodes if node.type == "Source"), None)
             context = (
-                {"source": source_node.properties["sourceName"], "device": source_node.properties["sourceDevice"]}
+                {
+                    "sourceName": source_node.properties["sourceName"],
+                    "sourceDevice": source_node.properties["sourceDevice"],
+                }
                 if source_node
                 else {}
             )
@@ -190,7 +198,10 @@ class Dataset(StoreModule):
             node.properties["runName"] = self.__config.run_name
             if node.type == "Event":
                 # This will raise an exception if the LLM produces an Event node without a message property.
-                node.properties["embedding"] = self.__embeddings.embed_query(node.properties["eventMessage"])
+                text_data = graph.source.metadata if graph.source else {}
+                text_data["event"] = node.properties["eventMessage"]
+                text = ",".join([f"{key}: {value}" for key, value in text_data.items()])
+                node.properties["embedding"] = self.__embeddings.embed_query(text)
 
             self.__graph_store.query(
                 f"""
@@ -216,6 +227,7 @@ class Dataset(StoreModule):
     def events_mmr_search(
         self,
         event: str,
+        context: dict | None = None,
         k: int = 3,
         fetch_k: int = 20,
         lambda_mult: float = 0.5,
@@ -224,6 +236,7 @@ class Dataset(StoreModule):
 
         Args:
             event (str): The event message to search for.
+            context (dict): The context to use for the search.
             k (int): The number of events to return.
             fetch_k (int): The number of events to pass to the MMR algorithm.
             lambda_mult (float): number between 0 and 1, that determines the trade-off between relevance and diversity.
@@ -236,12 +249,16 @@ class Dataset(StoreModule):
         """
         run_name_filter = (
             [{"runName": {"$eq": ""}}]
-            if self.__config.examples_only
+            if self.__config.examples_retrieval_only
             else [{"runName": {"$eq": self.__config.run_name}}, {"runName": {"$eq": ""}}]
         )
 
+        query_data = context or {}
+        query_data["event"] = event
+        query = ",".join([f"{key}: {value}" for key, value in query_data.items()])
+
         relevant_docs = self.__vector_index.max_marginal_relevance_search(
-            query=event,
+            query=query,
             k=k,
             fetch_k=fetch_k,
             lambda_mult=lambda_mult,
@@ -260,8 +277,8 @@ class Dataset(StoreModule):
             source_node = next((node for node in subgraph.nodes if node.type == "Source"), None)
             context = {}
             if source_node:
-                context["source"] = source_node.properties.get("sourceName", "")
-                context["device"] = source_node.properties.get("sourceDevice", "")
+                context["sourceName"] = source_node.properties.get("sourceName", "")
+                context["sourceDevice"] = source_node.properties.get("sourceDevice", "")
 
             subgraph.source = Document(page_content=doc.page_content, metadata=context)
             return subgraph
