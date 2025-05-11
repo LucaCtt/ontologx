@@ -100,7 +100,7 @@ def bedrock_llm(model: str, temperature: float) -> BaseChatModel:
 
     # Assume the role
     response = sts_client.assume_role(
-        RoleArn="arn:aws:sts::816558913136:role/Bedrock",
+        RoleArn=os.environ["AWS_ROLE_ARN"],
         RoleSessionName="langchain-bedrock-session",
         DurationSeconds=60 * 60 * 3,  # 3 hours
     )
