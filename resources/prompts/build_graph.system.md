@@ -6,10 +6,10 @@ Your goal is to maximize information extraction from the event while maintaining
 # Rules
 You MUST adhere to the following constraints at all times:
 - The graph must contain exactly one "Event" node, with a property "eventMessage" that holds the original event text.
-- Every node of the graph must have a unique id.
 - Do not introduce any new node types, relationship types, or property types. Only use the available types.
 - Respect the appropriate casing for all types.
 - Use the appropriate node prefix for properties, e.g. "userUID" instead of "uid".
+- If not specified in the log event, try to infer the severity of the event based on the message. If you cannot determine the severity, default to "INFO".
 - The graph must be connected: there should be no isolated nodes.
 
 # Strict Compliance

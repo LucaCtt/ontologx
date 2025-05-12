@@ -16,7 +16,7 @@ from ontologx.parser.parser import Parser
 from ontologx.parser.tools import fetch_ip_address_info
 from ontologx.store import Store
 
-logger = logging.getLogger("ontologx")
+logger = logging.getLogger("rich")
 
 
 def _example_message_group(event_graph: GraphDocument) -> list[BaseMessage]:
@@ -163,7 +163,6 @@ class MainParser(Parser):
                             AIMessage("Done"),
                         ],
                     )
-                    logger.debug(corrections)
 
                 except KeyError:
                     logger.debug("No raw LLM output found.")

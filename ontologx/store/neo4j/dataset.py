@@ -10,6 +10,15 @@ from ontologx.config import Config
 from ontologx.store import GraphDocument, Node, Relationship, StoreModule
 
 
+def _compose_embeddings_text(event: str, context: dict[str, str]) -> str:
+    text = f"event: '{event.replace("'", "\\'")}'"
+
+    for key, value in context.items():
+        text += f", {key}: '{value.replace("'", "\\'")}'"
+
+    return text
+
+
 class Dataset(StoreModule):
     """The Dataset module is responsible for managing the event graphs in the store.
 
@@ -85,7 +94,10 @@ class Dataset(StoreModule):
             },
         )
         texts = [
-            f"event: {el['eventMessage']}, sourceName: {el['sourceName']}, sourceDevice: {el['sourceDevice']}"
+            _compose_embeddings_text(
+                el["eventMessage"],
+                {"sourceName": el["sourceName"], "sourceDevice": el["sourceDevice"]},
+            )
             for el in to_populate
         ]
         text_embeddings = self.__embeddings.embed_documents(texts)
@@ -198,9 +210,10 @@ class Dataset(StoreModule):
             node.properties["runName"] = self.__config.run_name
             if node.type == "Event":
                 # This will raise an exception if the LLM produces an Event node without a message property.
-                text_data = graph.source.metadata if graph.source else {}
-                text_data["event"] = node.properties["eventMessage"]
-                text = ",".join([f"{key}: {value}" for key, value in text_data.items()])
+                text = _compose_embeddings_text(
+                    node.properties["eventMessage"],
+                    graph.source.metadata if graph.source else {},
+                )
                 node.properties["embedding"] = self.__embeddings.embed_query(text)
 
             self.__graph_store.query(
@@ -253,10 +266,7 @@ class Dataset(StoreModule):
             else [{"runName": {"$eq": self.__config.run_name}}, {"runName": {"$eq": ""}}]
         )
 
-        query_data = context or {}
-        query_data["event"] = event
-        query = ",".join([f"{key}: {value}" for key, value in query_data.items()])
-
+        query = _compose_embeddings_text(event, context or {})
         relevant_docs = self.__vector_index.max_marginal_relevance_search(
             query=query,
             k=k,

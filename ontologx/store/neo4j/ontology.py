@@ -6,7 +6,8 @@ from ontologx.config import Config
 from ontologx.store import GraphDocument, Node, Relationship, StoreModule
 
 TIME_ONTOLOGY_URI = "http://www.w3.org/2006/time#"
-MLSCHEMA_ONTOLOGY_URI = "https://www.w3.org/ns/mls#"
+INSTANT_CLASS_URI = f"{TIME_ONTOLOGY_URI}Instant"
+MLSCHEMA_ONTOLOGY_URI = "http://www.w3.org/ns/mls#"
 XML_SCHEMA_URI = "http://www.w3.org/2001/XMLSchema#"
 OWL_SCHEMA_URI = "http://www.w3.org/2002/07/owl#"
 
@@ -96,15 +97,14 @@ class Ontology(StoreModule):
         nodes_with_props = self.__graph_store.query(
             """
             MATCH (c:Class)
-            WHERE c.uri STARTS WITH $log_ontology_uri OR c.uri = $time_instant_uri OR c.uri = $time_datetime_uri
+            WHERE c.uri STARTS WITH $log_ontology_uri OR c.uri = $time_instant_uri
             OPTIONAL MATCH (c)<-[:DOMAIN]-(p:Property)
             WITH c.name AS class, c.uri as uri, COLLECT([p.name, p.comment]) AS pairs
             RETURN class, uri, apoc.map.fromPairs(pairs) AS properties
             """,
             params={
                 "log_ontology_uri": self.__config.ontology_uri,
-                "time_instant_uri": f"{TIME_ONTOLOGY_URI}#Instant",
-                "time_datetime_uri": f"{TIME_ONTOLOGY_URI}#GeneralDateTimeDescription",
+                "time_instant_uri": INSTANT_CLASS_URI,
             },
         )
         nodes_dict = {
@@ -123,14 +123,13 @@ class Ontology(StoreModule):
             OR
             (
                 n.uri = $time_instant_uri
-                AND m.uri = $time_datetime_uri
+                and m.uri STARTS WITH $log_ontology_uri
             )
             RETURN n.uri AS subject_uri, r.name AS predicate, m.uri AS object_uri
             """,
             params={
                 "log_ontology_uri": self.__config.ontology_uri,
-                "time_instant_uri": f"{TIME_ONTOLOGY_URI}#Instant",
-                "time_datetime_uri": f"{TIME_ONTOLOGY_URI}#GeneralDateTimeDescription",
+                "time_instant_uri": INSTANT_CLASS_URI,
             },
         )
         relationships = [

@@ -39,8 +39,8 @@ def __node_match(node1: Node, node2: Node) -> bool:
 
     """
     # Remove the 'id' and 'uri' properties from the nodes for comparison
-    props1 = {k: v for k, v in node1.properties.items() if k not in {"id", "uri", "runName", "embedding"}}
-    props2 = {k: v for k, v in node2.properties.items() if k not in {"id", "uri", "runName", "embedding"}}
+    props1 = {k: v.lower() for k, v in node1.properties.items() if k not in {"id", "uri", "runName", "embedding"}}
+    props2 = {k: v.lower() for k, v in node2.properties.items() if k not in {"id", "uri", "runName", "embedding"}}
 
     return node1.type == node2.type and props1 == props2
 

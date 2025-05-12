@@ -92,7 +92,7 @@
   log:sourceType "application".
 
 :address-14 rdf:type log:Address;
-  log:addressIP "192.168.230.95";
+  log:addressIPV4 "192.168.230.95";
   log:addressPort 40288.
 
 :user-14 rdf:type log:User;
@@ -127,7 +127,7 @@
   log:userEmail "rebecca.blake@smith.russellmitchell.com".
 
 :event-15 rdf:type log:Event;
-  log:eventMessage "2022-01-23 05:53:06 1nBVoI-00073L-0p => rebecca.blake <rebecca.blake@smith.russellmithcell.com> R=local_user T=maildir_home";
+  log:eventMessage "2022-01-23 05:53:06 1nBVoI-00073L-0p => rebecca.blake <rebecca.blake@smith.russellmitchell.com> R=local_user T=maildir_home";
   log:eventSeverity "INFO";
   log:hasTimeStamp :timestamp-15;
   log:hasSource :source-15;
@@ -172,7 +172,7 @@
   log:sourceType "application".
 
 :address-17 rdf:type log:Address;
-  log:addressIP "192.168.230.122".
+  log:addressIPV4 "192.168.230.122".
 
 :url-17 rdf:type log:URL;
   log:url "/".
@@ -272,7 +272,7 @@
   log:sourceType "application".
 
 :address-21 rdf:type log:Address;
-  log:addressIP "172.19.131.174".
+  log:addressIPV4 "172.19.131.174".
 
 :url-21 rdf:type log:URL;
   log:url "/paypal".
@@ -453,7 +453,7 @@
   log:hasProcess :process-28.
 
 :address-28 rdf:type log:Address;
-  log:addressIP "172.19.130.68".
+  log:addressIPV4 "172.19.130.68".
 
 :user-28 rdf:type log:User;
   log:userName "dorothy.ellis".
@@ -924,7 +924,7 @@
   log:url "github.com".
 
 :address-47 rdf:type log:Address;
-  log:addressIP "140.82.121.2";
+  log:addressIPV4 "140.82.121.2";
   log:addressPort 443.
 
 :event-47 rdf:type log:Event;
@@ -973,7 +973,7 @@
   log:applicationName "openvpn".
 
 :address-49 rdf:type log:Address;
-  log:addressIP "192.168.230.95";
+  log:addressIPV4 "192.168.230.95";
   log:addressPort 36864.
 
 :user-49 rdf:type log:User;
@@ -1120,7 +1120,7 @@
   log:sourceType "application".
 
 :address-56 rdf:type log:Address;
-  log:addressIP "192.168.230.165";
+  log:addressIPV4 "192.168.230.165";
   log:addressPort 59814.
 
 :user-56 rdf:type log:User;
@@ -1151,7 +1151,7 @@
   log:sourceType "application".
 
 :address-57 rdf:type log:Address;
-  log:addressIP "192.168.231.127";
+  log:addressIPV4 "192.168.231.127";
   log:addressPort 37135.
 
 :user-57 rdf:type log:User;

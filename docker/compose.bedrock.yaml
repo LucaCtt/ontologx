@@ -3,7 +3,6 @@ services:
     build:
       context: ..
       dockerfile: docker/ontologx.dockerfile
-    restart: unless-stopped
     container_name: ${COMPOSE_PROJECT_NAME-default}-olx
     environment:
       - LLM_BACKEND=bedrock
@@ -23,13 +22,13 @@ services:
       - ontologx-docker
 
   embs:
-    image: michaelf34/infinity:latest
+    image: michaelf34/infinity:0.0.76
     container_name: ${COMPOSE_PROJECT_NAME-default}-embs
     volumes:
       - ./exps/${COMPOSE_PROJECT_NAME-default}/embs:/app/.cache
     restart: on-failure:3
     runtime: nvidia
-    command: v2 --model-id ${EMBEDDINGS_MODEL} --port 9000
+    command: v2 --model-id ${EMBEDDINGS_MODEL} --dtype float16 --port 9000
     networks:
       - ontologx-docker
     expose:

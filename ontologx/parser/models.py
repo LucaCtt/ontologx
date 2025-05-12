@@ -28,14 +28,14 @@ class BaseEventGraph(BaseModel):
         nodes_dict = {
             node.id: LibNode(
                 id=node.id,
-                type=node.type,
-                properties={prop.type: prop.value for prop in node.properties} if node.properties else {},
+                type=node.type.value,
+                properties={prop.type.value: prop.value for prop in node.properties} if node.properties else {},
             )
             for node in self.nodes
         }
 
         relationships = [
-            LibRelationship(source=nodes_dict[rel.source_id], target=nodes_dict[rel.target_id], type=rel.type)
+            LibRelationship(source=nodes_dict[rel.source_id], target=nodes_dict[rel.target_id], type=rel.type.value)
             for rel in self.relationships
         ]
 

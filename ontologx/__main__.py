@@ -9,6 +9,8 @@ import time
 
 import typer
 from neo4j.exceptions import ClientError
+from rich.logging import RichHandler
+from rich.progress import track
 
 from ontologx import accuracy
 from ontologx.backend import EmbeddingsFactory, LLMFactory
@@ -19,8 +21,20 @@ from ontologx.store.neo4j import Neo4jStore
 
 config = Config()
 
-logging.basicConfig(format="%(asctime)s [%(levelname)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
-logger = logging.getLogger("ontologx")
+# Setup logging
+logging.basicConfig(
+    format="%(message)s",
+    handlers=[
+        RichHandler(
+            locals_max_string=200,
+            tracebacks_code_width=200,
+            tracebacks_width=None,
+            omit_repeated_times=False,
+            show_path=False,
+        ),
+    ],
+)
+logger = logging.getLogger("rich")
 logger.setLevel(logging.DEBUG)
 
 # Load the embeddings model
@@ -41,7 +55,7 @@ llm = LLMFactory.create(
 # Create the vector store
 store = Neo4jStore(config=config, embeddings=embeddings)
 
-app = typer.Typer()
+app = typer.Typer(pretty_exceptions_show_locals=False)
 
 
 @app.command()
@@ -55,6 +69,7 @@ def run() -> None:
     logger.info("Experiment: '%s'", config.experiment_name)
     logger.info("Embeddings model: '%s'", config.embeddings_model)
     logger.info("Language model: '%s'", config.parser_model)
+    logger.info("Parser type: '%s'", config.parser_type)
 
     for _ in range(config.n_runs):
         config.new_run()
@@ -64,6 +79,8 @@ def run() -> None:
         store.initialize()
         logger.info("Store at '%s' initialized.", config.neo4j_url)
 
+        # Read the events at every run just in case,
+        # to avoid leaking data between runs
         test_events = store.dataset.tests()
         logger.info("Read %d tests from '%s'", len(test_events), config.tests_path)
 
@@ -74,6 +91,7 @@ def run() -> None:
             config.prompt_build_graph,
             correction_steps=config.correction_steps,
         )
+        logger.info("Parser '%s' created.", config.parser_type)
 
         total_time = 0
         total_success = 0
@@ -81,36 +99,35 @@ def run() -> None:
         graphs_pred = []
         graphs_true = []
 
-        with typer.progressbar(test_events, label="Parsing events") as track:
-            for graph_true in track:
-                if graph_true.source is None:
-                    msg = "Test event graph source is None. This is a bug."
-                    raise ValueError(msg)
+        for graph_true in track(test_events, description="Parsing events"):
+            if graph_true.source is None:
+                msg = "Test event graph source is None. This is a bug."
+                raise ValueError(msg)
 
-                event = graph_true.source.page_content
-                context = graph_true.source.metadata
+            event = graph_true.source.page_content
+            context = graph_true.source.metadata
 
-                logger.info("Parsing event: '%s'", event)
+            logger.info("Parsing event: '%s'", event)
 
-                start_time = time.time()
-                graph_pred = parser.parse(event, context)
-                total_time += time.time() - start_time
+            start_time = time.time()
+            graph_pred = parser.parse(event, context)
+            total_time += time.time() - start_time
 
-                if graph_pred is None:
-                    logger.warning("Event '%s' could not be parsed", event)
-                    # Add an empty graph to the list of predicted graphs
-                    # so the metrics will be calculated correctly
-                    graphs_pred.append(GraphDocument(nodes=[], relationships=[]))
-                else:
-                    graphs_pred.append(graph_pred)
-                    total_success += 1
+            if graph_pred is None:
+                logger.warning("Event '%s' could not be parsed", event)
+                # Add an empty graph to the list of predicted graphs
+                # so the metrics will be calculated correctly
+                graphs_pred.append(GraphDocument(nodes=[], relationships=[]))
+            else:
+                graphs_pred.append(graph_pred)
+                total_success += 1
 
-                    try:
-                        store.dataset.add_event_graph(graph_pred)
-                    except ClientError:
-                        total_shacl_violations += 1
+                try:
+                    store.dataset.add_event_graph(graph_pred)
+                except ClientError:
+                    total_shacl_violations += 1
 
-                graphs_true.append(graph_true)
+            graphs_true.append(graph_true)
 
         logger.info("-------------------------")
         logger.info("Log parsing done.")

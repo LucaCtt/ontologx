@@ -36,6 +36,20 @@ The repo includes pre-commit hooks for running Ruff, and to check the Poetry con
 pre-commit install
 ```
 
+### Useful Queries
+
+Here are some useful neo4j queries:
+
+- Get run result nodes:
+```
+MATCH (n) WHERE n:EvaluationMeasure or n:ModelEvaluation or n:Run RETURN n
+```
+
+- Get evaluation results:
+```
+MATCH (m:EvaluationMeasure)<-[:specifiedBy]-(e:ModelEvaluation) RETURN m.hasName AS measure, avg(e.hasValue) AS averageValue, stDev(e.hasValue) AS stdDeviation ORDER BY measure
+```
+
 ## License
 
 MIT. See [LICENSE](/LICENSE) for details.
@@ -43,3 +57,4 @@ MIT. See [LICENSE](/LICENSE) for details.
 ## Author
 
 Luca Cotti <luca.cotti@unibs.it>
+
