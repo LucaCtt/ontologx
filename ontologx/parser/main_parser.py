@@ -80,9 +80,11 @@ class MainParser(Parser):
         store: Store,
         prompt_build_graph: str,
         correction_steps: int,
+        examples_retrieval: bool,
     ) -> None:
         super().__init__(llm, store, prompt_build_graph)
         self.correction_steps = correction_steps
+        self.examples_retrieval = examples_retrieval
 
         try:
             llm.with_structured_output(BaseEventGraph)
@@ -129,13 +131,14 @@ class MainParser(Parser):
 
         """
         # Retrieve examples once for all the self-reflection steps
-        examples = self.__get_examples(event, context)
+        examples = self.__get_examples(event, context) if self.examples_retrieval else []
 
         corrections = []
 
         # Using self_reflection_steps + 1 to account for the initial attempt
         for current_step in range(self.correction_steps + 1):
-            logger.debug("Correction step %d", current_step)
+            if current_step > 0:
+                logger.debug("Correction step %d", current_step)
 
             raw_schema = self.chain.invoke(
                 {

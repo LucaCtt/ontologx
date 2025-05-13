@@ -51,9 +51,12 @@ class Config:
     """Configuration class for setting up variables used in the log graph building."""
 
     parser_type = os.getenv("PARSER_TYPE", "main")
-    """The type of parser to use. Supported values are 'main', 'tools', and 'baseline'"""
+    """The type of parser to use. Supported values are 'main' and 'baseline'"""
 
-    examples_retrieval_only = bool(int(os.getenv("EXAMPLES_RETRIEVAL_ONLY", "0")))
+    examples_retrieval = bool(int(os.getenv("EXAMPLES_RETRIEVAL", "1")))
+    """If True, the parser will retrieve examples from the graph store."""
+
+    generated_graphs_retrieval = bool(int(os.getenv("GENERATED_GRAPHS_RETRIEVAL", "1")))
     """If True, only the labelled examples will be used in the RAG."""
 
     experiment_name: str = os.getenv("EXPERIMENT_NAME", str(uuid.uuid4()))
