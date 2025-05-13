@@ -89,7 +89,7 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
         """A property of a node in the event knowledge graph."""
 
         type: PropertyType = Field(  # type: ignore[valid-type]
-            description="Type of the property.",
+            description=f"Type of the property. Must be one of {valid.properties}.",
         )
         value: str | int | float = Field(description="Extracted value of the property.")
 
@@ -98,7 +98,7 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
 
         id: str = Field(description="Unique identifier for the node.")
         type: NodeType = Field(  # type: ignore[valid-type]
-            description="Type of the node.",
+            description=f"Type of the node. Must be one of {valid.node_types}.",
         )
         properties: list[Property] | None = Field(default=None, description="List of properties of the node.")
 
@@ -114,7 +114,7 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
         source_id: str = Field(description="Unique identifier of source node.")
         target_id: str = Field(description="Unique identifier of target node.")
         type: RelationshipType = Field(  # type: ignore[valid-type]
-            description="Type of the relationship.",
+            description=f"Type of the relationship. Must be one of {valid.relationship_types}.",
         )
 
         __doc__ = (

@@ -39,8 +39,16 @@ def __node_match(node1: Node, node2: Node) -> bool:
 
     """
     # Remove the 'id' and 'uri' properties from the nodes for comparison
-    props1 = {k: v.lower() for k, v in node1.properties.items() if k not in {"id", "uri", "runName", "embedding"}}
-    props2 = {k: v.lower() for k, v in node2.properties.items() if k not in {"id", "uri", "runName", "embedding"}}
+    props1 = {
+        k: (v.lower() if isinstance(v, str) else v)
+        for k, v in node1.properties.items()
+        if k not in {"id", "uri", "runName", "embedding"}
+    }
+    props2 = {
+        k: (v.lower() if isinstance(v, str) else v)
+        for k, v in node2.properties.items()
+        if k not in {"id", "uri", "runName", "embedding"}
+    }
 
     return node1.type == node2.type and props1 == props2
 
@@ -112,7 +120,9 @@ def metrics(y_pred: list[GraphDocument], y_true: list[GraphDocument]) -> tuple[f
     rels_total = sum(len(relationships) for relationships in graphs_rels_true)
     rels_correct = 0
     for rels_pred, rels_true in zip(
-        graphs_rels_pred, graphs_rels_true, strict=True,
+        graphs_rels_pred,
+        graphs_rels_true,
+        strict=True,
     ):
         for rel_pred in rels_pred:
             for rel_true in rels_true:

@@ -122,8 +122,8 @@ class Ontology(StoreModule):
             )
             OR
             (
-                n.uri = $time_instant_uri
-                and m.uri STARTS WITH $log_ontology_uri
+                n.uri STARTS WITH $log_ontology_uri
+                and m.uri = $time_instant_uri
             )
             RETURN n.uri AS subject_uri, r.name AS predicate, m.uri AS object_uri
             """,

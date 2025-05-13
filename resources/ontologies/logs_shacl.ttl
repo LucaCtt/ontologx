@@ -1,6 +1,7 @@
 @prefix log: <neo4j://graph.schema#>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix time: <neo4j://graph.schema#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 
 log:EventShape rdf:type sh:NodeShape;
@@ -35,7 +36,7 @@ log:EventShape rdf:type sh:NodeShape;
   ];
   sh:property [
     sh:path log:hasTimeStamp;
-    sh:class log:TimeStamp;
+    sh:class time:Instant;
     sh:minCount 0;
     sh:maxCount 1;
     sh:message "Event may have at most one timestamp";
@@ -267,20 +268,14 @@ log:ProcessShape rdf:type sh:NodeShape;
   );
   sh:property [
     sh:path log:processPID;
-    sh:or (
-      [ sh:datatype xsd:string ]
-      [ sh:datatype xsd:integer ]
-    );
+    sh:or ( [ sh:datatype xsd:string ] [ sh:datatype xsd:integer ] );
     sh:minCount 0;
     sh:maxCount 1;
     sh:message "Process may have at most one PID";
   ];
   sh:property [
     sh:path log:processTID;
-    sh:or (
-      [ sh:datatype xsd:string ]
-      [ sh:datatype xsd:integer ]
-    );
+    sh:or ( [ sh:datatype xsd:string ] [ sh:datatype xsd:integer ] );
     sh:minCount 0;
     sh:maxCount 1;
     sh:message "Process may have at most one TID";
@@ -292,7 +287,7 @@ log:ProcessShape rdf:type sh:NodeShape;
     sh:maxCount 1;
     sh:message "Process may have at most one signal";
   ].
-  
+
 log:URLShape rdf:type sh:NodeShape;
   sh:targetClass log:URL;
   sh:property [
@@ -322,30 +317,21 @@ log:UserShape rdf:type sh:NodeShape;
   ];
   sh:property [
     sh:path log:userUID;
-    sh:or (
-      [ sh:datatype xsd:string ]
-      [ sh:datatype xsd:integer ]
-    );
+    sh:or ( [ sh:datatype xsd:string ] [ sh:datatype xsd:integer ] );
     sh:minCount 0;
     sh:maxCount 1;
     sh:message "User may have at most one UID";
   ];
   sh:property [
     sh:path log:userAUID;
-    sh:or (
-      [ sh:datatype xsd:string ]
-      [ sh:datatype xsd:integer ]
-    );
+    sh:or ( [ sh:datatype xsd:string ] [ sh:datatype xsd:integer ] );
     sh:minCount 0;
     sh:maxCount 1;
     sh:message "User may have at most one AUID";
   ];
   sh:property [
     sh:path log:userGID;
-    sh:or (
-      [ sh:datatype xsd:string ]
-      [ sh:datatype xsd:integer ]
-    );
+    sh:or ( [ sh:datatype xsd:string ] [ sh:datatype xsd:integer ] );
     sh:minCount 0;
     sh:maxCount 1;
     sh:message "User may have at most one GID";

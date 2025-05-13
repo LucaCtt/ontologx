@@ -7,7 +7,7 @@
 @prefix dc: <http://purl.org/dc/terms#>.
 
 # mail, mainlog.3.csv, 2022-01-22 13:54:21 1nBGqT-0005kq-CQ Completed
-:timestamp-1 rdf:type log:TimeStamp;
+:timestamp-1 rdf:type time:Instant;
   time:inXSDDate "2022-01-22"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-22T13:54:21"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -25,7 +25,7 @@
   log:hasSource :source-1.
 
 # internal_share, suricata-start.log.csv, 20/1/2022 -- 13:16:23 - <Info> - Found an MTU of 1450 for 'ens3'
-:timestamp-2 rdf:type log:TimeStamp;
+:timestamp-2 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T13:16:23"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -47,7 +47,7 @@
   log:hasSource :source-2.
 
 # morris_mail, syslog.4.csv, Jan 20 12:20:53 morris-mail exim4[30354]: Stopping MTA: exim4_listener.
-:timestamp-3 rdf:type log:TimeStamp;
+:timestamp-3 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T12:20:53"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -73,7 +73,7 @@
   log:hasApplication :application-3.
 
 # mail, audit.log.csv, type=LOGIN msg=audit(1642770541.877:2345): pid=12030 uid=0 old-auid=4294967295 auid=0 tty=(none) old-ses=4294967295 ses=102 res=1
-:timestamp-4 rdf:type log:TimeStamp;
+:timestamp-4 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T12:20:53"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -108,7 +108,7 @@
   log:hasUser :user-4-1, :user-4-2.
 
 # cloud_share, redis.log.csv, 25792:M 22 Jan 17:41:56.137 * Background saving terminated with success
-:timestamp-5 rdf:type log:TimeStamp;
+:timestamp-5 rdf:type time:Instant;
   time:inXSDDate "2022-01-22"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-22T17:41:56"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -126,7 +126,7 @@
   log:hasSource :source-5.
 
 # davey_mail, user.log.1.csv, Jan 20 11:14:02 davey-mail ec2: 256 SHA256:wZvMsGOInOVqvsOlhNmCH7PNFaKk0EZfNcFDcFLShk8 root@davey-mail (ED25519)
-:timestamp-6 rdf:type log:TimeStamp;
+:timestamp-6 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T11:14:02"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -153,7 +153,7 @@
   log:hasUser :user-6.
 
 # cloud_share, suricata.log.csv, 20/1/2022 -- 13:16:28 - <Config> - Loading rule file: /etc/suricata/rules/ciarmy.rules
-:timestamp-7 rdf:type log:TimeStamp;
+:timestamp-7 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T13:16:28"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -175,7 +175,7 @@
   log:hasFile :file-7.
 
 # davey_mail, syslog.csv, Jan 25 06:57:58 davey-mail systemd[1]: Starting User Manager for UID 1001...
-:timestamp-8 rdf:type log:TimeStamp;
+:timestamp-8 rdf:type time:Instant;
   time:inXSDDate "2022-01-25"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-25T06:57:58"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -205,7 +205,7 @@
   log:hasUser :user-8.
 
 # morris_mail, mainlog.4.csv, 2022-01-20 13:20:54 End queue run: pid=30959
-:timestamp-9 rdf:type log:TimeStamp;
+:timestamp-9 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T13:20:54"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -230,7 +230,7 @@
   log:hasApplication :application-9.
 
 # webserver, error.log.2.csv, [Sun Jan 23 06:25:13.804652 2022] [core:notice] [pid 29640] AH00094: Command line: '/usr/sbin/apache2'
-:timestamp-10 rdf:type log:TimeStamp;
+:timestamp-10 rdf:type time:Instant;
   time:inXSDDate "2022-01-23"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-23T06:25:13"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -258,7 +258,7 @@
 
 # Dataset
 :validation-lc-dataset rdf:type mls:Dataset;
-  dc:type "validation";
+  dc:type "test";
   mls:hasPart :event-1,
     :event-2,
     :event-3,

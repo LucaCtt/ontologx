@@ -7,7 +7,7 @@
 @prefix dc: <http://purl.org/dc/terms#>.
 
 # inet-firewall, shorewall-init.log.1.csv, Jan 20 11:22:30    Chain tcpost deleted
-:timestamp-11 rdf:type log:TimeStamp;
+:timestamp-11 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T11:22:30"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -29,7 +29,7 @@
   log:hasSource :source-11.
 
 # webserver, suricata.log.csv, "20/1/2022 -- 13:12:35 - <Perf> - OTHER toserver: 0 proto groups, 0 unique SGH's, 0 copies"
-:timestamp-12 rdf:type log:TimeStamp;
+:timestamp-12 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T13:12:35"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -51,7 +51,7 @@
   log:hasSource :source-12.
 
 # cloud_share, error.log.3.csv, mkdir failed on directory /var/run/samba/msg.lock: Permission denied
-:timestamp-13 rdf:type log:TimeStamp;
+:timestamp-13 rdf:type time:Instant;
   time:inXSDDate "2022-01-22"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-22T17:41:56"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -80,7 +80,7 @@
   log:hasSource :source-13.
 
 # vpn, openvpn.log.csv, 2022-01-23 13:48:11 twhite/192.168.230.95:40288 Outgoing Data Channel: Using 160 bit message hash 'SHA1' for HMAC authentication
-:timestamp-14 rdf:type log:TimeStamp;
+:timestamp-14 rdf:type time:Instant;
   time:inXSDDate "2022-01-23"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-23T13:48:11"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -111,7 +111,7 @@
   log:hasApplication :application-14.
 
 # mail, mainlog.3.csv, 2022-01-23 05:53:06 1nBVoI-00073L-0p => rebecca.blake <rebecca.blake@smith.russellmitchell.com> R=local_user T=maildir_home
-:timestamp-15 rdf:type log:TimeStamp;
+:timestamp-15 rdf:type time:Instant;
   time:inXSDDate "2022-01-23"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-23T05:53:06"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -134,7 +134,7 @@
   log:hasUser :user-15.
 
 # morris_mail, syslog.2.csv, Jan 23 20:25:24 morris-mail freshclam[29586]: Sun Jan 23 20:25:24 2022 -> ClamAV update process started at Sun Jan 23 20:25:24 2022
-:timestamp-16 rdf:type log:TimeStamp;
+:timestamp-16 rdf:type time:Instant;
   time:inXSDDate "2022-01-23"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-23T20:25:24"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -160,7 +160,7 @@
   log:hasApplication :application-16.
 
 # davey_mail, horde-access.log.csv, "192.168.230.122 - - [24/Jan/2022:03:57:16 +0000] ""GET / HTTP/1.0"" 302 4095 ""-"" ""-"""
-:timestamp-17 rdf:type log:TimeStamp;
+:timestamp-17 rdf:type time:Instant;
   time:inXSDDate "2022-01-24"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-24T03:57:16"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -186,7 +186,7 @@
   log:hasURL :url-17.
 
 # intranet_server, error.log.2.csv, Length: 139921500 (133M) [text/plain]
-:timestamp-18 rdf:type log:TimeStamp;
+:timestamp-18 rdf:type time:Instant;
   time:inXSDDate "2022-01-24"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-24T03:57:16"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -208,7 +208,7 @@
   log:hasSource :source-18.
 
 # internal_share, syslog.4.csv, Jan 21 06:21:33 internal-share systemd[1]: message repeated 2 times: [ Reloading.]
-:timestamp-19 rdf:type log:TimeStamp;
+:timestamp-19 rdf:type time:Instant;
   time:inXSDDate "2022-01-21"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-21T06:21:33"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -234,7 +234,7 @@
   log:hasApplication :application-19.
 
 # vpn, syslog.4.csv, Jan 21 06:54:05 vpn os-prober: debug: running /usr/lib/os-probes/mounted/10freedos on mounted /dev/vda15
-:timestamp-20 rdf:type log:TimeStamp;
+:timestamp-20 rdf:type time:Instant;
   time:inXSDDate "2022-01-21"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-21T06:54:05"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -260,7 +260,7 @@
   log:hasFile :file-20.
 
 # intranet_server, intranet.smith.russellmitchell.com-access.log.2.csv, "172.19.131.174 - - [24/Jan/2022:03:57:34 +0000] ""GET /paypal HTTP/1.1"" 404 363 ""-"" ""Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"""
-:timestamp-21 rdf:type log:TimeStamp;
+:timestamp-21 rdf:type time:Instant;
   time:inXSDDate "2022-01-24"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-24T03:57:34"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -290,7 +290,7 @@
   log:hasApplication :application-21.
 
 # vpn, suricata-start.log.csv, 20/1/2022 -- 13:16:23 - <Config> - Protocol detection and parser disabled for modbus protocol.
-:timestamp-22 rdf:type log:TimeStamp;
+:timestamp-22 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T13:16:23"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -312,7 +312,7 @@
   log:hasApplication :application-22.
 
 # inet-firewall, kern.log.1.csv, Jan 20 11:12:27 inet-firewall kernel: [    1.060522] uhci_hcd 0000:00:01.2: UHCI Host Controller
-:timestamp-23 rdf:type log:TimeStamp;
+:timestamp-23 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T11:12:27"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -330,7 +330,7 @@
   log:hasSource :source-23.
 
 # inet-dns, syslog.csv, Jan 25 07:02:50 inet-dns systemd[16839]: Stopped target Timers.
-:timestamp-24 rdf:type log:TimeStamp;
+:timestamp-24 rdf:type time:Instant;
   time:inXSDDate "2022-01-25"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-25T07:02:50"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -356,7 +356,7 @@
   log:hasApplication :application-24.
 
 # inet-firewall, shorewall-init.log.1.csv, Jan 20 11:22:30 ..End inline action /usr/share/shorewall/action.Broadcast
-:timestamp-25 rdf:type log:TimeStamp;
+:timestamp-25 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T11:22:30"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -382,7 +382,7 @@
   log:hasFile :file-25.
 
 # cloud_share, suricata.log.csv, "20/1/2022 -- 13:16:29 - <Error> - [ERRCODE: SC_ERR_UNDEFINED_VAR(101)] - Variable ""SQL_SERVERS"" is not defined in configuration file"
-:timestamp-26 rdf:type log:TimeStamp;
+:timestamp-26 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T13:16:29"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -404,7 +404,7 @@
   log:hasApplication :application-26.
 
 # morris_mail, auth.log.1.csv, Jan 20 12:17:27 morris-mail sudo: pam_unix(sudo:session): session opened for user root by ait(uid=0)
-:timestamp-27 rdf:type log:TimeStamp;
+:timestamp-27 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T12:17:27"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -434,7 +434,7 @@
   log:hasUser :user-27-1, :user-27-2.
 
 # mail, syslog.2.csv, "Jan 23 11:27:31 mail HORDE: [horde] Login success for dorothy.ellis to horde (172.19.130.68) [pid 29777 on line 163 of ""/usr/share/horde/login.php""]"
-:timestamp-28 rdf:type log:TimeStamp;
+:timestamp-28 rdf:type time:Instant;
   time:inXSDDate "2022-01-23"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-23T11:27:31"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -473,7 +473,7 @@
   log:hasFile :file-28.
 
 # cloud_share, syslog.1.csv, "Jan 24 14:15:03 cloud-share CRON[12638]: (CRON) info (No MTA installed, discarding output)"
-:timestamp-29 rdf:type log:TimeStamp;
+:timestamp-29 rdf:type time:Instant;
   time:inXSDDate "2022-01-24"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-24T14:15:03"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -499,7 +499,7 @@
   log:hasApplication :application-29.
 
 # cloud_share, suricata.log.csv, 20/1/2022 -- 13:16:43 - <Config> - using 1 flow manager threads
-:timestamp-30 rdf:type log:TimeStamp;
+:timestamp-30 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T13:16:43"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -521,7 +521,7 @@
   log:hasApplication :application-30.
 
 # webserver, suricata-start.log.csv, 20/1/2022 -- 13:16:23 - <Notice> - This is Suricata version 6.0.4 RELEASE running in SYSTEM mode
-:timestamp-31 rdf:type log:TimeStamp;
+:timestamp-31 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T13:16:23"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -544,7 +544,7 @@
   log:hasApplication :application-31.
 
 # vpn, syslog.1.csv, Jan 24 22:42:32 vpn 50-motd-news[2769]:  * Super-optimized for small spaces - read how we shrank the memory
-:timestamp-32 rdf:type log:TimeStamp;
+:timestamp-32 rdf:type time:Instant;
   time:inXSDDate "2022-01-24"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-24T22:42:32"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -570,7 +570,7 @@
   log:hasApplication :application-32.
 
 # intranet_server, error.log.2.csv, ./wphashcrack-0.1/wphashcrack.sh: line 68: cd: HOME not set
-:timestamp-33 rdf:type log:TimeStamp;
+:timestamp-33 rdf:type time:Instant;
   time:inXSDDate "2022-01-24"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-24T03:57:16"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -599,7 +599,7 @@
   log:hasFile :file-33.
 
 # vpn, syslog.4.csv, Jan 21 06:52:59 vpn kernel: [70791.313280] systemd[1]: Stopped Journal Service.
-:timestamp-34 rdf:type log:TimeStamp;
+:timestamp-34 rdf:type time:Instant;
   time:inXSDDate "2022-01-21"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-21T06:52:59"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -625,7 +625,7 @@
   log:hasApplication :application-34.
 
 # mail, suricata.log.csv, "25/1/2022 -- 06:57:01 - <Notice> - Stats for 'eth0':  pkts: 780375, drop: 0 (0.00%), invalid chksum: 0"
-:timestamp-35 rdf:type log:TimeStamp;
+:timestamp-35 rdf:type time:Instant;
   time:inXSDDate "2022-01-25"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-25T06:57:01"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -647,7 +647,7 @@
   log:hasApplication :application-35.
 
 # vpn, suricata.log.csv, "20/1/2022 -- 13:12:37 - <Config> - stream.reassembly ""toserver-chunk-size"": 2560"
-:timestamp-36 rdf:type log:TimeStamp;
+:timestamp-36 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T13:12:37"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -669,7 +669,7 @@
   log:hasApplication :application-36.
 
 # inet-firewall, shorewall-init.log.1.csv, "Jan 20 11:22:30     Rule ""PARAM - - tcp 53"" Compiled"
-:timestamp-37 rdf:type log:TimeStamp;
+:timestamp-37 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T11:22:30"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -691,7 +691,7 @@
   log:hasApplication :application-37.
 
 # webserver, error.log.2.csv, "[Mon Jan 24 06:25:16.644970 2022] [mpm_prefork:notice] [pid 29640] AH00171: Graceful restart requested, doing restart"
-:timestamp-38 rdf:type log:TimeStamp;
+:timestamp-38 rdf:type time:Instant;
   time:inXSDDate "2022-01-24"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-24T06:25:16"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -717,7 +717,7 @@
   log:hasApplication :application-38.
 
 # inet-firewall, shorewall-init.log.1.csv, Jan 20 11:22:30
-:timestamp-39 rdf:type log:TimeStamp;
+:timestamp-39 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T11:22:30"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -739,7 +739,7 @@
   log:hasApplication :application-39.
 
 # inet-firewall, shorewall-init.log.1.csv, Jan 20 11:22:30    Policy for dmz to lan is REJECT using chain all-all
-:timestamp-40 rdf:type log:TimeStamp;
+:timestamp-40 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T11:22:30"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -761,7 +761,7 @@
   log:hasApplication :application-40.
 
 # vpn, suricata-start.log.csv, 20/1/2022 -- 13:16:23 - <Config> - luajit states preallocated: 128
-:timestamp-41 rdf:type log:TimeStamp;
+:timestamp-41 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T13:16:23"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -783,7 +783,7 @@
   log:hasApplication :application-41.
 
 # intranet_server, error.log.2.csv, rm: cannot remove 'john.pot': No such file or directory
-:timestamp-42 rdf:type log:TimeStamp;
+:timestamp-42 rdf:type time:Instant;
   time:inXSDDate "2022-01-24"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-24T03:57:16"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -809,7 +809,7 @@
   log:hasFile :file-42.
 
 # inet-firewall, suricata.log.csv, "20/1/2022 -- 13:12:47 - <Perf> - Builtin MPM ""toclient UDP packet"": 0"
-:timestamp-43 rdf:type log:TimeStamp;
+:timestamp-43 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T13:12:47"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -831,7 +831,7 @@
   log:hasApplication :application-43.
 
 # cloud_share, redis-server.log.1.csv, 5030:M 20 Jan 12:30:58.908 * Ready to accept connections
-:timestamp-44 rdf:type log:TimeStamp;
+:timestamp-44 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T12:30:58"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -857,7 +857,7 @@
   log:hasApplication :application-44.
 
 # cloud_share, redis-server.log.1.csv, 5030:M 20 Jan 12:38:12.421 * Saving the final RDB snapshot before exiting.
-:timestamp-45 rdf:type log:TimeStamp;
+:timestamp-45 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T12:38:12"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -883,7 +883,7 @@
   log:hasApplication :application-45.
 
 # internal_share, auth.log.1.csv, Jan 21 06:21:01 internal-share sshd[1018]: Received signal 15; terminating.
-:timestamp-46 rdf:type log:TimeStamp;
+:timestamp-46 rdf:type time:Instant;
   time:inXSDDate "2022-01-21"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-21T06:21:01"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -909,7 +909,7 @@
   log:hasApplication :application-46.
 
 # intranet_server, error.log.2.csv, Connecting to github.com (github.com)|140.82.121.3|:443... connected.
-:timestamp-47 rdf:type log:TimeStamp;
+:timestamp-47 rdf:type time:Instant;
   time:inXSDDate "2022-01-24"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-24T03:57:16"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -936,7 +936,7 @@
   log:hasAddress :address-47.
 
 # inet-firewall, shorewall-init.log.1.csv, Jan 20 11:22:30    Table filter Optimized -- Passes =
-:timestamp-48 rdf:type log:TimeStamp;
+:timestamp-48 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T11:22:30"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -958,7 +958,7 @@
   log:hasApplication :application-48.
 
 # vpn, openvpn.log.csv, 2022-01-23 22:43:34 twhite/192.168.230.95:36864 Validating certificate extended key usage
-:timestamp-49 rdf:type log:TimeStamp;
+:timestamp-49 rdf:type time:Instant;
   time:inXSDDate "2022-01-23"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-23T22:43:34"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -989,7 +989,7 @@
   log:hasUser :user-49.
 
 # intranet_server, suricata.log.csv, 20/1/2022 -- 13:16:23 - <Config> - enabling 'eve-log' module 'ssh'
-:timestamp-50 rdf:type log:TimeStamp;
+:timestamp-50 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T13:16:23"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -1041,7 +1041,7 @@
   log:hasFile :file-52.
 
 # morris_mail,syslog.4.csv,Jan 20 12:19:28 morris-mail php7.0-cli: php_invoke ftp: already enabled for PHP 7.0 cli sapi
-:timestamp-53 rdf:type log:TimeStamp;
+:timestamp-53 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T12:19:28"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -1064,7 +1064,7 @@
   log:hasApplication :application-53.
 
 # vpn,suricata.log.csv,"20/1/2022 -- 13:16:42 - <Perf> - AppLayer MPM ""toserver http_user_agent (http)"": 6"
-:timestamp-54 rdf:type log:TimeStamp;
+:timestamp-54 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T13:16:42"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -1086,7 +1086,7 @@
   log:hasApplication :application-54.
 
 # cloud_share,suricata-start.log.csv,20/1/2022 -- 13:16:23 - <Info> - CPUs/cores online: 1
-:timestamp-55 rdf:type log:TimeStamp;
+:timestamp-55 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T13:16:23"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -1108,7 +1108,7 @@
   log:hasApplication :application-55.
 
 # vpn,openvpn.log.csv,2022-01-22 12:44:02 jhall/192.168.230.165:59814 VERIFY EKU OK
-:timestamp-56 rdf:type log:TimeStamp;
+:timestamp-56 rdf:type time:Instant;
   time:inXSDDate "2022-01-22"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-22T12:44:02"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -1139,7 +1139,7 @@
   log:hasUser :user-56.
 
 # vpn,openvpn.log.csv,2022-01-22 11:56:06 ahayes/192.168.231.127:37135 peer info: IV_LZO=1
-:timestamp-57 rdf:type log:TimeStamp;
+:timestamp-57 rdf:type time:Instant;
   time:inXSDDate "2022-01-22"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-22T11:56:06"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -1170,7 +1170,7 @@
   log:hasUser :user-57.
 
 # morris_mail,syslog.4.csv,Jan 20 11:13:29 morris-mail kernel: [    2.185874] ACPI: PCI Interrupt Link [LNKB] enabled at IRQ 11
-:timestamp-58 rdf:type log:TimeStamp;
+:timestamp-58 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T11:13:29"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;
@@ -1192,7 +1192,7 @@
   log:hasApplication :application-58.
 
 # internal_share,suricata-start.log.csv,20/1/2022 -- 13:16:23 - <Config> - Adding interface ens3 from config file
-:timestamp-59 rdf:type log:TimeStamp;
+:timestamp-59 rdf:type time:Instant;
   time:inXSDDate "2022-01-20"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-20T13:16:23"^^xsd:dateTime;
   time:inXSDgYear "2022"^^xsd:gYear;

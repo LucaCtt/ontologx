@@ -45,12 +45,6 @@
   rdfs:comment "A log source, such as an aggregation of logs from different applications (e.g., SysLog) or aggregation of several log files from different devices.";
   rdfs:label "Source".
 
-###  https://cyberseclab.unibs.it/ontologx/log/dictionary#TimeStamp
-:TimeStamp rdf:type owl:Class;
-  rdfs:subClassOf time:Instant;
-  rdfs:comment "A timestamp associated with an event.";
-  rdfs:label "Timestamp".
-
 ###  https://cyberseclab.unibs.it/ontologx/log/dictionary#Address
 :Address rdf:type owl:Class;
   rdfs:comment "A logical address in a network, such as an IP address or a MAC address.";
@@ -68,8 +62,8 @@
 
 ###  https://cyberseclab.unibs.it/ontologx/log/dictionary#Process
 :Process rdf:type owl:Class;
-  rdfs:comment "An operating system process, such as a daemon, a service, etc.";
-  rdfs:label "Process".
+  rdfs:comment "An operating system process.";
+  rdfs:label "A running instance of a program.".
 
 ###  https://cyberseclab.unibs.it/ontologx/log/dictionary#URL
 :URL rdf:type owl:Class;
@@ -79,7 +73,7 @@
 ###  https://cyberseclab.unibs.it/ontologx/log/dictionary#User
 :User rdf:type owl:Class;
   rdfs:comment "A user account, such as a local user, a domain user, etc.";
-  rdfs:label "User Account".
+  rdfs:label "User Identity".
 
 #################################################################
 #    Object Properties
@@ -129,7 +123,7 @@
 ###  https://cyberseclab.unibs.it/ontologx/log/dictionary#hasTimeStamp
 :hasTimeStamp rdf:type owl:ObjectProperty;
   rdfs:domain :Event;
-  rdfs:range :TimeStamp;
+  rdfs:range time:Instant;
   rdfs:comment "Relation between an Event and its timestamp.".
 
 #################################################################
