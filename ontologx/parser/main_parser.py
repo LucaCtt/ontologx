@@ -13,7 +13,6 @@ from pydantic import ValidationError
 
 from ontologx.parser.models import BaseEventGraph, build_dynamic_model
 from ontologx.parser.parser import Parser
-from ontologx.parser.tools import fetch_ip_address_info
 from ontologx.store import Store
 
 logger = logging.getLogger("rich")
@@ -92,13 +91,9 @@ class MainParser(Parser):
             msg = "The parser model must support structured output."
             raise ValueError(msg) from e
 
-        # Add context enrichment tools.
-        # Note: not all models support tools + structured output
-        structured_model = llm.bind_tools([fetch_ip_address_info])
-
         # Add the graph structure to the structured output.
         # Also include raw output to retrieve eventual errors.
-        structured_model = structured_model.with_structured_output(  # type: ignore[attr-defined]
+        structured_model = llm.with_structured_output(  # type: ignore[attr-defined]
             build_dynamic_model(store.ontology()),
             include_raw=True,
             method="function_calling",

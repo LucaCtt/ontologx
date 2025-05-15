@@ -89,6 +89,7 @@ def run() -> None:
             llm,
             store,
             config.prompt_build_graph,
+            examples_retrieval=config.examples_retrieval,
             correction_steps=config.correction_steps,
         )
         logger.info("Parser '%s' created.", config.parser_type)
@@ -101,7 +102,7 @@ def run() -> None:
 
         for graph_true in track(test_events, description="Parsing events"):
             if graph_true.source is None:
-                msg = "Test event graph source is None. This is a bug."
+                msg = "Test source is None. This is a bug."
                 raise ValueError(msg)
 
             event = graph_true.source.page_content
