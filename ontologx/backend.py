@@ -4,6 +4,8 @@ import os
 
 from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel
+from deepeval.models.base_model import DeepEvalBaseLLM
+from pydantic import BaseModel
 
 
 def hf_embeddings(model: str) -> Embeddings:
@@ -22,38 +24,6 @@ def ollama_embeddings(model: str, url: str) -> Embeddings:
     from langchain_ollama.embeddings import OllamaEmbeddings  # type: ignore[import]
 
     return OllamaEmbeddings(model=model, base_url=url)
-
-
-class EmbeddingsFactory:
-    @staticmethod
-    def create(backend: str, model: str, url: str) -> Embeddings:
-        """Create an embeddings instance based on the specified backend type.
-
-        Args:
-            backend(str): The backend to use for creating embeddings.
-            model (str): The name or identifier of the model to use.
-            url (str): The URL for the backend.
-
-        Returns:
-            Embeddings: An instance of the specified backend type.
-
-        Raises:
-            ValueError: If the specified backend type is not supported.
-
-        """
-        match backend:
-            case "huggingface":
-                return hf_embeddings(model)
-
-            case "infinity":
-                return infinity_embeddings(model, url)
-
-            case "ollama":
-                return ollama_embeddings(model, url)
-
-            case _:
-                msg = f"Unsupported backend type: {backend}"
-                raise ValueError(msg)
 
 
 def hf_llm(model: str, temperature: float) -> BaseChatModel:
@@ -118,11 +88,39 @@ def bedrock_llm(model: str, temperature: float) -> BaseChatModel:
     )
 
 
-class LLMFactory:
-    """Factory class for creating backend instances based on the specified backend type."""
+def bedrock_tests(model: str) -> DeepEvalBaseLLM:
+    class AWSBedrock(DeepEvalBaseLLM):
+        def __init__(
+            self,
+            model_name: str,
+        ):
+            self.model_name = self.load_model(model_name)
 
-    @staticmethod
-    def create(backend: str, model: str, temperature: float, url: str) -> BaseChatModel:
+        def load_model(self, model: str) -> BaseChatModel:  # type: ignore[override]
+            return bedrock_llm(model, 0.4)
+
+        def generate(self, prompt: str, schema: BaseModel) -> BaseModel:  # type: ignore[override]
+            structured_llm = self.model.with_structured_output(schema)  # type: ignore[attr-defined]
+            return structured_llm.invoke(prompt)  # type: ignore[return-value]
+
+        async def a_generate(self, prompt: str, schema: BaseModel) -> BaseModel:  # type: ignore[override]
+            structured_llm = self.model.with_structured_output(schema)  # type: ignore[attr-defined]
+            return await structured_llm.ainvoke(prompt)  # type: ignore[return-value]
+
+        def get_model_name(self) -> str:
+            return f"{self.model_name} (AWS Bedrock)"
+
+    return AWSBedrock(model)
+
+
+class BackendFactory:
+    def create_llm(
+        self,
+        backend: str,
+        model: str,
+        temperature: float,
+        url: str = "",
+    ) -> BaseChatModel:
         """Create an LLM instance based on the specified backend type.
 
         Args:
@@ -152,3 +150,37 @@ class LLMFactory:
 
         msg = f"Unsupported backend type: {backend}"
         raise ValueError(msg)
+
+    def create_embeddings(
+        self,
+        backend: str,
+        model: str,
+        url: str = "",
+    ) -> Embeddings:
+        """Create an embeddings instance based on the specified backend type.
+
+        Args:
+            backend (str): The backend to use for creating embeddings.
+            model (str): The name or identifier of the model to use.
+            url (str): The URL for the backend.
+
+        Returns:
+            Embeddings: An instance of the specified backend type.
+
+        Raises:
+            ValueError: If the specified backend type is not supported.
+
+        """
+        match backend:
+            case "huggingface":
+                return hf_embeddings(model)
+
+            case "infinity":
+                return infinity_embeddings(model, url)
+
+            case "ollama":
+                return ollama_embeddings(model, url)
+
+            case _:
+                msg = f"Unsupported backend type: {backend}"
+                raise ValueError(msg)

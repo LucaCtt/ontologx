@@ -1,5 +1,8 @@
 """OntoLogX accuracy metrics."""
 
+from deepeval.metrics.g_eval.g_eval import GEval
+from deepeval.metrics.g_eval.utils import Rubric
+from deepeval.test_case.llm_test_case import LLMTestCase, LLMTestCaseParams
 from langchain_neo4j.graphs.graph_document import GraphDocument, Node, Relationship
 
 type Triple = tuple[str, str, str]
@@ -65,6 +68,47 @@ def __relationship_match(rel1: Relationship, rel2: Relationship) -> bool:
 
     """
     return rel1.type == rel2.type and __node_match(rel1.source, rel2.source) and __node_match(rel1.target, rel2.target)
+
+
+def relevancy(y_pred: list[GraphDocument]) -> float:
+    correctness = GEval(
+        name="GraphRelevance",
+        evaluation_steps=[
+            "Evaluate whether the triples in 'actual output' are relevant and faithul to the log event in 'input'.",
+            "Check if the entities in the triples "
+            "Check if the relationships between nodes are meaningful and accurately reflect the log event.",
+            "Do not evaluate the 'id' values, which are useful only to define relationships.",
+        ],
+        evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.INPUT],
+        rubric=[
+            Rubric(score_range=(0, 2), expected_outcome="Graph does not reflect the log at all."),
+            Rubric(
+                score_range=(2, 4),
+                expected_outcome="Graph mostly wrong or incomplete.",
+            ),
+            Rubric(
+                score_range=(4, 6),
+                expected_outcome="Graph is mostly correct but has some errors.",
+            ),
+            Rubric(
+                score_range=(6, 8),
+                expected_outcome="Graph has only small omissions or mistakes.",
+            ),
+            Rubric(
+                score_range=(8, 10),
+                expected_outcome="Graph is correct and faithful.",
+            ),
+        ],
+    )
+    test_cases = [
+        LLMTestCase(
+            input=graph.source.page_content if graph.source else "",
+            actual_output=f'{"nodes": {graph.nodes}, "relationships": {graph.relationships}}',
+        )
+        for graph in y_pred
+    ]
+
+    return sum([correctness.measure(test_case) for test_case in test_cases]) / len(test_cases)
 
 
 def metrics(y_pred: list[GraphDocument], y_true: list[GraphDocument]) -> tuple[float, float, float, float, float]:
