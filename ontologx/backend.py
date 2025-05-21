@@ -2,9 +2,9 @@
 
 import os
 
+from deepeval.models.base_model import DeepEvalBaseLLM
 from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel
-from deepeval.models.base_model import DeepEvalBaseLLM
 from pydantic import BaseModel
 
 
@@ -114,8 +114,9 @@ def bedrock_tests(model: str) -> DeepEvalBaseLLM:
 
 
 class BackendFactory:
+    @classmethod
     def create_llm(
-        self,
+        cls,
         backend: str,
         model: str,
         temperature: float,
@@ -151,8 +152,9 @@ class BackendFactory:
         msg = f"Unsupported backend type: {backend}"
         raise ValueError(msg)
 
+    @classmethod
     def create_embeddings(
-        self,
+        cls,
         backend: str,
         model: str,
         url: str = "",
