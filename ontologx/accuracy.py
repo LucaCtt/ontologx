@@ -70,33 +70,35 @@ def __relationship_match(rel1: Relationship, rel2: Relationship) -> bool:
     return rel1.type == rel2.type and __node_match(rel1.source, rel2.source) and __node_match(rel1.target, rel2.target)
 
 
-def relevancy(y_pred: list[GraphDocument]) -> float:
-    correctness = GEval(
-        name="GraphRelevance",
+def completeness(y_pred: list[GraphDocument]) -> float:
+    metric = GEval(
+        name="GraphCompleteness",
         evaluation_steps=[
-            "Evaluate whether the triples in 'actual output' are relevant and faithul to the log event in 'input'.",
-            "Check if the entities in the triples "
-            "Check if the relationships between nodes are meaningful and accurately reflect the log event.",
-            "Do not evaluate the 'id' values, which are useful only to define relationships.",
+            "Write a thorough description of the log event in 'input', describing what event occurred and its details.",
+            "Write a thorough description of the knowledge graph in 'actual output'.",
+            "Evaluate whether the knowledge graph description semantically matches the log event description.",
         ],
         evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.INPUT],
         rubric=[
-            Rubric(score_range=(0, 2), expected_outcome="Graph does not reflect the log at all."),
+            Rubric(score_range=(0, 2), expected_outcome="The descriptions are not related at all."),
             Rubric(
                 score_range=(2, 4),
-                expected_outcome="Graph mostly wrong or incomplete.",
+                expected_outcome="The graph description is not related at all to the log event description.",
             ),
             Rubric(
                 score_range=(4, 6),
-                expected_outcome="Graph is mostly correct but has some errors.",
+                expected_outcome="The graph description is somewhat related to the log event description, \
+                    but has omissions",
             ),
             Rubric(
                 score_range=(6, 8),
-                expected_outcome="Graph has only small omissions or mistakes.",
+                expected_outcome="The graph description is related to the log event description, \
+                    and only has minor omissions.",
             ),
             Rubric(
                 score_range=(8, 10),
-                expected_outcome="Graph is correct and faithful.",
+                expected_outcome="The graph description is very related to the log event description, \
+                    and has no omissions.",
             ),
         ],
     )
@@ -108,7 +110,7 @@ def relevancy(y_pred: list[GraphDocument]) -> float:
         for graph in y_pred
     ]
 
-    return sum([correctness.measure(test_case) for test_case in test_cases]) / len(test_cases)
+    return sum([metric.measure(test_case) for test_case in test_cases]) / len(test_cases)
 
 
 def metrics(y_pred: list[GraphDocument], y_true: list[GraphDocument]) -> tuple[float, float, float, float, float]:

@@ -5,3 +5,4 @@ __pycache__/
 .vscode/
 dumps/
 docker/exps/
+.deepeval
