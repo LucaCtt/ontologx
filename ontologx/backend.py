@@ -88,29 +88,26 @@ def bedrock_llm(model: str, temperature: float) -> BaseChatModel:
     )
 
 
-def bedrock_tests(model: str) -> DeepEvalBaseLLM:
-    class AWSBedrock(DeepEvalBaseLLM):
-        def __init__(
-            self,
-            model_name: str,
-        ):
-            self.model_name = self.load_model(model_name)
+class LangchainTestsBackend(DeepEvalBaseLLM):
+    def __init__(self, model_name: str, backend: str, url: str):
+        self.model_name = model_name
+        self.backend = backend
+        self.url = url
+        self.model = self.load_model()
 
-        def load_model(self, model: str) -> BaseChatModel:  # type: ignore[override]
-            return bedrock_llm(model, 0.4)
+    def load_model(self) -> BaseChatModel:  # type: ignore[override]
+        return BackendFactory.create_llm(backend=self.backend, model=self.model_name, url=self.url, temperature=0.4)
 
-        def generate(self, prompt: str, schema: BaseModel) -> BaseModel:  # type: ignore[override]
-            structured_llm = self.model.with_structured_output(schema)  # type: ignore[attr-defined]
-            return structured_llm.invoke(prompt)  # type: ignore[return-value]
+    def generate(self, prompt: str, schema: BaseModel) -> BaseModel:  # type: ignore[override]
+        structured_llm = self.model.with_structured_output(schema)  # type: ignore[attr-defined]
+        return structured_llm.invoke(prompt)  # type: ignore[return-value]
 
-        async def a_generate(self, prompt: str, schema: BaseModel) -> BaseModel:  # type: ignore[override]
-            structured_llm = self.model.with_structured_output(schema)  # type: ignore[attr-defined]
-            return await structured_llm.ainvoke(prompt)  # type: ignore[return-value]
+    async def a_generate(self, prompt: str, schema: BaseModel) -> BaseModel:  # type: ignore[override]
+        structured_llm = self.model.with_structured_output(schema)  # type: ignore[attr-defined]
+        return await structured_llm.ainvoke(prompt)  # type: ignore[return-value]
 
-        def get_model_name(self) -> str:
-            return f"{self.model_name} (AWS Bedrock)"
-
-    return AWSBedrock(model)
+    def get_model_name(self) -> str:
+        return f"{self.model_name} ({self.backend})"
 
 
 class BackendFactory:
@@ -137,20 +134,22 @@ class BackendFactory:
             ValueError: If the specified backend type is not supported.
 
         """
-        if backend == "huggingface":
-            return hf_llm(model, temperature)
+        match backend:
+            case "huggingface":
+                return hf_llm(model, temperature)
 
-        if backend == "ollama":
-            return ollama_llm(model, temperature, url)
+            case "ollama":
+                return ollama_llm(model, temperature, url)
 
-        if backend == "vllm":
-            return vllm_llm(model, temperature, url)
+            case "vllm":
+                return vllm_llm(model, temperature, url)
 
-        if backend == "bedrock":
-            return bedrock_llm(model, temperature)
+            case "bedrock":
+                return bedrock_llm(model, temperature)
 
-        msg = f"Unsupported backend type: {backend}"
-        raise ValueError(msg)
+            case _:
+                msg = f"Unsupported backend type: {backend}"
+                raise ValueError(msg)
 
     @classmethod
     def create_embeddings(
@@ -186,3 +185,26 @@ class BackendFactory:
             case _:
                 msg = f"Unsupported backend type: {backend}"
                 raise ValueError(msg)
+
+    @classmethod
+    def create_tests(
+        cls,
+        backend: str,
+        model: str,
+        url: str = "",
+    ) -> DeepEvalBaseLLM:
+        """Create a test instance based on the specified backend type.
+
+        Args:
+            backend (str): The backend to use for creating tests.
+            model (str): The name or identifier of the model to use.
+            url (str): The URL for the language model.
+
+        Returns:
+            DeepEvalBaseLLM: An instance of the specified backend type.
+
+        Raises:
+            ValueError: If the specified backend type is not supported.
+
+        """
+        return LangchainTestsBackend(model_name=model, backend=backend, url=url)

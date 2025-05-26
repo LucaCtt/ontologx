@@ -47,9 +47,16 @@ embeddings = BackendFactory.create_embeddings(
 # Load the llm
 llm = BackendFactory.create_llm(
     backend=config.llm_backend,
-    model=config.parser_model,
+    model=config.llm_model,
     temperature=config.parser_temperature,
     url=config.llm_backend_url,
+)
+
+# Load the tests evaluator
+tests_evaluator = BackendFactory.create_tests(
+    backend=config.tests_backend,
+    model=config.llm_model,
+    url=config.tests_backend_url,
 )
 
 # Create the vector store
@@ -68,7 +75,7 @@ def clear() -> None:
 def run() -> None:
     logger.info("Experiment: '%s'", config.experiment_name)
     logger.info("Embeddings model: '%s'", config.embeddings_model)
-    logger.info("Language model: '%s'", config.parser_model)
+    logger.info("Language model: '%s'", config.llm_model)
     logger.info("Parser type: '%s'", config.parser_type)
 
     for _ in range(config.n_runs):
@@ -133,18 +140,20 @@ def run() -> None:
         logger.info("-------------------------")
         logger.info("Log parsing done.")
 
-        precision, recall, f1, ela, rla = accuracy.metrics(graphs_pred, graphs_true)
+        metrics = accuracy.AccuracyEvaluator(graphs_pred, graphs_true, tests_evaluator)
 
         results = [
             ("total_run_time", total_time),
             ("average_generation_time", total_time / len(test_events)),
             ("generation_success_percentage", total_success / len(test_events)),
             ("SHACL_violations_percentage", total_shacl_violations / len(test_events)),
-            ("precision", precision),
-            ("recall", recall),
-            ("f1_score", f1),
-            ("entity_linking_accuracy", ela),
-            ("relationship_linking_accuracy", rla),
+            ("precision", metrics.precision()),
+            ("recall", metrics.recall()),
+            ("f1_score", metrics.f1()),
+            ("entity_linking_accuracy", metrics.entity_linking_accuracy()),
+            ("relationship_linking_accuracy", metrics.relationship_linking_accuracy()),
+            ("completeness", metrics.completeness()),
+            ("BERT score", metrics.bert_score()),
         ]
 
         for name, value in results:

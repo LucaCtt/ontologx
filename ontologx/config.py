@@ -27,6 +27,13 @@ DEFAULT_EMBEDDINGS_MODELS = {
     "infinity": "Alibaba-NLP/gte-multilingual-base",
 }
 
+DEFAULT_TESTS_MODELS = {
+    "ollama": "llama3.2:3b",
+    "huggingface": "meta-llama/Llama-3.2-3B-Instruct",
+    "vllm": "meta-llama/Llama-3.2-3B-Instruct",
+    "bedrock": "meta.llama3-2-3b-instruct-v1:0",
+}
+
 
 def _get_uri_from_ttl(ttl_path: str) -> str:
     """Get the URI from the TTL file.
@@ -95,20 +102,26 @@ class Config:
     embeddings_backend = os.getenv("EMBEDDINGS_BACKEND", "ollama")
     """
     The backend to use for the embeddings.
-    Must be one of "ollama", "huggingface", or "google-ai".
+    Must be one of "ollama", "huggingface", or "infinity".
     """
 
     embeddings_backend_url = os.getenv("EMBEDDINGS_BACKEND_URL", "http://localhost:11434")
-    """The URL of the embeddings backend. Used only if the backend is 'ollama' or 'vllm'."""
+    """The URL of the embeddings backend. Used only if the backend is "ollama" or "infinity"."""
 
     llm_backend = os.getenv("LLM_BACKEND", "ollama")
     """
     The backend to use for the llm.
-    Must be one of "ollama", "huggingface", "google-ai", or "bedrock".
+    Must be one of "ollama", "huggingface", "vllm", or "bedrock".
     """
 
     llm_backend_url = os.getenv("LLM_BACKEND_URL", "http://localhost:11434")
-    """The URL of the llm backend. Used only if the backend is 'ollama' or 'vllm'."""
+    """The URL of the llm backend. Used only if the backend is "ollama" or "vllm"."""
+
+    tests_backend = os.getenv("TESTS_BACKEND", "bedrock")
+    """The LLM backend to use for the tests. Must be one of the supported LLM backends."""
+
+    tests_backend_url = os.getenv("TESTS_BACKEND_URL", "http://localhost:11434")
+    """The URL of the tests backend. Used only if the backend is "ollama" or "vllm"."""
 
     embeddings_model = os.getenv(
         "EMBEDDINGS_MODEL",
@@ -119,12 +132,20 @@ class Config:
     e.g. a model from the HuggingFace model hub if using the HuggingFace backend.
     """
 
-    parser_model = os.getenv(
-        "PARSER_MODEL",
+    llm_model = os.getenv(
+        "LLM_MODEL",
         DEFAULT_LLM_MODELS[llm_backend],
     )
     """
     The model used to parse logs. Must be a valid model for the backend used,
+    e.g. a model from the HuggingFace model hub if using the HuggingFace backend.
+    """
+    tests_model = os.getenv(
+        "TESTS_MODEL",
+        DEFAULT_LLM_MODELS[tests_backend],
+    )
+    """
+    The model used to evaluate the tests. Must be a valid model for the backend used,
     e.g. a model from the HuggingFace model hub if using the HuggingFace backend.
     """
 
@@ -198,7 +219,7 @@ class Config:
         return {
             "parser_type": self.parser_type,
             "embeddings_model": self.embeddings_model,
-            "parser_model": self.parser_model,
+            "parser_model": self.llm_model,
             "parser_temperature": self.parser_temperature,
             "correction_steps": self.correction_steps,
         }

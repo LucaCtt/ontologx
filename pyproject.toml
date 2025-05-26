@@ -16,6 +16,7 @@ dependencies = [
     "rdflib (>=7.1.4,<8.0.0)",
     "typer (>=0.15.3,<0.16.0)",
     "deepeval (>=2.9.0,<3.0.0)",
+    "bert-score (>=0.3.13,<0.4.0)",
 ]
 
 [project.scripts]
