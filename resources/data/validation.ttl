@@ -257,7 +257,7 @@
   log:hasApplication :application-10.
 
 # Dataset
-:validation-lc-dataset rdf:type mls:Dataset;
+:validation-dataset rdf:type mls:Dataset;
   dc:type "test";
   mls:hasPart :event-1,
     :event-2,

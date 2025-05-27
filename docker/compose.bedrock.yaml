@@ -7,6 +7,7 @@ services:
     environment:
       - LLM_BACKEND=bedrock
       - EMBEDDINGS_BACKEND=infinity
+      - TESTS_BACKEND=bedrock
       - EMBEDDINGS_BACKEND_URL=http://embs:9000
       - NEO4J_URL=bolt://neo4j:7687
     env_file:

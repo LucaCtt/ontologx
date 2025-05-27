@@ -1,9 +1,9 @@
 """OntoLogX accuracy metrics."""
 
+from bert_score import score
 from deepeval.metrics.g_eval.g_eval import GEval
 from deepeval.metrics.g_eval.utils import Rubric
 from deepeval.models.base_model import DeepEvalBaseLLM
-from deepeval.scorer.scorer import Scorer
 from deepeval.test_case.llm_test_case import LLMTestCase, LLMTestCaseParams
 from langchain_neo4j.graphs.graph_document import GraphDocument, Node, Relationship
 
@@ -83,37 +83,35 @@ def _llm_completeness(y_pred: list[GraphDocument], model: DeepEvalBaseLLM) -> fl
         model=model,
         evaluation_steps=[
             "Write a thorough description of the log event in 'input', describing what event occurred and its details.",
-            "Write a thorough description of the knowledge graph in 'actual output'.",
+            "Write a thorough description of the knowledge graph in 'actual output', given as triples.",
             "Evaluate whether the knowledge graph description semantically matches the log event description.",
         ],
         evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.INPUT],
         rubric=[
-            Rubric(score_range=(0, 2), expected_outcome="The descriptions are not related at all."),
             Rubric(
-                score_range=(2, 4),
-                expected_outcome="The graph description is not related at all to the log event description.",
+                score_range=(0, 2),
+                expected_outcome="The graph description is not related to the log event description.",
             ),
             Rubric(
-                score_range=(4, 6),
+                score_range=(3, 6),
                 expected_outcome="The graph description is somewhat related to the log event description, \
-                    but has omissions",
+                    but has major omissions.",
             ),
             Rubric(
-                score_range=(6, 8),
+                score_range=(7, 9),
                 expected_outcome="The graph description is related to the log event description, \
                     and only has minor omissions.",
             ),
             Rubric(
-                score_range=(8, 10),
-                expected_outcome="The graph description is very related to the log event description, \
-                    and has no omissions.",
+                score_range=(10, 10),
+                expected_outcome="The graph description completely matches the log event description.",
             ),
         ],
     )
     test_cases = [
         LLMTestCase(
             input=graph.source.page_content if graph.source else "",
-            actual_output=f'{"nodes": {graph.nodes}, "relationships": {graph.relationships}}',
+            actual_output=f"{_triples(graph)}",
         )
         for graph in y_pred
     ]
@@ -133,8 +131,9 @@ def _bert_score(y_pred: list[GraphDocument]) -> float:
 
     """
     references = [graph.source.page_content if graph.source else "" for graph in y_pred]
-    predictions = [f'{"nodes": {graph.nodes}, "relationships": {graph.relationships}}' for graph in y_pred]
-    return Scorer.bert_score(references=references, predictions=predictions)
+    predictions = [f"{_triples(graph)}" for graph in y_pred]
+    _, _, f1 = score(cands=predictions, refs=references, lang="en", verbose=False)
+    return f1.mean().item() if f1 is not None else 0.0
 
 
 class AccuracyEvaluator:

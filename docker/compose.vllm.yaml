@@ -9,6 +9,8 @@ services:
       - LLM_BACKEND_URL=http://llm:8000/v1
       - EMBEDDINGS_BACKEND=infinity
       - EMBEDDINGS_BACKEND_URL=http://embs:9000
+      - TESTS_BACKEND=vllm
+      - TESTS_BACKEND_URL=http://llm:8000/v1
       - NEO4J_URL=bolt://neo4j:7687
       - OPENAI_API_KEY=Empty # Required by OpenAI client API
     env_file:

@@ -5,7 +5,6 @@ import os
 from deepeval.models.base_model import DeepEvalBaseLLM
 from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel
-from pydantic import BaseModel
 
 
 def hf_embeddings(model: str) -> Embeddings:
@@ -77,19 +76,19 @@ def bedrock_llm(model: str, temperature: float) -> BaseChatModel:
 
     # Extract the temporary credentials
     credentials = response["Credentials"]
-    os.environ["AWS_ACCESS_KEY_ID"] = credentials["AccessKeyId"]
-    os.environ["AWS_SECRET_ACCESS_KEY"] = credentials["SecretAccessKey"]
-    os.environ["AWS_SESSION_TOKEN"] = credentials["SessionToken"]
 
     return ChatBedrockConverse(
         model=model,
-        region_name="us-east-1",
         temperature=temperature,
+        region_name="us-east-1",
+        aws_access_key_id=credentials["AccessKeyId"],
+        aws_secret_access_key=credentials["SecretAccessKey"],
+        aws_session_token=credentials["SessionToken"],
     )
 
 
 class LangchainTestsBackend(DeepEvalBaseLLM):
-    def __init__(self, model_name: str, backend: str, url: str):
+    def __init__(self, model_name: str, backend: str, url: str = "") -> None:
         self.model_name = model_name
         self.backend = backend
         self.url = url
@@ -98,13 +97,13 @@ class LangchainTestsBackend(DeepEvalBaseLLM):
     def load_model(self) -> BaseChatModel:  # type: ignore[override]
         return BackendFactory.create_llm(backend=self.backend, model=self.model_name, url=self.url, temperature=0.4)
 
-    def generate(self, prompt: str, schema: BaseModel) -> BaseModel:  # type: ignore[override]
-        structured_llm = self.model.with_structured_output(schema)  # type: ignore[attr-defined]
-        return structured_llm.invoke(prompt)  # type: ignore[return-value]
+    def generate(self, prompt: str) -> str:
+        out = self.model.invoke(prompt)
+        return str(out.content)
 
-    async def a_generate(self, prompt: str, schema: BaseModel) -> BaseModel:  # type: ignore[override]
-        structured_llm = self.model.with_structured_output(schema)  # type: ignore[attr-defined]
-        return await structured_llm.ainvoke(prompt)  # type: ignore[return-value]
+    async def a_generate(self, prompt: str) -> str:
+        out = await self.model.ainvoke(prompt)
+        return str(out.content)
 
     def get_model_name(self) -> str:
         return f"{self.model_name} ({self.backend})"
