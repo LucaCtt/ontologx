@@ -3,13 +3,14 @@ services:
     build:
       context: ..
       dockerfile: docker/ontologx.dockerfile
-    container_name: ${COMPOSE_PROJECT_NAME-default}-olx
+    container_name: ${COMPOSE_PROJECT_NAME-default}_olx
     environment:
       - LLM_BACKEND=bedrock
       - EMBEDDINGS_BACKEND=infinity
       - TESTS_BACKEND=bedrock
       - EMBEDDINGS_BACKEND_URL=http://embs:9000
       - NEO4J_URL=bolt://neo4j:7687
+      - TRANSFORMERS_VERBOSITY=fatal
     env_file:
       - ../.env
     depends_on:
@@ -20,18 +21,18 @@ services:
         condition: service_healthy
         restart: true
     networks:
-      - ontologx-docker
+      - ontologx
 
   embs:
     image: michaelf34/infinity:0.0.76
-    container_name: ${COMPOSE_PROJECT_NAME-default}-embs
+    container_name: ${COMPOSE_PROJECT_NAME-default}_embs
     volumes:
       - ./exps/${COMPOSE_PROJECT_NAME-default}/embs:/app/.cache
     restart: on-failure:3
     runtime: nvidia
     command: v2 --model-id ${EMBEDDINGS_MODEL} --dtype float16 --port 9000
     networks:
-      - ontologx-docker
+      - ontologx
     expose:
       - 9000
     env_file:
@@ -52,7 +53,7 @@ services:
 
   neo4j:
     image: neo4j:5.20.0
-    container_name: ${COMPOSE_PROJECT_NAME-default}-neo4j
+    container_name: ${COMPOSE_PROJECT_NAME-default}_neo4j
     environment:
       - NEO4J_PLUGINS=["apoc", "n10s"]
       - NEO4J_dbms_security_procedures_unrestricted=apoc.*,n10s.*
@@ -67,7 +68,7 @@ services:
       - ./exps/${COMPOSE_PROJECT_NAME-default}/neo4j/logs:/logs
       - ./exps/${COMPOSE_PROJECT_NAME-default}/neo4j/plugins:/plugins
     networks:
-      - ontologx-docker
+      - ontologx
     expose:
       - 7474
       - 7687
@@ -81,5 +82,5 @@ services:
       start_interval: 10s
 
 networks:
-  ontologx-docker:
+  ontologx:
     driver: bridge

@@ -122,11 +122,12 @@ def run() -> None:
             total_time += time.time() - start_time
 
             if graph_pred is None:
-                logger.warning("Event '%s' could not be parsed", event)
+                logger.warning("Event '%s' could not be parsed.", event)
                 # Add an empty graph to the list of predicted graphs
                 # so the metrics will be calculated correctly
                 graphs_pred.append(GraphDocument(nodes=[], relationships=[]))
             else:
+                logger.info("Event parsed successfully.")
                 graphs_pred.append(graph_pred)
                 total_success += 1
 
