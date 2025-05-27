@@ -1229,7 +1229,7 @@
   log:hasApplication :application-60.
 
 # Dataset
-:test-lc-dataset rdf:type mls:Dataset;
+:test-dataset rdf:type mls:Dataset;
   dc:type "tests";
   mls:hasPart :event-11, :event-12, :event-13, :event-14, :event-15, :event-16, :event-17, :event-18, :event-19,
               :event-20, :event-21, :event-22, :event-23, :event-24, :event-25, :event-26, :event-27, :event-28,

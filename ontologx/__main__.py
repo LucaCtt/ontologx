@@ -13,7 +13,7 @@ from rich.logging import RichHandler
 from rich.progress import track
 
 from ontologx import accuracy
-from ontologx.backend import BackendFactory
+from ontologx.backend import EmbeddingsFactory, LLMFactory, TestsFactory
 from ontologx.config import Config
 from ontologx.parser import ParserFactory
 from ontologx.store import GraphDocument
@@ -38,14 +38,14 @@ logger = logging.getLogger("rich")
 logger.setLevel(logging.DEBUG)
 
 # Load the embeddings model
-embeddings = BackendFactory.create_embeddings(
+embeddings = EmbeddingsFactory.create(
     backend=config.embeddings_backend,
     model=config.embeddings_model,
     url=config.embeddings_backend_url,
 )
 
 # Load the llm
-llm = BackendFactory.create_llm(
+llm = LLMFactory.create(
     backend=config.llm_backend,
     model=config.llm_model,
     temperature=config.parser_temperature,
@@ -53,7 +53,7 @@ llm = BackendFactory.create_llm(
 )
 
 # Load the tests evaluator
-tests_evaluator = BackendFactory.create_tests(
+tests_evaluator = TestsFactory.create(
     backend=config.tests_backend,
     model=config.llm_model,
     url=config.tests_backend_url,

@@ -81,7 +81,7 @@ class Config:
     examples_path = os.getenv("EXAMPLES_PATH", "resources/data/train.ttl")
     """ The path to the examples log graphs file. Used to retrieve the examples."""
 
-    tests_path = os.getenv("TESTS_PATH", "resources/data/test.lc.ttl")
+    tests_path = os.getenv("TESTS_PATH", "resources/data/test.ttl")
     """The input path to the logs to parse."""
 
     shacl_path = os.getenv("CONSTRAINTS_PATH", "resources/ontologies/logs_shacl.ttl")
