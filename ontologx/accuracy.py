@@ -32,6 +32,21 @@ def _triples(graph: GraphDocument) -> list[_Triple]:
     return triples
 
 
+def _triples_without_event_message(graph: GraphDocument) -> list[_Triple]:
+    """Get the triples from a graph, excluding the event message.
+
+    Args:
+        graph (GraphDocument): The graph to extract triples from.
+
+    Returns:
+        list[tuple[str,str,str]]: A list of triples in the form (subject, predicate, object).
+
+    """
+    triples = _triples(graph)
+    # Exclude the 'eventMessage' property from the triples
+    return [triple for triple in triples if triple[1] != "eventMessage"]
+
+
 def _node_match(node1: Node, node2: Node) -> bool:
     """Check if two nodes are equal.
 
@@ -77,41 +92,68 @@ def _relationship_match(rel1: Relationship, rel2: Relationship) -> bool:
     return rel1.type == rel2.type and _node_match(rel1.source, rel2.source) and _node_match(rel1.target, rel2.target)
 
 
-def _llm_completeness(y_pred: list[GraphDocument], model: DeepEvalBaseLLM) -> float:
+def _alignment(y_pred: list[GraphDocument], model: DeepEvalBaseLLM) -> float:
     metric = GEval(
-        name="GraphCompleteness",
+        name="Alignment",
         model=model,
         evaluation_steps=[
-            "Write a thorough description of the log event in 'input', describing what event occurred and its details.",
-            "Write a thorough description of the knowledge graph in 'actual output', given as triples.",
-            "Evaluate whether the knowledge graph description semantically matches the log event description.",
+            (
+                "Write a detailed description of the input log event in natural language. "
+                "Include what occurred, the involved entities, their roles, any parameters, "
+                "timestamps, or contextual details conveyed in the log."
+            ),
+            (
+                "Translate the output knowledge graph, expressed as triples (subject-predicate-object), "
+                "into a coherent natural language description that reflects the event(s) they represent."
+            ),
+            (
+                "Assess whether the graph description semantically captures "
+                "the same core information as the log event. "
+                "Check for:\n"
+                "  - Coverage: Are all key elements from the log event present?\n"
+                "  - Correctness: Are entities, actions, and relationships represented accurately?\n"
+                "  - Relevance: Are any additional triples relevant to the log event context?\n"
+                "It is acceptable if the graph contains more information than the log event, "
+                "as long as it enriches the representation without introducing unrelated or incorrect content."
+            ),
         ],
         evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.INPUT],
         rubric=[
             Rubric(
                 score_range=(0, 2),
-                expected_outcome="The graph description is not related to the log event description.",
+                expected_outcome=(
+                    "The graph does not reflect the log event at all, "
+                    "or includes mostly irrelevant or incorrect information."
+                ),
             ),
             Rubric(
                 score_range=(3, 6),
-                expected_outcome="The graph description is somewhat related to the log event description, \
-                    but has major omissions.",
+                expected_outcome=(
+                    "Some elements of the log event are captured, "
+                    "but major components are missing, misrepresented, or incorrect."
+                ),
             ),
             Rubric(
                 score_range=(7, 9),
-                expected_outcome="The graph description is related to the log event description, \
-                    and only has minor omissions.",
+                expected_outcome=(
+                    "The graph mostly captures the event accurately, "
+                    "with only minor omissions or small errors in detail or phrasing."
+                ),
             ),
             Rubric(
                 score_range=(10, 10),
-                expected_outcome="The graph description completely matches the log event description.",
+                expected_outcome=(
+                    "The graph provides a complete, correct, and faithful "
+                    "representation of the log event. All key elements are present "
+                    "and expressed clearly with no errors or omissions.."
+                ),
             ),
         ],
     )
     test_cases = [
         LLMTestCase(
             input=graph.source.page_content if graph.source else "",
-            actual_output=f"{_triples(graph)}",
+            actual_output=f"{_triples_without_event_message(graph)}",
         )
         for graph in y_pred
     ]
@@ -131,7 +173,7 @@ def _bert_score(y_pred: list[GraphDocument]) -> float:
 
     """
     references = [graph.source.page_content if graph.source else "" for graph in y_pred]
-    predictions = [f"{_triples(graph)}" for graph in y_pred]
+    predictions = [f"{_triples_without_event_message(graph)}" for graph in y_pred]
     _, _, f1 = score(cands=predictions, refs=references, lang="en", verbose=False)
     return f1.mean().item() if f1 is not None else 0.0
 
@@ -224,9 +266,9 @@ class AccuracyEvaluator:
         """Calculate relationship linking accuracy."""
         return self.__rels_correct / self.__rels_total if self.__rels_total > 0 else 0
 
-    def completeness(self) -> float:
+    def alignment(self) -> float:
         """Calculate completeness score using LLM evaluation."""
-        return _llm_completeness(self.y_pred, self.llm_model)
+        return _alignment(self.y_pred, self.llm_model)
 
     def bert_score(self) -> float:
         """Calculate BERT score for the predicted graphs."""

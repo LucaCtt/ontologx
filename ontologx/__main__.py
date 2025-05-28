@@ -144,7 +144,7 @@ def run() -> None:
         metrics = accuracy.AccuracyEvaluator(graphs_pred, graphs_true, tests_evaluator)
 
         results = [
-            ("total_run_time", total_time),
+            ("total_experiment_time", total_time),
             ("average_generation_time", total_time / len(test_events)),
             ("generation_success_percentage", total_success / len(test_events)),
             ("SHACL_violations_percentage", total_shacl_violations / len(test_events)),
@@ -153,7 +153,7 @@ def run() -> None:
             ("f1_score", metrics.f1()),
             ("entity_linking_accuracy", metrics.entity_linking_accuracy()),
             ("relationship_linking_accuracy", metrics.relationship_linking_accuracy()),
-            ("completeness", metrics.completeness()),
+            ("alignment", metrics.alignment()),
             ("BERT score", metrics.bert_score()),
         ]
 

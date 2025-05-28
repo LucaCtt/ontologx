@@ -12,7 +12,7 @@ WORKDIR /app
 COPY pyproject.toml poetry.lock ./
 RUN touch README.md
 
-RUN poetry install --with vllm,aws --no-root && rm -rf ${POETRY_CACHE_DIR}
+RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --with vllm,aws --no-root
 
 COPY ontologx ./ontologx
 COPY resources ./resources
