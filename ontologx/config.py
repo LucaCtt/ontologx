@@ -66,6 +66,9 @@ class Config:
     generated_graphs_retrieval = bool(int(os.getenv("GENERATED_GRAPHS_RETRIEVAL", "1")))
     """If True, only the labelled examples will be used in the RAG."""
 
+    correction_steps = int(os.getenv("CORRECTION_STEPS", "3"))
+    """The number of correction steps to take. Must be greater or equal to 0."""
+
     experiment_name: str = os.getenv("EXPERIMENT_NAME", str(uuid.uuid4()))
     """
     The name of the current experiment. Experiments are used to group runs together,
@@ -151,9 +154,6 @@ class Config:
 
     parser_temperature = float(os.getenv("PARSER_TEMPERATURE", "0.7"))
     """The temperature of the LLM used to parse logs. Must be between 0 and 1."""
-
-    correction_steps = int(os.getenv("CORRECTION_STEPS", "3"))
-    """The number of correction steps to take. Must be greater or equal to 0."""
 
     events_index_name = os.getenv("EVENTS_INDEX_NAME", "eventMessageIndex")
     """The name of the vector index to use for the events in the graph store."""

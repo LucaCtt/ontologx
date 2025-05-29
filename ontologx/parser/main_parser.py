@@ -148,6 +148,10 @@ class MainParser(Parser):
 
             # Error handling for when the output is not parsed correctly
             if not raw_schema.get("parsed"):
+                # Short-circuit if no corrections are allowed
+                if self.correction_steps == 0:
+                    return None
+
                 logger.debug("LLM output invalid. Checking for corrections.")
 
                 try:

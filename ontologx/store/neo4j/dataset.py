@@ -262,7 +262,7 @@ class Dataset(StoreModule):
         """
         run_name_filter = (
             [{"runName": {"$eq": ""}}]
-            if self.__config.examples_retrieval_only
+            if self.__config.generated_graphs_retrieval
             else [{"runName": {"$eq": self.__config.run_name}}, {"runName": {"$eq": ""}}]
         )
 

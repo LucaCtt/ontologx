@@ -113,7 +113,7 @@ class Schema(StoreModule):
         exp = self.__graph_store.query(
             """
             MATCH (e:Experiment)<-[:hasPart]-(s:Study {uri: $study_uri})
-            WHERE s.name = $name
+            WHERE e.name = $name
             RETURN e.uri as uri
             LIMIT 1
             """,

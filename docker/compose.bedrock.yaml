@@ -10,7 +10,7 @@ services:
       - TESTS_BACKEND=bedrock
       - EMBEDDINGS_BACKEND_URL=http://embs:9000
       - NEO4J_URL=bolt://neo4j:7687
-      - TRANSFORMERS_VERBOSITY=fatal
+      - TRANSFORMERS_VERBOSITY=critical
     env_file:
       - ../.env
     depends_on:

@@ -13,7 +13,7 @@ services:
       - TESTS_BACKEND_URL=http://llm:8000/v1
       - NEO4J_URL=bolt://neo4j:7687
       - OPENAI_API_KEY=Empty # Required by OpenAI client API
-      - TRANSFORMERS_VERBOSITY=fatal
+      - TRANSFORMERS_VERBOSITY=critical
     env_file:
       - ../.env
     depends_on:

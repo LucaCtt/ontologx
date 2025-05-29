@@ -158,7 +158,7 @@ def _alignment(y_pred: list[GraphDocument], model: DeepEvalBaseLLM) -> float:
         for graph in y_pred
     ]
 
-    return sum([metric.measure(test_case) for test_case in test_cases]) / len(test_cases)
+    return sum([metric.measure(test_case, _show_indicator=False) for test_case in test_cases]) / len(test_cases)
 
 
 def _bert_score(y_pred: list[GraphDocument]) -> float:
