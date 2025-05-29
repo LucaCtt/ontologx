@@ -2,7 +2,6 @@
 
 from bert_score import score
 from deepeval.metrics.g_eval.g_eval import GEval
-from deepeval.metrics.g_eval.utils import Rubric
 from deepeval.models.base_model import DeepEvalBaseLLM
 from deepeval.test_case.llm_test_case import LLMTestCase, LLMTestCaseParams
 from langchain_neo4j.graphs.graph_document import GraphDocument, Node, Relationship
@@ -118,37 +117,6 @@ def _alignment(y_pred: list[GraphDocument], model: DeepEvalBaseLLM) -> float:
             ),
         ],
         evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.INPUT],
-        rubric=[
-            Rubric(
-                score_range=(0, 2),
-                expected_outcome=(
-                    "The graph does not reflect the log event at all, "
-                    "or includes mostly irrelevant or incorrect information."
-                ),
-            ),
-            Rubric(
-                score_range=(3, 6),
-                expected_outcome=(
-                    "Some elements of the log event are captured, "
-                    "but major components are missing, misrepresented, or incorrect."
-                ),
-            ),
-            Rubric(
-                score_range=(7, 9),
-                expected_outcome=(
-                    "The graph mostly captures the event accurately, "
-                    "with only minor omissions or small errors in detail or phrasing."
-                ),
-            ),
-            Rubric(
-                score_range=(10, 10),
-                expected_outcome=(
-                    "The graph provides a complete, correct, and faithful "
-                    "representation of the log event. All key elements are present "
-                    "and expressed clearly with no errors or omissions.."
-                ),
-            ),
-        ],
     )
     test_cases = [
         LLMTestCase(
