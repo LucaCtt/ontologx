@@ -55,7 +55,7 @@ llm = LLMFactory.create(
 # Load the tests evaluator
 tests_evaluator = TestsFactory.create(
     backend=config.tests_backend,
-    model=config.llm_model,
+    model=config.tests_model,
     url=config.tests_backend_url,
 )
 
