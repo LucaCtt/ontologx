@@ -144,7 +144,7 @@ def run() -> None:
         metrics = accuracy.AccuracyEvaluator(graphs_pred, graphs_true, tests_evaluator)
 
         results = [
-            ("total_experiment_time", total_time),
+            ("total_run_time", total_time),
             ("average_generation_time", total_time / len(test_events)),
             ("generation_success_percentage", total_success / len(test_events)),
             ("SHACL_violations_percentage", total_shacl_violations / len(test_events)),
