@@ -126,7 +126,19 @@ def _alignment(y_pred: list[GraphDocument], model: DeepEvalBaseLLM) -> float:
         for graph in y_pred
     ]
 
-    return sum([metric.measure(test_case, _show_indicator=False) for test_case in test_cases]) / len(test_cases)
+    measures = []
+    for test_case in test_cases:
+        # Re-run the measure until it succeeds, as it may fail due to the LLM returning invalid output.
+        while True:
+            try:
+                res = metric.measure(test_case, _show_indicator=False)
+                break
+            except ValueError as _:
+                continue
+
+        measures.append(res)
+
+    return sum(measures) / len(test_cases)
 
 
 def _bert_score(y_pred: list[GraphDocument]) -> float:
