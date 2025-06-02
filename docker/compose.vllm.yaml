@@ -33,7 +33,7 @@ services:
     image: vllm/vllm-openai:v0.8.5
     container_name: ${COMPOSE_PROJECT_NAME-default}_llm
     volumes:
-      - ./exps/${COMPOSE_PROJECT_NAME-default}/vllm/llms:/root/.cache/huggingface # Save models so they are not downloaded every time
+      - /mnt/servicesdata/lcotti/run/${COMPOSE_PROJECT_NAME-default}/vllm/llms:/root/.cache/huggingface # Save models so they are not downloaded every time
     runtime: nvidia
     ipc: host # Allow the container access to the host's shared memory
     restart: on-failure:3
@@ -42,9 +42,8 @@ services:
     networks:
       - ontologx
     entrypoint: python3
-    command: -m vllm.entrypoints.openai.api_server --model ${PARSER_MODEL} --task generate --trust-remote-code --tool-call-parser pythonic ${VLLM_ADDITIONAL_ARGS-} # Ad-hoc vllm arguments are likely to be needed
+    command: -m vllm.entrypoints.openai.api_server --model ${LLM_MODEL} --task generate --trust-remote-code --tool-call-parser pythonic ${VLLM_ADDITIONAL_ARGS-} # Ad-hoc vllm arguments are likely to be needed
     environment:
-      - CUDA_DEVICE_ORDER=PCI_BUS_ID
       - CUDA_VISIBLE_DEVICES=${VLLM_VISIBLE_DEVICES-}
     env_file:
       - ../.env
@@ -66,7 +65,7 @@ services:
     image: michaelf34/infinity:0.0.76
     container_name: ${COMPOSE_PROJECT_NAME-default}_embs
     volumes:
-      - ./exps/${COMPOSE_PROJECT_NAME-default}/embs:/app/.cache
+      - /mnt/servicesdata/lcotti/run/${COMPOSE_PROJECT_NAME-default}/embs:/app/.cache
     restart: on-failure:3
     runtime: nvidia
     command: v2 --model-id ${EMBEDDINGS_MODEL} --dtype float16 --port 9000
@@ -76,6 +75,9 @@ services:
       - 9000
     env_file:
       - ../.env
+    environment:
+      - CUDA_DEVICE_ORDER=PCI_BUS_ID
+      - CUDA_VISIBLE_DEVICES=${INFINITY_VISIBLE_DEVICES-}
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://localhost:9000/docs" ]
       interval: 20s
@@ -103,9 +105,9 @@ services:
       - NEO4J_apoc_import_file_use__neo4j__config=true
       - NEO4J_apoc_trigger_enabled=true
     volumes:
-      - ./exps/${COMPOSE_PROJECT_NAME-default}/neo4j/data:/data
-      - ./exps/${COMPOSE_PROJECT_NAME-default}/neo4j/logs:/logs
-      - ./exps/${COMPOSE_PROJECT_NAME-default}/neo4j/plugins:/plugins
+      - /mnt/servicesdata/lcotti/run/${COMPOSE_PROJECT_NAME-default}/neo4j/data:/data
+      - /mnt/servicesdata/lcotti/run/${COMPOSE_PROJECT_NAME-default}/neo4j/logs:/logs
+      - /mnt/servicesdata/lcotti/run/${COMPOSE_PROJECT_NAME-default}/neo4j/plugins:/plugins
     networks:
       - ontologx
     expose:
