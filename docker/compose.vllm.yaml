@@ -1,3 +1,5 @@
+name: ontologx-vllm
+
 services:
   ontologx:
     build:

@@ -6,6 +6,7 @@
 
 log:EventShape rdf:type sh:NodeShape;
   sh:targetClass log:Event;
+  sh:closed true;
   sh:property [
     sh:path log:eventMessage;
     sh:datatype xsd:string;
@@ -44,10 +45,11 @@ log:EventShape rdf:type sh:NodeShape;
 
 log:SourceShape rdf:type sh:NodeShape;
   sh:targetClass log:Source;
+  sh:closed true;
   sh:property [
     sh:path log:sourceName;
     sh:datatype xsd:string;
-    sh:minCount 1;
+    sh:minCount 0;
     sh:maxCount 1;
     sh:message "Source must have a name";
   ];
@@ -68,6 +70,7 @@ log:SourceShape rdf:type sh:NodeShape;
 
 log:AddressShape rdf:type sh:NodeShape;
   sh:targetClass log:Address;
+  sh:closed true;
   sh:property [
     sh:path log:addressIPV4;
     sh:datatype xsd:string;
@@ -175,6 +178,7 @@ log:AddressShape rdf:type sh:NodeShape;
 
 log:ApplicationShape rdf:type sh:NodeShape;
   sh:targetClass log:Application;
+  sh:closed true;
   sh:or (
     [ sh:path log:applicationName ]
     [ sh:path log:applicationVendor ]
@@ -205,6 +209,7 @@ log:ApplicationShape rdf:type sh:NodeShape;
 
 log:FileShape rdf:type sh:NodeShape;
   sh:targetClass log:File;
+  sh:closed true;
   sh:property [
     sh:path log:fileName;
     sh:datatype xsd:string;
@@ -261,6 +266,7 @@ log:FileShape rdf:type sh:NodeShape;
 
 log:ProcessShape rdf:type sh:NodeShape;
   sh:targetClass log:Process;
+  sh:closed true;
   sh:or (
     [ sh:path log:processPID ]
     [ sh:path log:processTID ]
@@ -290,6 +296,7 @@ log:ProcessShape rdf:type sh:NodeShape;
 
 log:URLShape rdf:type sh:NodeShape;
   sh:targetClass log:URL;
+  sh:closed true;
   sh:property [
     sh:path log:url;
     sh:datatype xsd:string;
@@ -300,6 +307,7 @@ log:URLShape rdf:type sh:NodeShape;
 
 log:UserShape rdf:type sh:NodeShape;
   sh:targetClass log:User;
+  sh:closed true;
   sh:or (
     [ sh:path log:userName ]
     [ sh:path log:userUID ]
