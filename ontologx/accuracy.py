@@ -184,11 +184,11 @@ class AccuracyEvaluator:
             llm_model (DeepEvalBaseLLM): The LLM model used for LLM evaluation.
 
         """
-        self.y_pred = y_pred
-        self.y_true = y_true
+        self.y_pred = y_pred.copy()
+        self.y_true = y_true.copy()
         self.llm_model = llm_model
 
-        for pred, true in zip(y_pred, y_true, strict=True):
+        for pred, true in zip(self.y_pred, self.y_true, strict=True):
             triples_pred = _triples(pred)
             triples_true = _triples(true)
 
