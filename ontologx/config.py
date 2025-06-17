@@ -22,7 +22,7 @@ DEFAULT_LLM_MODELS = {
 }
 
 DEFAULT_EMBEDDINGS_MODELS = {
-    "ollama": "snowflake-arctic-embed:110m",
+    "ollama": "milkey/gte",
     "huggingface": "Alibaba-NLP/gte-multilingual-base",
     "infinity": "Alibaba-NLP/gte-multilingual-base",
 }
@@ -90,7 +90,10 @@ class Config:
     shacl_path = os.getenv("CONSTRAINTS_PATH", "resources/ontologies/logs_shacl.ttl")
     """The path to the SHACL constraints file for the ontology."""
 
-    prompt_path = os.getenv("PROMPT_PATH", "resources/prompts/build_graph.system.md")
+    prompt_path = os.getenv(
+        "PROMPT_PATH",
+        "resources/prompts/main.system.md" if parser_type == "main" else "resources/prompts/baseline.system.md",
+    )
     """The prompt used to build the graph."""
 
     neo4j_url = os.getenv("NEO4J_URL", "bolt://localhost:7687")
