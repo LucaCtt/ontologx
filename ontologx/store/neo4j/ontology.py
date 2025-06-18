@@ -1,9 +1,10 @@
 from pathlib import Path
 
+from langchain_core.documents import Document
 from langchain_neo4j import Neo4jGraph
 
 from ontologx.config import Config
-from ontologx.store import GraphDocument, Node, Relationship, StoreModule
+from ontologx.store import GraphDocument, Node, Relationship
 
 TIME_ONTOLOGY_URI = "http://www.w3.org/2006/time#"
 INSTANT_CLASS_URI = f"{TIME_ONTOLOGY_URI}Instant"
@@ -12,11 +13,10 @@ XML_SCHEMA_URI = "http://www.w3.org/2001/XMLSchema#"
 OWL_SCHEMA_URI = "http://www.w3.org/2002/07/owl#"
 
 
-class Ontology(StoreModule):
-    """Ontology store module.
+class Ontology:
+    """Ontology store.
 
-    This module is responsible for initializing the ontology store and
-    providing access to the ontology.
+    Initializes the ontology on the store and provides access to the ontology.
     """
 
     def __init__(self, config: Config, graph_store: Neo4jGraph) -> None:
@@ -52,32 +52,10 @@ class Ontology(StoreModule):
             params={"url": MLSCHEMA_ONTOLOGY_URI},
         )
 
-        # Load the constraints
+        # Load the SHACL constraints
         self.__graph_store.query(
             "CALL n10s.validation.shacl.import.inline($constraints, 'Turtle')",
             params={"constraints": Path(self.__config.shacl_path).read_text()},
-        )
-
-        # Add transaction validator
-        self.__graph_store.query(
-            """
-            USE system
-            CALL apoc.trigger.install(
-                'neo4j',
-                $trigger_name,
-                'call n10s.validation.shacl.validateTransaction(
-                    $createdNodes,
-                    $createdRelationships,
-                    $assignedLabels,
-                    $removedLabels,
-                    $assignedNodeProperties,
-                    $removedNodeProperties,
-                    $deletedRelationships,
-                    $deletedNodes)',
-                { labels: ['Run']},
-                {phase:'before'})
-            """,
-            params={"trigger_name": self.__config.n10s_trigger_name},
         )
 
     def graph(self) -> GraphDocument:
@@ -144,4 +122,36 @@ class Ontology(StoreModule):
         return GraphDocument(
             nodes=list(nodes_dict.values()),
             relationships=relationships,
+            source=Document(
+                page_content="Ontology graph",
+                metadata={"ontology_uri": self.__config.ontology_uri},
+            ),
         )
+
+    def validate(self, graph: GraphDocument) -> bool:
+        """Validate the given graph against the SHACL constraints.
+
+        The nodes in the graph must already be present in the store.
+
+        Args:
+            graph (GraphDocument): The graph to validate.
+
+        Returns:
+            bool: True if the graph is valid, False otherwise.
+
+        """
+        nodes_uris = [node.id for node in graph.nodes]
+
+        result = self.__graph_store.query(
+            """
+            MATCH (n)
+            WHERE n.uri IN $uris
+            WITH COLLECT(n) AS nodes
+            CALL n10s.validation.shacl.validateSet(nodes)
+            YIELD focusNode, nodeType, propertyShape, offendingValue, resultPath, severity
+            RETURN focusNode, nodeType, propertyShape, offendingValue, resultPath, severity
+            """,
+            params={"uris": nodes_uris},
+        )
+
+        return len(result) == 0

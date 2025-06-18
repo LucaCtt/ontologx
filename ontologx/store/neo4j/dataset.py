@@ -7,7 +7,7 @@ from langchain_core.embeddings import Embeddings
 from langchain_neo4j import Neo4jGraph, Neo4jVector
 
 from ontologx.config import Config
-from ontologx.store import GraphDocument, Node, Relationship, StoreModule
+from ontologx.store import GraphDocument, Node, Relationship
 
 
 def _compose_embeddings_text(event: str, context: dict[str, str]) -> str:
@@ -19,7 +19,7 @@ def _compose_embeddings_text(event: str, context: dict[str, str]) -> str:
     return text
 
 
-class Dataset(StoreModule):
+class Dataset:
     """The Dataset module is responsible for managing the event graphs in the store.
 
     Includes the loading of the examples and tests, and the search for similar events.
@@ -212,7 +212,7 @@ class Dataset(StoreModule):
                 # This will raise an exception if the LLM produces an Event node without a message property.
                 text = _compose_embeddings_text(
                     node.properties["eventMessage"],
-                    graph.source.metadata if graph.source else {},
+                    graph.source.metadata,
                 )
                 node.properties["embedding"] = self.__embeddings.embed_query(text)
 
@@ -260,6 +260,10 @@ class Dataset(StoreModule):
                 with the nodes they are connected to and their relationships.
 
         """
+        # This filter is for retrieving examples only,
+        # or examples + generated events.
+        # Examples will have no run name but an embedding,
+        # Tests will have neither. Generated events will have both.
         run_name_filter = (
             [{"runName": {"$eq": ""}}]
             if not self.__config.generated_graphs_retrieval
@@ -280,20 +284,7 @@ class Dataset(StoreModule):
             # Tests will have neither. Generated events will have both.
         )
 
-        def subgraph(doc: Document) -> GraphDocument:
-            """Get the subgraph of a node in the store."""
-            subgraph = self.__get_subgraph_from_node(doc.metadata["uri"])
-
-            source_node = next((node for node in subgraph.nodes if node.type == "Source"), None)
-            context = {}
-            if source_node:
-                context["sourceName"] = source_node.properties.get("sourceName", "")
-                context["sourceDevice"] = source_node.properties.get("sourceDevice", "")
-
-            subgraph.source = Document(page_content=doc.page_content, metadata=context)
-            return subgraph
-
-        return [subgraph(doc) for doc in relevant_docs]
+        return [self.__get_subgraph_from_node(doc.metadata["uri"]) for doc in relevant_docs]
 
     def __get_subgraph_from_node(self, node_uri: str, props_to_remove: list[str] | None = None) -> GraphDocument:
         """Get the subgraph of a node in the store.
@@ -327,7 +318,7 @@ class Dataset(StoreModule):
         )
 
         if not nodes_subgraphs:
-            return GraphDocument(nodes=[], relationships=[])
+            return GraphDocument(nodes=[], relationships=[], source=Document(page_content="", metadata={}))
 
         nodes_subgraph = nodes_subgraphs[0]
 
@@ -365,7 +356,13 @@ class Dataset(StoreModule):
             else []  # The node may not have any relationships
         )
 
+        # Create the context from the event source, if present.
+        event_node = next(node for node in nodes_dict.values() if node.type == "Event")
+        source_node = next((node for node in nodes_dict.values() if node.type == "Source"), None)
+        context = {key: value for key, value in source_node.properties.items() if key != "uri"} if source_node else {}
+
         return GraphDocument(
             nodes=list(nodes_dict.values()),
             relationships=relationships,
+            source=Document(page_content=event_node.properties["eventMessage"], metadata=context),
         )

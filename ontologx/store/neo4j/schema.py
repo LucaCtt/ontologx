@@ -3,17 +3,12 @@ import uuid
 from langchain_neo4j import Neo4jGraph
 
 from ontologx.config import Config
-from ontologx.store import StoreModule
 
 MLSCHEMA_URI = "https://raw.githubusercontent.com/ML-Schema/core/master/MLSchema.ttl"
 
 
-class Schema(StoreModule):
-    """Graph store and vector index for the events knowledge graph.
-
-    This class uses LangChain's Neo4jGraph api. It does not use the Neo4jVector api
-    because it is not flexible enough.
-    """
+class Schema:
+    """Graph store and vector index for the events knowledge graph."""
 
     def __init__(
         self,
@@ -28,11 +23,11 @@ class Schema(StoreModule):
 
         The graph store is initialized with the ontology and the labelled examples.
         The vector index is created for the event nodes, also populating the embeddings.
-        Note: the ontology and examples data is not experiment-tagged.
+
+        The ontology and examples data is not experiment-tagged.
         To reset it, the store must be cleared and re-initialized.
         This is intentional, as the ontology and examples are expected to be static among experiments.
         """
-        # Create the study node if it does not exist
         study_uri = self.__initialize_study()
         experiment_uri = self.__initialize_experiment(study_uri)
         self.__initialize_run(experiment_uri)
@@ -75,24 +70,21 @@ class Schema(StoreModule):
     def __initialize_study(self) -> str:
         """Initialize the study node in the graph store.
 
-        The study node is created if it does not exist.
+        Only one study node is expected to exist in the graph store.
+        If it does not exist, it will be created.
 
         Returns:
             str: The URI of the study node.
 
         """
         study = self.__graph_store.query(
-            """
-            MATCH (s:Study)
-            RETURN s.uri as uri
-            LIMIT 1
-            """,
+            "MATCH (s:Study) RETURN s.uri as uri LIMIT 1",
         )
         if study:
             return study[0]["uri"]
 
-        uri = self.__gen_uri()
         # Create the study node if it does not exist
+        uri = self.__gen_uri()
         self.__graph_store.query("CREATE (s:Study {uri: $uri, name: 'OntoLogX'})", params={"uri": uri})
 
         return uri
@@ -109,7 +101,7 @@ class Schema(StoreModule):
             str: The URI of the experiment node.
 
         """
-        # Check if there is an experiment node with the same ontology and examples.
+        # Check if there is an experiment node with the same name under the given study
         exp = self.__graph_store.query(
             """
             MATCH (e:Experiment)<-[:hasPart]-(s:Study {uri: $study_uri})
@@ -144,6 +136,14 @@ class Schema(StoreModule):
         return uri
 
     def __initialize_run(self, experiment_uri: str) -> None:
+        """Initialize the run node in the graph store.
+
+        The run node is created if it does not exist, and it is attached to the experiment node.
+
+        Args:
+            experiment_uri (str): The URI of the experiment node.
+
+        """
         # Create the run node and attach it to the experiment node
         run_uri = self.__gen_uri(self.__config.run_name)
 

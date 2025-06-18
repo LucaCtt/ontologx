@@ -3,11 +3,10 @@ import json
 from langchain_core.documents import Document
 from langchain_core.language_models import BaseChatModel
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_neo4j.graphs.graph_document import GraphDocument, Node, Relationship
 
 from ontologx.parser.models import build_baseline_prompt
 from ontologx.parser.parser import Parser
-from ontologx.store import Store
+from ontologx.store import GraphDocument, Node, Relationship, Store
 
 
 class BaselineParser(Parser):
@@ -52,11 +51,7 @@ class BaselineParser(Parser):
         if "nodes" not in raw_schema or not isinstance(raw_schema["nodes"], list):
             return None
 
-        output_graph = GraphDocument(
-            nodes=[],
-            relationships=[],
-        )
-        output_graph.source = Document(page_content=event, metadata=context)
+        output_graph = GraphDocument(nodes=[], relationships=[], source=Document(page_content=event, metadata=context))
 
         nodes_dict = {}
         for node in raw_schema["nodes"]:

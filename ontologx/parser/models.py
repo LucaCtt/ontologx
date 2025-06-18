@@ -2,11 +2,13 @@
 
 from enum import Enum
 
-from langchain_neo4j.graphs.graph_document import GraphDocument
-from langchain_neo4j.graphs.graph_document import Node as LibNode
-from langchain_neo4j.graphs.graph_document import Relationship as LibRelationship
+from langchain_core.documents import Document
 from pydantic import BaseModel, Field, model_validator
 from pydantic_core import PydanticCustomError
+
+from ontologx.store import GraphDocument
+from ontologx.store import Node as LibNode
+from ontologx.store import Relationship as LibRelationship
 
 
 class BaseEventGraph(BaseModel):
@@ -19,11 +21,19 @@ class BaseEventGraph(BaseModel):
     nodes: list
     relationships: list
 
-    def graph(self) -> GraphDocument:
+    def graph(self, source_event: str, context: dict) -> GraphDocument:
         """Convert the generated event graph to a GraphDocument.
 
         This method assumes that the nodes and relationships are already in the correct format,
         ontology-compliant, and with valid ids. As such, it does not perform any validation.
+
+        Args:
+            source_event (str): The event that was parsed to create this graph.
+            context (dict): The context of the event, which will be used as metadata in the GraphDocument.
+
+        Returns:
+            GraphDocument: A GraphDocument containing the nodes and relationships of the event graph.
+
         """
         nodes_dict = {
             node.id: LibNode(
@@ -39,7 +49,11 @@ class BaseEventGraph(BaseModel):
             for rel in self.relationships
         ]
 
-        return GraphDocument(nodes=list(nodes_dict.values()), relationships=relationships)
+        return GraphDocument(
+            nodes=list(nodes_dict.values()),
+            relationships=relationships,
+            source=Document(page_content=source_event, metadata=context),
+        )
 
 
 class _OntologyValidValues:

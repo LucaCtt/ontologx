@@ -17,14 +17,14 @@ class Neo4jStore(Store):
             password=config.neo4j_password,
         )
 
-        self.onto = Ontology(config, self.__graph_store)
-        self.schema = Schema(config, self.__graph_store)
-        self.dataset = Dataset(config, self.__graph_store, self.__embeddings)
+        self.__onto = Ontology(config, self.__graph_store)
+        self.__schema = Schema(config, self.__graph_store)
+        self.__dataset = Dataset(config, self.__graph_store, self.__embeddings)
 
     def initialize(self) -> None:
-        self.onto.initialize()
-        self.schema.initialize()
-        self.dataset.initialize()
+        self.__onto.initialize()
+        self.__schema.initialize()
+        self.__dataset.initialize()
 
     def clear(self) -> None:
         # Delete all nodes and relationships in the graph
@@ -40,19 +40,11 @@ class Neo4jStore(Store):
         for index in indexes:
             self.__graph_store.query(f"DROP INDEX {index['name']}")
 
-        # Delete all triggers
-        triggers = self.__graph_store.query("CALL apoc.trigger.list() YIELD name RETURN name")
-        for trigger in triggers:
-            self.__graph_store.query(f"USE system CALL apoc.trigger.drop('neo4j', '{trigger['name']}')")
-
     def ontology(self) -> GraphDocument:
-        return self.onto.graph()
+        return self.__onto.graph()
 
     def tests(self) -> list[GraphDocument]:
-        return self.dataset.tests()
-
-    def add_event_graph(self, event_graph: GraphDocument) -> None:
-        self.dataset.add_event_graph(event_graph)
+        return self.__dataset.tests()
 
     def search(
         self,
@@ -62,10 +54,16 @@ class Neo4jStore(Store):
         **kwargs: str | float,
     ) -> list[GraphDocument]:
         if criterion == "mmr":
-            return self.dataset.events_mmr_search(event, context, **kwargs)  # type: ignore[call-arg]
+            return self.__dataset.events_mmr_search(event, context, **kwargs)  # type: ignore[call-arg]
 
         msg = f"Unknown search criterion: {criterion}"
         raise ValueError(msg)
 
+    def add_event_graph(self, event_graph: GraphDocument) -> None:
+        self.__dataset.add_event_graph(event_graph)
+
+    def validate_event_graph(self, event_graph: GraphDocument) -> bool:
+        return self.__onto.validate(event_graph)
+
     def add_evaluation_result(self, measure: str, evaluation: str | float) -> None:
-        self.schema.add_evaluation_result(measure, evaluation)
+        self.__schema.add_evaluation_result(measure, evaluation)

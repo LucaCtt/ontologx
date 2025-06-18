@@ -4,26 +4,20 @@ import logging
 import uuid
 from typing import cast
 
-from langchain_core.documents import Document
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, ToolCall, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_neo4j.graphs.graph_document import GraphDocument
 from pydantic import ValidationError
 
 from ontologx.parser.models import BaseEventGraph, build_dynamic_model
 from ontologx.parser.parser import Parser
-from ontologx.store import Store
+from ontologx.store import GraphDocument, Store
 
 logger = logging.getLogger("rich")
 
 
 def _example_message_group(event_graph: GraphDocument) -> list[BaseMessage]:
     """Create an example message group for the given event and graph."""
-    if not event_graph.source:
-        msg = "Event graph has no source. This is a bug."
-        raise ValueError(msg)
-
     event = event_graph.source.page_content
     context = event_graph.source.metadata
 
@@ -192,8 +186,7 @@ class MainParser(Parser):
 
                 continue
 
-            output_graph: GraphDocument = raw_schema["parsed"].graph()
-            output_graph.source = Document(page_content=event, metadata=context)
+            output_graph: GraphDocument = raw_schema["parsed"].graph(event, context)
 
             logger.debug("Graph constructed successfully.")
             return output_graph

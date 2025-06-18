@@ -164,9 +164,6 @@ class Config:
     n10s_constraint_name = os.getenv("N10S_CONSTRAINT_NAME", "n10s_unique_uri")
     """The name of the neosemantics constraint for unique URIs."""
 
-    n10s_trigger_name = os.getenv("N10S_TRIGGER_NAME", "shacl_validate")
-    """The name of the neosemantics trigger for validating the graph."""
-
     prompt_build_graph = Path(prompt_path).read_text()
     """The prompt used to build the graph."""
 

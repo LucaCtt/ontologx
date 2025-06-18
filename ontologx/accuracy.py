@@ -4,7 +4,8 @@ from bert_score import score
 from deepeval.metrics.g_eval.g_eval import GEval
 from deepeval.models.base_model import DeepEvalBaseLLM
 from deepeval.test_case.llm_test_case import LLMTestCase, LLMTestCaseParams
-from langchain_neo4j.graphs.graph_document import GraphDocument, Node, Relationship
+
+from ontologx.store import GraphDocument, Node, Relationship
 
 type _Triple = tuple[str, str, str]
 
@@ -120,7 +121,7 @@ def _alignment(y_pred: list[GraphDocument], model: DeepEvalBaseLLM) -> float:
     )
     test_cases = [
         LLMTestCase(
-            input=graph.source.page_content if graph.source else "",
+            input=graph.source.page_content,
             actual_output=f"{_triples_without_event_message(graph)}",
         )
         for graph in y_pred
@@ -152,7 +153,7 @@ def _bert_score(y_pred: list[GraphDocument]) -> float:
         float: The average BERT score for the predicted graphs.
 
     """
-    references = [graph.source.page_content if graph.source else "" for graph in y_pred]
+    references = [graph.source.page_content for graph in y_pred]
     predictions = [f"{_triples_without_event_message(graph)}" for graph in y_pred]
     _, _, f1 = score(cands=predictions, refs=references, lang="en", verbose=False)
     return f1.mean().item() if f1 is not None else 0.0

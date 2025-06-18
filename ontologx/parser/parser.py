@@ -4,9 +4,8 @@ import logging
 from abc import ABC, abstractmethod
 
 from langchain_core.language_models import BaseChatModel
-from langchain_neo4j.graphs.graph_document import GraphDocument
 
-from ontologx.store import Store
+from ontologx.store import GraphDocument, Store
 
 logger = logging.getLogger("rich")
 

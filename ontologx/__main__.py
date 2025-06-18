@@ -8,7 +8,6 @@ import logging
 import time
 
 import typer
-from neo4j.exceptions import ClientError
 from rich.logging import RichHandler
 from rich.progress import track
 
@@ -88,7 +87,7 @@ def run() -> None:
 
         # Read the events at every run just in case,
         # to avoid leaking data between runs
-        test_events = store.dataset.tests()
+        test_events = store.tests()
         logger.info("Read %d tests from '%s'", len(test_events), config.tests_path)
 
         parser = ParserFactory.create(
@@ -108,10 +107,6 @@ def run() -> None:
         graphs_true = []
 
         for graph_true in track(test_events, description="Parsing events"):
-            if graph_true.source is None:
-                msg = "Test source is None. This is a bug."
-                raise ValueError(msg)
-
             event = graph_true.source.page_content
             context = graph_true.source.metadata
 
@@ -125,15 +120,15 @@ def run() -> None:
                 logger.warning("Event '%s' could not be parsed.", event)
                 # Add an empty graph to the list of predicted graphs
                 # so the metrics will be calculated correctly
-                graphs_pred.append(GraphDocument(nodes=[], relationships=[]))
+                graphs_pred.append(GraphDocument(nodes=[], relationships=[], source=graph_true.source))
             else:
                 logger.info("Event parsed successfully.")
                 graphs_pred.append(graph_pred)
                 total_success += 1
 
-                try:
-                    store.dataset.add_event_graph(graph_pred)
-                except ClientError:
+                store.add_event_graph(graph_pred)
+
+                if store.validate_event_graph(graph_pred):
                     total_shacl_violations += 1
 
             graphs_true.append(graph_true)

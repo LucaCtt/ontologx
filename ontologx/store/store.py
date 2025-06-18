@@ -3,22 +3,18 @@ from abc import ABC, abstractmethod
 from ontologx.store import GraphDocument
 
 
-class StoreModule(ABC):
-    """Abstract class for store modules."""
-
+class Store(ABC):
     @abstractmethod
     def initialize(self) -> None:
-        """Initialize the store module by creating module-specific nodes."""
+        """Initialize the store module by creating the necessary nodes, relationships, constraints, and indexes.
 
-
-class Store(StoreModule, ABC):
-    @abstractmethod
-    def initialize(self) -> None:
-        """Initialize the store module by creating module-specific nodes."""
+        In particular, this method should create the ML Schema, the log ontology, and the datasets.
+        This method should be called before any other operations on the store.
+        """
 
     @abstractmethod
     def clear(self) -> None:
-        """Clear the store back to a clean state."""
+        """Clear the store back to a clean state, removing nodes, relationships, constraints, and indexes."""
 
     @abstractmethod
     def ontology(self) -> GraphDocument:
@@ -26,16 +22,7 @@ class Store(StoreModule, ABC):
 
     @abstractmethod
     def tests(self) -> list[GraphDocument]:
-        """Get the tests set."""
-
-    @abstractmethod
-    def add_event_graph(self, event_graph: GraphDocument) -> None:
-        """Add an event graph to the store.
-
-        Args:
-            event_graph (GraphDocument): The event graph to add.
-
-        """
+        """Get the test set."""
 
     @abstractmethod
     def search(
@@ -50,8 +37,32 @@ class Store(StoreModule, ABC):
         Args:
             criterion (str): The search criterion.
             event (str): The event to search for.
-            context (dict | None): Optional context for the search.
+            context (dict | None): Optional context for the log event.
             **kwargs: Additional keyword arguments for the search.
+
+        Returns:
+            list[GraphDocument]: A list of event graphs that match the search criterion.
+
+        """
+
+    @abstractmethod
+    def add_event_graph(self, event_graph: GraphDocument) -> None:
+        """Add an event graph to the store.
+
+        Args:
+            event_graph (GraphDocument): The event graph to add.
+
+        """
+
+    @abstractmethod
+    def validate_event_graph(self, event_graph: GraphDocument) -> bool:
+        """Validate the event graph against the SHACL constraints defined in the ontology.
+
+        Args:
+            event_graph (GraphDocument): The event graph to validate with SHACL.
+
+        Returns:
+            bool: True if the event graph is valid, False otherwise.
 
         """
 
