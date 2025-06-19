@@ -143,13 +143,12 @@ def run() -> None:
             ("average_generation_time", total_time / len(test_events)),
             ("generation_success_percentage", total_success / len(test_events)),
             ("SHACL_violations_percentage", total_shacl_violations / len(test_events)),
-            ("precision", metrics.precision()),
-            ("recall", metrics.recall()),
-            ("f1_score", metrics.f1()),
-            ("entity_linking_accuracy", metrics.entity_linking_accuracy()),
-            ("relationship_linking_accuracy", metrics.relationship_linking_accuracy()),
-            ("alignment", metrics.alignment()),
-            ("BERT score", metrics.bert_score()),
+            ("precision", metrics.precision),
+            ("recall", metrics.recall),
+            ("f1_score", metrics.f1),
+            ("entity_linking_accuracy", metrics.entity_linking_accuracy),
+            ("relationship_linking_accuracy", metrics.relationship_linking_accuracy),
+            ("g-eval", metrics.geval),
         ]
 
         for name, value in results:

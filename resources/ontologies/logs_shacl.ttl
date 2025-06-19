@@ -4,9 +4,13 @@
 @prefix time: <neo4j://graph.schema#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 
+
 log:EventShape rdf:type sh:NodeShape;
   sh:targetClass log:Event;
   sh:closed true;
+  sh:property [
+    sh:path log:embedding; # Workaround for log embeddings added by Neo4j
+  ];
   sh:property [
     sh:path log:eventMessage;
     sh:datatype xsd:string;
