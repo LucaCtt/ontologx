@@ -77,8 +77,8 @@
   log:hasProcess :process-3.
 
 :address-3 rdf:type log:Address;
-  log:hostname "d1zkz3k4cclnv6.cloudfront.net";
-  log:ipv4 "192.168.231.180".
+  log:addressHostname "d1zkz3k4cclnv6.cloudfront.net";
+  log:addressIPV4 "192.168.231.180".
 
 :source-3 rdf:type log:Source;
   log:sourceName "dnsmasq.log";

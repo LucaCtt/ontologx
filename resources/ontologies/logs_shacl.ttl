@@ -285,6 +285,11 @@ log:ApplicationShape rdf:type sh:NodeShape;
     sh:minCount 0;
     sh:maxCount 1;
     sh:message "Application may have at most one version";
+  ];
+  sh:property [
+    sh:path log:hasProcess;
+    sh:class log:Process;
+    sh:minCount 0;
   ].
 
 log:FileShape rdf:type sh:NodeShape;
