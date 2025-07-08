@@ -86,8 +86,11 @@
   log:applicationName "auditctl";
   log:hasProcess :process-4.
 
+:username-4-1 rdf:type log:UserName;
+  log:credentialValue "traci.stevenson".
+
 :user-4-1 rdf:type log:User;
-  log:userName "root";
+  log:hasCredential :username-4-1;
   log:userUID 0;
   log:userAUID 0.
 
@@ -141,8 +144,11 @@
   log:fileHash "SHA256:wZvMsGOInOVqvsOlhNmCH7PNFaKk0EZfNcFDcFLShk8";
   log:fileHashType "SHA256".
 
+:username-6 rdf:type log:UserName;
+  log:credentialValue "root".
+
 :user-6 rdf:type log:User;
-  log:userName "root".
+  log:hasCredential :username-6.
 
 :event-6 rdf:type log:Event;
   log:eventMessage "Jan 20 11:14:02 davey-mail ec2: 256 SHA256:wZvMsGOInOVqvsOlhNmCH7PNFaKk0EZfNcFDcFLShk8 root@davey-mail (ED25519)";

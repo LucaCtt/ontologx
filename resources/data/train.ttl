@@ -18,8 +18,11 @@
   log:sourceType "syslog";
   log:sourceDevice "inet-dns".
 
+:username-1 rdf:type log:UserName;
+  log:credentialValue "root".
+
 :user-1 rdf:type log:User;
-  log:userName "root".
+  log:hasCredential :username-1.
 
 :process-1 rdf:type log:Process;
   log:processPID 16314.
@@ -100,8 +103,11 @@
 :application-4 rdf:type log:Application;
   log:applicationName "dovecot".
 
+:username-4 rdf:type log:UserName;
+  log:credentialValue "traci.stevenson".
+
 :user-4 rdf:type log:User;
-  log:userName "traci.stevenson".
+  log:hasCredential :username-4.
 
 :source-4 rdf:type log:Source;
   log:sourceName "mail.log";

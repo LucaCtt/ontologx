@@ -12,6 +12,20 @@ log:EventShape rdf:type sh:NodeShape;
     sh:path log:embedding; # Workaround for log embeddings added by Neo4j
   ];
   sh:property [
+    sh:path log:uri; # A uri is associated to each node
+    sh:datatype xsd:string;
+    sh:minCount 1;
+    sh:maxCount 1;
+    sh:message "Node must have a URI";
+  ];
+  sh:property [
+    sh:path log:runName; # Workaround for run name
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Event may have at most one run name";
+  ];
+  sh:property [
     sh:path log:eventMessage;
     sh:datatype xsd:string;
     sh:minCount 1;
@@ -40,6 +54,26 @@ log:EventShape rdf:type sh:NodeShape;
     sh:message "Event may have at most one source";
   ];
   sh:property [
+    sh:path log:hasUser;
+    sh:class log:User;
+    sh:minCount 0;
+  ];
+  sh:property [
+    sh:path log:hasAddress;
+    sh:class log:Address;
+    sh:minCount 0;
+  ];
+  sh:property [
+    sh:path log:hasApplication;
+    sh:class log:Application;
+    sh:minCount 0;
+  ];  
+  sh:property [
+    sh:path log:hasFile;
+    sh:class log:File;
+    sh:minCount 0;
+  ];
+  sh:property [
     sh:path log:hasTimeStamp;
     sh:class time:Instant;
     sh:minCount 0;
@@ -50,6 +84,20 @@ log:EventShape rdf:type sh:NodeShape;
 log:SourceShape rdf:type sh:NodeShape;
   sh:targetClass log:Source;
   sh:closed true;
+  sh:property [
+    sh:path log:uri; # A uri is associated to each node
+    sh:datatype xsd:string;
+    sh:minCount 1;
+    sh:maxCount 1;
+    sh:message "Node must have a URI";
+  ];
+  sh:property [
+    sh:path log:runName; # Workaround for run name
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Event may have at most one run name";
+  ];
   sh:property [
     sh:path log:sourceName;
     sh:datatype xsd:string;
@@ -75,6 +123,20 @@ log:SourceShape rdf:type sh:NodeShape;
 log:AddressShape rdf:type sh:NodeShape;
   sh:targetClass log:Address;
   sh:closed true;
+  sh:property [
+    sh:path log:uri; # A uri is associated to each node
+    sh:datatype xsd:string;
+    sh:minCount 1;
+    sh:maxCount 1;
+    sh:message "Node must have a URI";
+  ];
+  sh:property [
+    sh:path log:runName; # Workaround for run name
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Event may have at most one run name";
+  ];
   sh:property [
     sh:path log:addressIPV4;
     sh:datatype xsd:string;
@@ -190,6 +252,20 @@ log:ApplicationShape rdf:type sh:NodeShape;
     [ sh:path log:hasProcess ]
   );
   sh:property [
+    sh:path log:uri; # A uri is associated to each node
+    sh:datatype xsd:string;
+    sh:minCount 1;
+    sh:maxCount 1;
+    sh:message "Node must have a URI";
+  ];
+  sh:property [
+    sh:path log:runName; # Workaround for run name
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Event may have at most one run name";
+  ];
+  sh:property [
     sh:path log:applicationName;
     sh:datatype xsd:string;
     sh:minCount 0;
@@ -214,6 +290,20 @@ log:ApplicationShape rdf:type sh:NodeShape;
 log:FileShape rdf:type sh:NodeShape;
   sh:targetClass log:File;
   sh:closed true;
+  sh:property [
+    sh:path log:uri; # A uri is associated to each node
+    sh:datatype xsd:string;
+    sh:minCount 1;
+    sh:maxCount 1;
+    sh:message "Node must have a URI";
+  ];
+  sh:property [
+    sh:path log:runName; # Workaround for run name
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Event may have at most one run name";
+  ];
   sh:property [
     sh:path log:fileName;
     sh:datatype xsd:string;
@@ -277,6 +367,20 @@ log:ProcessShape rdf:type sh:NodeShape;
     [ sh:path log:processSignal ]
   );
   sh:property [
+    sh:path log:uri; # A uri is associated to each node
+    sh:datatype xsd:string;
+    sh:minCount 1;
+    sh:maxCount 1;
+    sh:message "Node must have a URI";
+  ];
+  sh:property [
+    sh:path log:runName; # Workaround for run name
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Event may have at most one run name";
+  ];
+  sh:property [
     sh:path log:processPID;
     sh:or ( [ sh:datatype xsd:string ] [ sh:datatype xsd:integer ] );
     sh:minCount 0;
@@ -302,6 +406,20 @@ log:URLShape rdf:type sh:NodeShape;
   sh:targetClass log:URL;
   sh:closed true;
   sh:property [
+    sh:path log:uri; # A uri is associated to each node
+    sh:datatype xsd:string;
+    sh:minCount 1;
+    sh:maxCount 1;
+    sh:message "Node must have a URI";
+  ];
+  sh:property [
+    sh:path log:runName; # Workaround for run name
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Event may have at most one run name";
+  ];
+  sh:property [
     sh:path log:url;
     sh:datatype xsd:string;
     sh:minCount 1;
@@ -309,11 +427,35 @@ log:URLShape rdf:type sh:NodeShape;
     sh:message "URL must have an url address";
   ].
 
+log:IdentityCredentialShape rdf:type sh:NodeShape;
+  sh:targetClass log:IdentityCredential;
+  sh:closed true;
+  sh:property [
+    sh:path log:uri; # A uri is associated to each node
+    sh:datatype xsd:string;
+    sh:minCount 1;
+    sh:maxCount 1;
+    sh:message "Node must have a URI";
+  ];
+  sh:property [
+    sh:path log:runName; # Workaround for run name
+    sh:datatype xsd:string;
+    sh:minCount 0;
+    sh:maxCount 1;
+    sh:message "Event may have at most one run name";
+  ];
+  sh:property [
+    sh:path log:credentialValue;
+    sh:datatype xsd:string;
+    sh:minCount 1;
+    sh:maxCount 1;
+    sh:message "Credential must have a value";
+  ].
+
 log:UserShape rdf:type sh:NodeShape;
   sh:targetClass log:User;
   sh:closed true;
   sh:or (
-    [ sh:path log:userName ]
     [ sh:path log:userUID ]
     [ sh:path log:userAUID ]
     [ sh:path log:userGID ]
@@ -321,11 +463,23 @@ log:UserShape rdf:type sh:NodeShape;
     [ sh:path log:userGroupName ]
   );
   sh:property [
-    sh:path log:userName;
+    sh:path log:uri; # A uri is associated to each node
+    sh:datatype xsd:string;
+    sh:minCount 1;
+    sh:maxCount 1;
+    sh:message "Node must have a URI";
+  ];
+  sh:property [
+    sh:path log:runName; # Workaround for run name
     sh:datatype xsd:string;
     sh:minCount 0;
     sh:maxCount 1;
-    sh:message "User may have at most one name";
+    sh:message "Event may have at most one run name";
+  ];
+  sh:property [
+    sh:path log:hasCredential;
+    sh:class log:IdentityCredential;
+    sh:minCount 0;
   ];
   sh:property [
     sh:path log:userUID;

@@ -75,6 +75,25 @@
   rdfs:comment "A user account, such as a local user, a domain user, etc.";
   rdfs:label "User Identity".
 
+:IdentityCredential rdf:type owl:Class;
+  rdfs:comment "A credential used by a user to authenticate, such as a username, password, or a token.";
+  rdfs:label "Identity Credentials".
+
+:UserName rdf:type owl:Class;
+  rdfs:subClassOf :IdentityCredential;
+  rdfs:comment "A user name, such as a login name.";
+  rdfs:label "User Name".
+
+:UserEmail rdf:type owl:Class;
+  rdfs:subClassOf :IdentityCredential;
+  rdfs:comment "An email address, used as a user identifier.";
+  rdfs:label "User Email Address".
+
+:UserPassword rdf:type owl:Class;
+  rdfs:subClassOf :IdentityCredential;
+  rdfs:comment "A password, used to authenticate a user.";
+  rdfs:label "User Password".
+
 #################################################################
 #    Object Properties
 #################################################################
@@ -119,6 +138,11 @@
   rdfs:domain :Event;
   rdfs:range :User;
   rdfs:comment "Relation between an Event and a User mentioned in it.".
+
+:hasCredential rdf:type owl:ObjectProperty;
+  rdfs:domain :User;
+  rdfs:range :IdentityCredential;
+  rdfs:comment "Relation between a User and its Identity Credential.".
 
 ###  https://cyberseclab.unibs.it/ontologx/log/dictionary#hasTimeStamp
 :hasTimeStamp rdf:type owl:ObjectProperty;
@@ -333,16 +357,10 @@
   rdfs:range xsd:integer;
   rdfs:comment "User account audit ID (auid)".
 
-###  https://cyberseclab.unibs.it/ontologx/log/dictionary#userName
-:userName rdf:type owl:DatatypeProperty;
-  rdfs:domain :User;
+:credentialValue rdf:type owl:DatatypeProperty;
+  rdfs:domain :IdentityCredential;
   rdfs:range xsd:string;
-  rdfs:comment "User account name".
-
-:userEmail rdf:type owl:DatatypeProperty;
-  rdfs:domain :User;
-  rdfs:range xsd:string;
-  rdfs:comment "User account email".
+  rdfs:comment "Value of the credential (e.g. password, token value, etc.)".
 
 ###  https://cyberseclab.unibs.it/ontologx/log/dictionary#sourceType
 :sourceType rdf:type owl:DatatypeProperty;

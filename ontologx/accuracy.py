@@ -200,7 +200,7 @@ class OntologyGraphMetrics:
                     entities_correct.append(entity_pred)
                     entities_true.remove(entity_true)
                     break
-        self.entity_linking_accuracy = len(entities_correct) / len(entities_true) if entities_true else 0
+        self.entity_linking_accuracy = len(entities_correct) / len(true.nodes) if entities_true else 0
 
         # Only consider relatioships among correct entities
         candidate_rels = [

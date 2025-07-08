@@ -95,8 +95,11 @@
   log:addressIPV4 "192.168.230.95";
   log:addressPort 40288.
 
+:username-14 rdf:type log:UserName;
+  log:credentialValue "twhite".
+
 :user-14 rdf:type log:User;
-  log:userName "twhite".
+  log:hasCredential :username-14.
 
 :application-14 rdf:type log:Application;
   log:applicationName "openvpn".
@@ -122,9 +125,14 @@
   log:sourceDevice "mail";
   log:sourceType "application".
 
-:user-15 rdf:type log:User;
-  log:userName "rebecca.blake";
-  log:userEmail "rebecca.blake@smith.russellmitchell.com".
+:username-15 rdf:type log:UserName;
+  log:credentialValue "rebecca.blake".
+
+:email-15 rdf:type log:UserEmail;
+  log:credentialValue "rebecca.blake@smith.russellmitchell.com".
+
+:user-15 rdf:type log:User; 
+  log:hasCredential :username-15, :email-15.
 
 :event-15 rdf:type log:Event;
   log:eventMessage "2022-01-23 05:53:06 1nBVoI-00073L-0p => rebecca.blake <rebecca.blake@smith.russellmitchell.com> R=local_user T=maildir_home";
@@ -418,12 +426,18 @@
 :application-27 rdf:type log:Application;
   log:applicationName "sudo".
 
+:username-27-1 rdf:type log:UserName;
+  log:credentialValue "root".
+
 :user-27-1 rdf:type log:User;
-  log:userName "root".
+  log:hasCredential :username-27-1.
+
+:username-27-2 rdf:type log:UserName;
+  log:credentialValue "ait".
 
 :user-27-2 rdf:type log:User;
-  log:userName "ait";
-  log:userID 0.
+  log:hasCredential :username-27-2;
+  log:userUID 0.
 
 :event-27 rdf:type log:Event;
   log:eventMessage "Jan 20 12:17:27 morris-mail sudo: pam_unix(sudo:session): session opened for user root by ait(uid=0)";
@@ -455,8 +469,11 @@
 :address-28 rdf:type log:Address;
   log:addressIPV4 "172.19.130.68".
 
+:username-28 rdf:type log:UserName;
+  log:credentialValue "dorothy.ellis".
+
 :user-28 rdf:type log:User;
-  log:userName "dorothy.ellis".
+  log:hasCredential :username-28.
 
 :file-28 rdf:type log:File;
   log:filePath "/usr/share/horde/login.php";
@@ -976,8 +993,11 @@
   log:addressIPV4 "192.168.230.95";
   log:addressPort 36864.
 
+:username-49 rdf:type log:UserName;
+  log:credentialValue "twhite".
+
 :user-49 rdf:type log:User;
-  log:userName "twhite".
+  log:hasCredential :username-49.
 
 :event-49 rdf:type log:Event;
   log:eventMessage '2022-01-23 22:43:34 twhite/192.168.230.95:36864 Validating certificate extended key usage';
@@ -1123,8 +1143,11 @@
   log:addressIPV4 "192.168.230.165";
   log:addressPort 59814.
 
+:username-56 rdf:type log:UserName;
+  log:credentialValue "jhall".
+
 :user-56 rdf:type log:User;
-  log:userName "jhall".
+  log:hasCredential :username-56.
 
 :application-56 rdf:type log:Application;
   log:applicationName "openvpn".
@@ -1154,8 +1177,11 @@
   log:addressIPV4 "192.168.231.127";
   log:addressPort 37135.
 
+:username-57 rdf:type log:UserName;
+  log:credentialValue "ahayes".
+
 :user-57 rdf:type log:User;
-  log:userName "ahayes".
+  log:hasCredential :username-57.
 
 :application-57 rdf:type log:Application;
   log:applicationName "openvpn".
