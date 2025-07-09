@@ -1,0 +1,115 @@
+@prefix : <https://cyberseclab.unibs.it/ontologx/log/examples/1.0#>.
+@prefix log: <https://cyberseclab.unibs.it/ontologx/log/dictionary#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix time: <http://www.w3.org/2006/time#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix mls: <http://www.w3.org/ns/mls#>.
+@prefix dc: <http://purl.org/dc/terms#>.
+
+# dionaea,dionaea.json-20211130.gz,"{""connection"": {""protocol"": ""mssqld"", ""transport"": ""tcp"", ""type"": ""accept""}, ""dst_ip"": ""172.26.0.2"", ""dst_port"": 1433, ""src_hostname"": """", ""src_ip"": ""10.0.0.1"", ""src_port"": 59100, ""timestamp"": ""2021-11-29T14:34:04.377302"", ""credentials"": {""username"": [""sa""], ""password"": [""Password2014++""]}}"
+
+:timestamp-1 rdf:type time:Instant ;
+  time:inXSDDate "2021-11-29"^^xsd:date;
+  time:inXSDDateTimeStamp "2021-11-29T14:34:04.377302Z"^^xsd:dateTimeStamp;
+  time:inXSDgYear "2021"^^xsd:gYear;
+  time:inXSDgYearMonth "2021-11"^^xsd:gYearMonth.
+
+:source-1 rdf:type log:Source;
+  log:sourceName "dionaea.json-20211130.gz";
+  log:sourceType "dionaea".
+
+:address-1-1 rdf:type log:Address;
+  log:addressIPV4 "172.26.0.2";
+  log:addressPort 1433.
+
+:address-1-2 rdf:type log:Address;
+  log:addressIPV4 "10.0.0.1";
+  log:addressPort 59100.
+
+:application-1 rdf:type log:Application;
+  log:applicationName "mssqld".
+
+:event-1 rdf:type log:Event;
+  log:eventMessage "{\"connection\": {\"protocol\": \"mssqld\", \"transport\": \"tcp\", \"type\": \"accept\"}, \"dst_ip\": \"172.26.0.2\", \"dst_port\": 1433, \"src_hostname\": \"\", \"src_ip\": \"10.0.0.1\", \"src_port\": 59100, \"timestamp\": \"2021-11-29T14:34:04.377302\", \"credentials\": {\"username\": [\"sa\"], \"password\": [\"Password2014++\"]}}";
+  log:eventSeverity "INFO";
+  log:hasSource :source-1;
+  log:hasAddress :address-1-1, :address-1-2;
+  log:hasApplication :application-1;
+  log:hasTimeStamp :timestamp-1.
+
+# cowrie,cowrie.json.2021-04-11,"{""eventid"":""cowrie.direct-tcpip.request"",""dst_ip"":""35.190.214.48"",""dst_port"":443,""src_ip"":""45.227.255.207"",""src_port"":0,""message"":""direct-tcp connection request to 35.190.214.48:443 from 0.0.0.0:0"",""sensor"":""4f2220a17ee1"",""timestamp"":""2021-04-11T19:13:51.180173Z"",""session"":""e925470c3175""}"
+
+:timestamp-2 rdf:type time:Instant ;
+  time:inXSDDate "2021-04-11"^^xsd:date;
+  time:inXSDDateTimeStamp "2021-04-11T19:13:51.180173Z"^^xsd:dateTimeStamp;
+  time:inXSDgYear "2021"^^xsd:gYear;
+  time:inXSDgYearMonth "2021-04"^^xsd:gYearMonth.
+
+:source-2 rdf:type log:Source;
+  log:sourceName "cowrie.json.2021-04-11";
+  log:sourceType "cowrie".
+
+:address-2-1 rdf:type log:Address;
+  log:addressIPV4 "35.190.214.48";
+  log:addressPort 443.
+
+:address-2-2 rdf:type log:Address;
+  log:addressIPV4 "45.227.255.207";
+  log:addressPort 0.
+
+:application-2 rdf:type log:Application;
+  log:applicationName "direct-tcpip".
+
+:event-2 rdf:type log:Event;
+  log:eventMessage "{\"eventid\":\"cowrie.direct-tcpip.request\",\"dst_ip\":\"35.190.214.48\",\"dst_port\":443,\"src_ip\":\"45.227.255.207\",\"src_port\":0,\"message\":\"direct-tcp connection request to 35.190.214.48:443 from 0.0.0.0:0\",\"sensor\":\"4f2220a17ee1\",\"timestamp\":\"2021-04-11T19:13:51.180173Z\",\"session\":\"e925470c3175\"}";
+  log:eventSeverity "INFO";
+  log:hasSource :source-2;
+  log:hasAddress :address-2-1, :address-2-2;
+  log:hasApplication :application-2;
+  log:hasTimeStamp :timestamp-2.
+
+#cowrie,cowrie.json.2021-04-22,"{""eventid"":""cowrie.session.params"",""arch"":""linux-powerpc-lsb"",""message"":[],""sensor"":""8bc94e80bc9b"",""timestamp"":""2021-04-22T14:12:42.388631Z"",""src_ip"":""164.90.172.66"",""session"":""d5950f79df24""}"
+
+:timestamp-3 rdf:type time:Instant ;
+  time:inXSDDate "2021-04-22"^^xsd:date;
+  time:inXSDDateTimeStamp "2021-04-22T14:12:42.388631Z"^^xsd:dateTimeStamp;
+  time:inXSDgYear "2021"^^xsd:gYear;
+  time:inXSDgYearMonth "2021-04"^^xsd:gYearMonth.
+
+:source-3 rdf:type log:Source;
+  log:sourceName "cowrie.json.2021-04-22";
+  log:sourceType "cowrie".
+
+:address-3-1 rdf:type log:Address;
+  log:addressIPV4 "164.90.172.66".
+
+
+:application-3 rdf:type log:Application;
+  log:applicationName "linux-powerpc-lsb".
+
+:event-3 rdf:type log:Event;
+  log:eventMessage "{\"eventid\":\"cowrie.session.params\",\"arch\":\"linux-powerpc-lsb\",\"message\":[],\"sensor\":\"8bc94e80bc9b\",\"timestamp\":\"2021-04-22T14:12:42.388631Z\",\"src_ip\":\"164.90.172.66\",\"session\":\"d5950f79df24\"}";
+  log:eventSeverity "INFO";
+  log:hasSource :source-3;
+  log:hasAddress :address-3-1;
+  log:hasApplication :application-3;
+  log:hasTimeStamp :timestamp-3.
+
+# cowrie,cowrie.json.2024-05-06,"{""eventid"":""cowrie.login.failed"",""username"":""kubernetes"",""password"":""kubernetes"",""message"":""login attempt [kubernetes/kubernetes] failed"",""sensor"":""7bf2b91954c7"",""timestamp"":""2024-05-06T03:37:53.518446Z"",""src_ip"":""170.64.236.134"",""session"":""cb3378ab3a47""}"
+
+# dionaea,dionaea.json-20220212.gz,"{""connection"": {""protocol"": ""mirrorc"", ""transport"": ""tcp"", ""type"": ""connect""}, ""dst_ip"": ""172.26.0.2"", ""dst_port"": 37295, ""src_hostname"": """", ""src_ip"": ""91.219.212.203"", ""src_port"": 42, ""timestamp"": ""2022-02-11T11:39:31.844142""}"
+
+# cowrie,cowrie.json.2022-06-10,"{""eventid"":""cowrie.command.input"",""input"":""cat /proc/cpuinfo | grep name | head -n 1 | awk '{print $4,$5,$6,$7,$8,$9;}'"",""message"":""CMD: cat /proc/cpuinfo | grep name | head -n 1 | awk '{print $4,$5,$6,$7,$8,$9;}'"",""sensor"":""3c728c286bae"",""timestamp"":""2022-06-10T09:40:20.008803Z"",""src_ip"":""23.94.70.83"",""session"":""3be6aef77894""}"
+
+# cowrie,cowrie.json.2022-08-31,"{""eventid"":""cowrie.login.failed"",""username"":""vagrant"",""password"":""vagrant"",""message"":""login attempt [vagrant/vagrant] failed"",""sensor"":""b7c67a0683b7"",""timestamp"":""2022-08-31T23:50:21.701949Z"",""src_ip"":""113.31.118.105"",""session"":""387d9f1a6180""}"
+
+# cowrie,cowrie.json.2020-12-11.gz,"{""eventid"":""cowrie.login.failed"",""username"":""root"",""password"":""vizxv"",""message"":""login attempt [root/vizxv] failed"",""sensor"":""gateway"",""timestamp"":""2020-12-11T07:13:23.402779Z"",""src_ip"":""94.73.29.158"",""session"":""59e69bcce00a""}"
+
+# cowrie,cowrie.json.2021-09-11,"{""eventid"":""cowrie.login.success"",""username"":""xavier"",""password"":""123456"",""message"":""login attempt [xavier/123456] succeeded"",""sensor"":""8693ee54a0b5"",""timestamp"":""2021-09-11T09:15:18.077504Z"",""src_ip"":""178.210.39.78"",""session"":""ccd1d0c8607a""}"
+
+# cowrie,cowrie.json.2024-05-25,"{""eventid"":""cowrie.login.failed"",""username"":""root"",""password"":""zahid"",""message"":""login attempt [root/zahid] failed"",""sensor"":""94e4ea5ba77b"",""timestamp"":""2024-05-25T12:52:31.828186Z"",""src_ip"":""180.101.88.234"",""session"":""77b257979e12""}"
+
+# Dataset
+:validation-dataset rdf:type mls:Dataset;
+  dc:type "test";
+  mls:hasPart :event-1, :event-2, :event-3.
