@@ -81,10 +81,10 @@ class Config:
     ontology_path = os.getenv("ONTOLOGY_PATH", "resources/ontologies/logs.ttl")
     """The path to the ontology file."""
 
-    examples_path = os.getenv("EXAMPLES_PATH", "resources/data/train.ttl")
+    examples_path = os.getenv("EXAMPLES_PATH", "resources/data/ait/train.ttl")
     """ The path to the examples log graphs file. Used to retrieve the examples."""
 
-    tests_path = os.getenv("TESTS_PATH", "resources/data/test.ttl")
+    tests_path = os.getenv("TESTS_PATH", "resources/data/ait/test.ttl")
     """The input path to the logs to parse."""
 
     shacl_path = os.getenv("CONSTRAINTS_PATH", "resources/ontologies/logs_shacl.ttl")

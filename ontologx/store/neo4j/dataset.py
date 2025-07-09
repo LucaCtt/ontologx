@@ -86,7 +86,7 @@ class Dataset:
             WHERE e.embedding IS NULL AND d.uri STARTS WITH $examples_uri
             SET e.runName = ''
             RETURN elementId(e) AS id, e.eventMessage AS eventMessage, s.sourceName AS sourceName,
-            s.sourceDevice AS sourceDevice
+            s.sourceDevice AS sourceDevice, s.sourceType AS sourceType
             """,
             params={
                 "run_name": self.__config.run_name,
@@ -96,7 +96,11 @@ class Dataset:
         texts = [
             _compose_embeddings_text(
                 el["eventMessage"],
-                {"sourceName": el["sourceName"], "sourceDevice": el["sourceDevice"]},
+                {
+                    "sourceName": el.get("sourceName", ""),
+                    "sourceDevice": el["sourceDevice"] if el.get("sourceDevice") else "",  # Handle missing sourceDevice
+                    "sourceType": el["sourceType"] if el.get("sourceType") else "",  # Handle missing sourceType
+                },
             )
             for el in to_populate
         ]
@@ -163,8 +167,9 @@ class Dataset:
             source_node = next((node for node in graph.nodes if node.type == "Source"), None)
             context = (
                 {
-                    "sourceName": source_node.properties["sourceName"],
-                    "sourceDevice": source_node.properties["sourceDevice"],
+                    "sourceName": source_node.properties.get("sourceName", ""),
+                    "sourceDevice": source_node.properties.get("sourceDevice", ""),
+                    "sourceType": source_node.properties.get("sourceType", ""),
                 }
                 if source_node
                 else {}
