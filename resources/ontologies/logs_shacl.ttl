@@ -1,4 +1,4 @@
-@prefix log: <https://cyberseclab.unibs.it/ontologx/log/dictionary#>.
+@prefix log: <neo4j://graph.schema#>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
@@ -28,7 +28,8 @@ log:EventShape rdf:type sh:NodeShape;
   ];
   sh:property [
     sh:path log:hasParameter;
-    sh:class log:Property;
+    # sh:class log:Property;
+    sh:nodeKind sh:IRI;
   ].
 
 log:SourceShape rdf:type sh:NodeShape;
@@ -126,12 +127,14 @@ log:ApplicationShape rdf:type sh:NodeShape;
   ];
   sh:property [
     sh:path log:hasArgument;
-    sh:class log:Parameter;
+    # sh:class log:Parameter;
+    sh:nodeKind sh:IRI;
   ];
   sh:property [
     sh:path log:concatenatesWith;
     sh:class log:ConcatenationOperator;
     sh:maxCount 1;
+    sh:nodeKind sh:IRI;
   ].
 
 log:ConcatenationOperatorShape rdf:type sh:NodeShape;
@@ -148,6 +151,7 @@ log:ConcatenationOperatorShape rdf:type sh:NodeShape;
     sh:class log:Application;
     sh:minCount 1;
     sh:maxCount 1;
+    sh:nodeKind sh:IRI;
   ].
 
 log:ProcessShape rdf:type sh:NodeShape;
@@ -209,7 +213,8 @@ log:UserShape rdf:type sh:NodeShape;
   ];
   sh:property [
     sh:path log:hasCredential;
-    sh:class log:IdentityCredential;
+    # sh:class log:IdentityCredential;
+    sh:nodeKind sh:IRI;
   ].
 
 log:UserCredentialShape rdf:type sh:NodeShape;

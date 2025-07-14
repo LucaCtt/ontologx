@@ -82,8 +82,9 @@ class Dataset:
         # Populate the embeddings for the examples
         to_populate = self.__graph_store.query(
             """
-            MATCH (d:Dataset)-[:hasPart]->(e:Event)-[:hasSource]->(s:Source)
+            MATCH (d:Dataset)-[:hasPart]->(e:Event)
             WHERE e.embedding IS NULL AND d.uri STARTS WITH $examples_uri
+            OPTIONAL MATCH (e)-[:hasParameter]->(s:Source)
             SET e.runName = ''
             RETURN elementId(e) AS id, e.eventMessage AS eventMessage, s.sourceName AS sourceName,
             s.sourceDevice AS sourceDevice

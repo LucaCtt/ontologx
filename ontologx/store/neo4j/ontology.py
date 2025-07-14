@@ -149,6 +149,7 @@ class Ontology:
             WITH COLLECT(n) AS nodes
             CALL n10s.validation.shacl.validateSet(nodes)
             YIELD focusNode, nodeType, propertyShape, offendingValue, resultPath, severity
+            WHERE resultPath <> "uri" AND resultPath <> "embedding" AND resultPath <> "runName"
             RETURN focusNode, nodeType, propertyShape, offendingValue, resultPath, severity
             """,
             params={"uris": nodes_uris},
