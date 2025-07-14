@@ -93,7 +93,7 @@ def _relationship_match(rel1: Relationship, rel2: Relationship) -> bool:
 
 def _geval(y_pred: list[GraphDocument], model: DeepEvalBaseLLM) -> float:
     metric = GEval(
-        name="Alignment",
+        name="Graph Alignment",
         model=model,
         evaluation_steps=[
             (
@@ -116,7 +116,7 @@ def _geval(y_pred: list[GraphDocument], model: DeepEvalBaseLLM) -> float:
                 "as long as it enriches the representation without introducing unrelated or incorrect content."
             ),
         ],
-        evaluation_params=[LLMTestCaseParams.ACTUAL_OUTPUT, LLMTestCaseParams.INPUT],
+        evaluation_params=[LLMTestCaseParams.INPUT, LLMTestCaseParams.ACTUAL_OUTPUT],
     )
     test_cases = [
         LLMTestCase(
@@ -128,6 +128,11 @@ def _geval(y_pred: list[GraphDocument], model: DeepEvalBaseLLM) -> float:
 
     measures = []
     for test_case in test_cases:
+        # If the actual output is None, skip the LLM evaluation completely
+        if test_case.actual_output == "[]":
+            measures.append(0)
+            continue
+
         # Re-run the measure for 5 attempts to mitigate invalid LLM output issues
         res = 0
         for _ in range(5):

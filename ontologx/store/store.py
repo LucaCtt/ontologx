@@ -55,14 +55,23 @@ class Store(ABC):
         """
 
     @abstractmethod
-    def validate_event_graph(self, event_graph: GraphDocument) -> bool:
+    def total_constraints(self) -> int:
+        """Get the total number of SHACL constraints in the store.
+
+        Returns:
+            int: The total number of constraints.
+
+        """
+
+    @abstractmethod
+    def validate_event_graph(self, event_graph: GraphDocument) -> int:
         """Validate the event graph against the SHACL constraints defined in the ontology.
 
         Args:
             event_graph (GraphDocument): The event graph to validate with SHACL.
 
         Returns:
-            bool: True if the event graph is valid, False otherwise.
+            int: The number of SHACL violations found in the event graph.
 
         """
 

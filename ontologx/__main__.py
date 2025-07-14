@@ -36,6 +36,9 @@ logging.basicConfig(
 logger = logging.getLogger("rich")
 logger.setLevel(logging.DEBUG)
 
+# Silence useless logs from Neo4j
+logging.getLogger("neo4j").setLevel(logging.ERROR)
+
 # Load the embeddings model
 embeddings = EmbeddingsFactory.create(
     backend=config.embeddings_backend,
@@ -102,7 +105,7 @@ def run() -> None:
 
         total_time = 0
         total_success = 0
-        total_shacl_violations = 0
+        pct_shacl_violations = 0
         graphs_pred = []
         graphs_true = []
 
@@ -128,8 +131,7 @@ def run() -> None:
 
                 store.add_event_graph(graph_pred)
 
-                if not store.validate_event_graph(graph_pred):
-                    total_shacl_violations += 1
+                pct_shacl_violations += store.validate_event_graph(graph_pred) / store.total_constraints()
 
             graphs_true.append(graph_true)
 
@@ -142,7 +144,7 @@ def run() -> None:
             ("run_total_time", total_time),
             ("average_generation_time", total_time / len(test_events)),
             ("generation_success_percentage", total_success / len(test_events)),
-            ("SHACL_violations_percentage", total_shacl_violations / len(test_events)),
+            ("SHACL_violations_percentage", pct_shacl_violations / len(test_events)),
             ("precision", metrics.precision),
             ("recall", metrics.recall),
             ("f1_score", metrics.f1),

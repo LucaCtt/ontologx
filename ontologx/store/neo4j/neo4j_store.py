@@ -62,7 +62,10 @@ class Neo4jStore(Store):
     def add_event_graph(self, event_graph: GraphDocument) -> None:
         self.__dataset.add_event_graph(event_graph)
 
-    def validate_event_graph(self, event_graph: GraphDocument) -> bool:
+    def total_constraints(self) -> int:
+        return self.__onto.total_constraints()
+
+    def validate_event_graph(self, event_graph: GraphDocument) -> int:
         return self.__onto.validate(event_graph)
 
     def add_evaluation_result(self, measure: str, evaluation: str | float) -> None:

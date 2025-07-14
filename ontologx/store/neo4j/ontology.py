@@ -128,7 +128,19 @@ class Ontology:
             ),
         )
 
-    def validate(self, graph: GraphDocument) -> bool:
+    def total_constraints(self) -> int:
+        """Return the total number of SHACL constraints in the ontology.
+
+        Returns:
+            int: The total number of SHACL constraints.
+
+        """
+        result = self.__graph_store.query(
+            "CALL n10s.validation.shacl.listShapes() YIELD target RETURN COUNT(target) AS count",
+        )
+        return result[0]["count"] if result else 0
+
+    def validate(self, graph: GraphDocument) -> int:
         """Validate the given graph against the SHACL constraints.
 
         The nodes in the graph must already be present in the store.
@@ -137,7 +149,7 @@ class Ontology:
             graph (GraphDocument): The graph to validate.
 
         Returns:
-            bool: True if the graph is valid, False otherwise.
+            int: The number of validation errors found in the graph.
 
         """
         nodes_uris = [node.id for node in graph.nodes]
@@ -155,4 +167,4 @@ class Ontology:
             params={"uris": nodes_uris},
         )
 
-        return len(result) == 0
+        return len(result)
