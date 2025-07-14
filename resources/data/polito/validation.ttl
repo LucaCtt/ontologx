@@ -1,10 +1,9 @@
-@prefix : <https://cyberseclab.unibs.it/ontologx/log/examples/1.0#>.
+@prefix : <https://cyberseclab.unibs.it/ontologx/log/tests#>.
 @prefix log: <https://cyberseclab.unibs.it/ontologx/log/dictionary#>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix time: <http://www.w3.org/2006/time#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 @prefix mls: <http://www.w3.org/ns/mls#>.
-@prefix dc: <http://purl.org/dc/terms#>.
 
 # dionaea,dionaea.json-20211130.gz,"{""connection"": {""protocol"": ""mssqld"", ""transport"": ""tcp"", ""type"": ""accept""}, ""dst_ip"": ""172.26.0.2"", ""dst_port"": 1433, ""src_hostname"": """", ""src_ip"": ""10.0.0.1"", ""src_port"": 59100, ""timestamp"": ""2021-11-29T14:34:04.377302"", ""credentials"": {""username"": [""sa""], ""password"": [""Password2014++""]}}"
 
@@ -124,5 +123,4 @@
 
 # Dataset
 :validation-dataset rdf:type mls:Dataset;
-  dc:type "test";
   mls:hasPart :event-1, :event-2, :event-3.

@@ -1,10 +1,9 @@
-@prefix : <https://cyberseclab.unibs.it/ontologx/log/examples/1.0#>.
+@prefix : <https://cyberseclab.unibs.it/ontologx/log/examples/#>.
 @prefix log: <https://cyberseclab.unibs.it/ontologx/log/dictionary#>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix time: <http://www.w3.org/2006/time#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 @prefix mls: <http://www.w3.org/ns/mls#>.
-@prefix dc: <http://purl.org/dc/terms#>.
 
 # inet-dns, syslog.1.csv, Jan 25 06:17:01 inet-dns CRON[16314]: (root) CMD (   cd / && run-parts --report /etc/cron.hourly)
 :timestamp-1 rdf:type time:Instant;
@@ -268,5 +267,4 @@
 
 # Dataset
 :examples-dataset rdf:type mls:Dataset;
-  dc:type "examples";
   mls:hasPart :event-1, :event-2, :event-3, :event-4, :event-5, :event-6, :event-7, :event-8, :event-9, :event-10.

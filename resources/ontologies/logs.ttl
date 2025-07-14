@@ -114,11 +114,6 @@
   rdfs:comment "A password, used to authenticate a user.";
   rdfs:label "User Password".
 
-:String rdf:type owl:Class;
-  rdfs:subClassOf :Parameter;
-  rdfs:comment "A generic string, such as a text message, a log line, etc.";
-  rdfs:label "String".
-
 #################################################################
 #    Object Properties
 #################################################################
