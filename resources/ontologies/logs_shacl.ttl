@@ -1,30 +1,11 @@
-@prefix log: <neo4j://graph.schema#>.
-@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix log: <https://cyberseclab.unibs.it/ontologx/log/dictionary#>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 
-log:CommonShape rdf:type sh:NodeShape;
-  sh:targetClass owl:Class;
-  sh:property [
-    # A uri is associated to each node
-    sh:path log:uri;
-    sh:datatype xsd:string;
-    sh:minCount 1;
-    sh:maxCount 1;
-  ];
-  sh:property [
-    sh:path log:runName;
-    # Workaround for run name
-    sh:datatype xsd:string;
-    sh:maxCount 1;
-  ].
-
 log:EventShape rdf:type sh:NodeShape;
   sh:targetClass log:Event;
   sh:closed true;
-  # Workaround for log embeddings added by Neo4j
-  sh:property [ sh:path log:embedding ];
   sh:property [
     sh:path log:eventMessage;
     sh:datatype xsd:string;
@@ -47,7 +28,7 @@ log:EventShape rdf:type sh:NodeShape;
   ];
   sh:property [
     sh:path log:hasParameter;
-    sh:class log:Parameter;
+    sh:class log:Property;
   ].
 
 log:SourceShape rdf:type sh:NodeShape;
@@ -97,9 +78,9 @@ log:NetworkAddressShape rdf:type sh:NodeShape;
   sh:or (
     [ sh:path log:networkAddressIPV4 ]
     [ sh:path log:networkAddressIPV6 ]
-    [ sh:path log:addressMAC ]
-    [ sh:path log:addressPort ]
-    [ sh:path log:addressHostname ]
+    [ sh:path log:networkAddressMAC ]
+    [ sh:path log:networkAddressPort ]
+    [ sh:path log:networkAddressHostname ]
   );
   sh:property [
     sh:path log:networkAddressIPV4;
@@ -114,18 +95,18 @@ log:NetworkAddressShape rdf:type sh:NodeShape;
     sh:pattern "^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$"^^xsd:string;
   ];
   sh:property [
-    sh:path log:addressMAC;
+    sh:path log:networkAddressMAC;
     sh:datatype xsd:string;
     sh:maxCount 1;
     sh:pattern "^([0-9a-fA-F]{2}[:-]){5}([0-9a-fA-F]{2})$"^^xsd:string;
   ];
   sh:property [
-    sh:path log:addressPort;
+    sh:path log:networkAddressPort;
     sh:datatype xsd:integer;
     sh:maxCount 1;
   ];
   sh:property [
-    sh:path log:addressHostname;
+    sh:path log:networkAddressHostname;
     sh:datatype xsd:string;
     sh:maxCount 1;
   ].

@@ -86,7 +86,7 @@ class Dataset:
             WHERE e.embedding IS NULL AND d.uri STARTS WITH $examples_uri
             SET e.runName = ''
             RETURN elementId(e) AS id, e.eventMessage AS eventMessage, s.sourceName AS sourceName,
-            s.sourceDevice AS sourceDevice, s.sourceType AS sourceType
+            s.sourceDevice AS sourceDevice
             """,
             params={
                 "run_name": self.__config.run_name,
@@ -99,7 +99,6 @@ class Dataset:
                 {
                     "sourceName": el.get("sourceName", ""),
                     "sourceDevice": el["sourceDevice"] if el.get("sourceDevice") else "",  # Handle missing sourceDevice
-                    "sourceType": el["sourceType"] if el.get("sourceType") else "",  # Handle missing sourceType
                 },
             )
             for el in to_populate
@@ -169,7 +168,6 @@ class Dataset:
                 {
                     "sourceName": source_node.properties.get("sourceName", ""),
                     "sourceDevice": source_node.properties.get("sourceDevice", ""),
-                    "sourceType": source_node.properties.get("sourceType", ""),
                 }
                 if source_node
                 else {}

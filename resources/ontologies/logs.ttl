@@ -5,7 +5,6 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix time: <http://www.w3.org/2006/time#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
-@prefix prov: <http://www.w3.org/ns/prov#>.
 
 <https://cyberseclab.unibs.it/ontologx/log/dictionary> rdf:type owl:Ontology;
   owl:versionIRI <https://cyberseclab.unibs.it/ontologx/log/dictionary/1.0.0>;
@@ -30,9 +29,12 @@
 #    Classes
 #################################################################
 :Event rdf:type owl:Class;
-  rdfs:subClassOf prov:Entity;
   rdfs:comment "A single log event, such a log line in a log file.";
   rdfs:label "Event".
+
+:Parameter rdf:type owl:Class;
+  rdfs:comment "A parameter of an Event, such as a command line argument, a URL parameter, etc.";
+  rdfs:label "Parameter".
 
 :TimeStamp rdf:type owl:Class;
   rdfs:subClassOf time:Instant, :Parameter;
@@ -40,13 +42,9 @@
   rdfs:label "Timestamp".
 
 :Source rdf:type owl:Class;
-  rdfs:subClassOf prov:Agent;
+  rdfs:subClassOf :Parameter;
   rdfs:comment "A log source, such as an aggregation of logs from different applications (e.g., SysLog) or aggregation of several log files from different devices.";
   rdfs:label "Source".
-
-:Parameter rdf:type owl:Class;
-  rdfs:comment "A parameter of an Event, such as a command line argument, a URL parameter, etc.";
-  rdfs:label "Parameter".
 
 :HashString rdf:type owl:Class;
   rdfs:subClassOf :Parameter;
@@ -68,10 +66,6 @@
   rdfs:comment "An application, such as a web server, a database, etc.";
   rdfs:label "Application".
 
-:ConcatenationOperator rdf:type owl:Class;
-  rdfs:comment "An operator used to concatenate two commands, such as '|', '&&', '||', ';'.";
-  rdfs:label "Concatenation Operator".
-
 :Process rdf:type owl:Class;
   rdfs:subClassOf :Application;
   rdfs:comment "An operating system process.";
@@ -81,6 +75,10 @@
   rdfs:subClassOf :Application;
   rdfs:comment "A shell command.";
   rdfs:label "Command".
+
+:ConcatenationOperator rdf:type owl:Class;
+  rdfs:comment "An operator used to concatenate two commands, such as '|', '&&', '||', ';'.";
+  rdfs:label "Concatenation Operator".
 
 :File rdf:type owl:Class;
   rdfs:subClassOf :Parameter;
@@ -98,7 +96,6 @@
   rdfs:label "User".
 
 :UserCredential rdf:type owl:Class;
-  rdfs:subClassOf :Parameter;
   rdfs:comment "A credential used by a user to authenticate, such as a username, password, or a token.";
   rdfs:label "Identity Credentials".
 
@@ -136,6 +133,12 @@
   rdfs:range :Parameter;
   rdfs:comment "Relation between an Application and one of its arguments.";
   rdfs:label "Has Argument".
+
+:hasCredential rdf:type owl:ObjectProperty;
+  rdfs:domain :User;
+  rdfs:range :UserCredential;
+  rdfs:comment "Relation between a User and one of its credentials.";
+  rdfs:label "Has Credential".
 
 :concatenatesWith rdf:type owl:ObjectProperty;
   rdfs:domain :Application;

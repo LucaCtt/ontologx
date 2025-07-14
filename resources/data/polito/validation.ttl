@@ -8,7 +8,7 @@
 
 # dionaea,dionaea.json-20211130.gz,"{""connection"": {""protocol"": ""mssqld"", ""transport"": ""tcp"", ""type"": ""accept""}, ""dst_ip"": ""172.26.0.2"", ""dst_port"": 1433, ""src_hostname"": """", ""src_ip"": ""10.0.0.1"", ""src_port"": 59100, ""timestamp"": ""2021-11-29T14:34:04.377302"", ""credentials"": {""username"": [""sa""], ""password"": [""Password2014++""]}}"
 
-:timestamp-1 rdf:type time:Instant ;
+:timestamp-1 rdf:type log:TimeStamp;
   time:inXSDDate "2021-11-29"^^xsd:date;
   time:inXSDDateTimeStamp "2021-11-29T14:34:04.377302Z"^^xsd:dateTimeStamp;
   time:inXSDgYear "2021"^^xsd:gYear;
@@ -52,7 +52,7 @@
 
 # cowrie,cowrie.json.2021-04-11,"{""eventid"":""cowrie.direct-tcpip.request"",""dst_ip"":""35.190.214.48"",""dst_port"":443,""src_ip"":""45.227.255.207"",""src_port"":0,""message"":""direct-tcp connection request to 35.190.214.48:443 from 0.0.0.0:0"",""sensor"":""4f2220a17ee1"",""timestamp"":""2021-04-11T19:13:51.180173Z"",""session"":""e925470c3175""}"
 
-:timestamp-2 rdf:type time:Instant ;
+:timestamp-2 rdf:type log:TimeStamp;
   time:inXSDDate "2021-04-11"^^xsd:date;
   time:inXSDDateTimeStamp "2021-04-11T19:13:51.180173Z"^^xsd:dateTimeStamp;
   time:inXSDgYear "2021"^^xsd:gYear;
@@ -84,7 +84,7 @@
 
 #cowrie,cowrie.json.2021-04-22,"{""eventid"":""cowrie.session.params"",""arch"":""linux-powerpc-lsb"",""message"":[],""sensor"":""8bc94e80bc9b"",""timestamp"":""2021-04-22T14:12:42.388631Z"",""src_ip"":""164.90.172.66"",""session"":""d5950f79df24""}"
 
-:timestamp-3 rdf:type time:Instant ;
+:timestamp-3 rdf:type log:TimeStamp;
   time:inXSDDate "2021-04-22"^^xsd:date;
   time:inXSDDateTimeStamp "2021-04-22T14:12:42.388631Z"^^xsd:dateTimeStamp;
   time:inXSDgYear "2021"^^xsd:gYear;

@@ -9,7 +9,6 @@ You MUST adhere to the following constraints at all times:
 - Do not introduce any new node types, relationship types, or property types. Only use the available types.
 - Respect the appropriate casing for all types.
 - Use the appropriate node prefix for properties, e.g. "userUID" instead of "uid".
-- If not specified in the log event, try to infer the severity of the event based on the message. If you cannot determine the severity, default to "INFO".
 - The graph must be connected: there should be no isolated nodes.
 
 # Strict Compliance
