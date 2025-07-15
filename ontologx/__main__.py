@@ -105,7 +105,6 @@ def run() -> None:
 
         total_time = 0
         total_success = 0
-        pct_shacl_violations = 0
         graphs_pred = []
         graphs_true = []
 
@@ -131,26 +130,25 @@ def run() -> None:
 
                 store.add_event_graph(graph_pred)
 
-                pct_shacl_violations += store.validate_event_graph(graph_pred) / store.total_constraints()
-
             graphs_true.append(graph_true)
 
         logger.info("-------------------------")
         logger.info("Log parsing done.")
 
-        metrics = accuracy.AccuracyEvaluator(graphs_pred, graphs_true, tests_evaluator)
+        metrics = accuracy.AccuracyEvaluator(graphs_pred, graphs_true, tests_evaluator, store)
 
         results = [
             ("run_total_time", total_time),
             ("average_generation_time", total_time / len(test_events)),
             ("generation_success_percentage", total_success / len(test_events)),
-            ("SHACL_violations_percentage", pct_shacl_violations / len(test_events)),
+            ("SHACL_violations_percentage", metrics.shacl_violations_percentage),
             ("precision", metrics.precision),
             ("recall", metrics.recall),
             ("f1_score", metrics.f1),
             ("entity_linking_accuracy", metrics.entity_linking_accuracy),
             ("relationship_linking_accuracy", metrics.relationship_linking_accuracy),
-            ("g-eval", metrics.geval),
+            ("g-eval_mean_all", metrics.geval_mean),
+            ("g-eval_mean_valid_only", metrics.geval_mean_valid_only),
         ]
 
         for name, value in results:
