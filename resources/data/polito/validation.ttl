@@ -17,12 +17,12 @@
   log:sourceName "dionaea".
 
 :network-address-1-1 rdf:type log:NetworkAddress;
-  log:addressIPV4 "172.26.0.2";
-  log:addressPort 1433.
+  log:networkAddressIPV4 "172.26.0.2";
+  log:networkAddressPort 1433.
 
 :network-address-1-2 rdf:type log:NetworkAddress;
-  log:addressIPV4 "10.0.0.1"; 
-  log:addressPort 59100.
+  log:networkAddressIPV4 "10.0.0.1"; 
+  log:networkAddressPort 59100.
 
 :network-protocol-1-1 rdf:type log:NetworkProtocol;
   log:networkProtocolName "mssqld".
@@ -61,12 +61,12 @@
   log:sourceName "cowrie".
 
 :network-address-2-1 rdf:type log:NetworkAddress;
-  log:addressIPV4 "35.190.214.48";
-  log:addressPort 443.
+  log:networkAddressIPV4 "35.190.214.48";
+  log:networkAddressPort 443.
 
 :network-address-2-2 rdf:type log:NetworkAddress;
-  log:addressIPV4 "45.227.255.207";
-  log:addressPort 0.
+  log:networkAddressIPV4 "45.227.255.207";
+  log:networkAddressPort 0.
 
 :network-protocol-2 rdf:type log:NetworkProtocol;
   log:networkProtocolName "tcp".

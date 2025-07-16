@@ -51,8 +51,8 @@
   log:networkAddressPort 445.
 
 :network-address-2-2 rdf:type log:NetworkAddress;
-  log:addressIPV4 "131.117.130.12";
-  log:addressPort 50438.
+  log:networkAddressIPV4 "131.117.130.12";
+  log:networkAddressPort 50438.
 
 :network-protocol-2 rdf:type log:NetworkProtocol;
   log:networkProtocolName "smbd".
