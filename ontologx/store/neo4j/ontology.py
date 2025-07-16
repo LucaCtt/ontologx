@@ -7,10 +7,13 @@ from ontologx.config import Config
 from ontologx.store import GraphDocument, Node, Relationship
 
 TIME_ONTOLOGY_URI = "http://www.w3.org/2006/time#"
-INSTANT_CLASS_URI = f"{TIME_ONTOLOGY_URI}Instant"
 MLSCHEMA_ONTOLOGY_URI = "http://www.w3.org/ns/mls#"
-XML_SCHEMA_URI = "http://www.w3.org/2001/XMLSchema#"
-OWL_SCHEMA_URI = "http://www.w3.org/2002/07/owl#"
+ONTOLOGY_PARAMS = {
+    "subClassOfRel": "subClassOf",
+    "subPropertyOfRel": "subPropertyOf",
+    "domainRel": "domain",
+    "rangeRel": "range",
+}
 
 
 class Ontology:
@@ -31,26 +34,24 @@ class Ontology:
             return
 
         # Init neosemantics plugin
-        self.__graph_store.query("CALL n10s.graphconfig.init()")
-        self.__graph_store.query("CALL n10s.graphconfig.set({ handleVocabUris: 'IGNORE' })")
+        self.__graph_store.query("CALL n10s.graphconfig.init($params)", params={"params": ONTOLOGY_PARAMS})
         self.__graph_store.query(
             f"""CREATE CONSTRAINT {self.__config.n10s_constraint_name} IF NOT EXISTS
             FOR (r:Resource) REQUIRE r.uri IS UNIQUE""",
         )
+
+        # Set the namespaces
+        self.__graph_store.query("CALL n10s.nsprefixes.add('log', $uri)", params={"uri": self.__config.ontology_uri})
+        self.__graph_store.query("CALL n10s.nsprefixes.add('time', $uri )", params={"uri": TIME_ONTOLOGY_URI})
+        self.__graph_store.query("CALL n10s.nsprefixes.add('mls', $uri)", params={"uri": MLSCHEMA_ONTOLOGY_URI})
 
         # Load the ontologies
         self.__graph_store.query(
             "CALL n10s.onto.import.inline($ontology, 'Turtle')",
             params={"ontology": Path(self.__config.ontology_path).read_text()},
         )
-        self.__graph_store.query(
-            "CALL n10s.onto.import.fetch($url, 'Turtle')",
-            params={"url": TIME_ONTOLOGY_URI},
-        )
-        self.__graph_store.query(
-            "CALL n10s.onto.import.fetch($url, 'Turtle')",
-            params={"url": MLSCHEMA_ONTOLOGY_URI},
-        )
+        self.__graph_store.query("CALL n10s.onto.import.fetch($url, 'Turtle')", params={"url": TIME_ONTOLOGY_URI})
+        self.__graph_store.query("CALL n10s.onto.import.fetch($url, 'Turtle')", params={"url": MLSCHEMA_ONTOLOGY_URI})
 
         # Load the SHACL constraints
         self.__graph_store.query(
@@ -74,16 +75,24 @@ class Ontology:
         """
         nodes_with_props = self.__graph_store.query(
             """
-            MATCH (c:Class)
-            WHERE c.uri STARTS WITH $log_ontology_uri OR c.uri = $time_instant_uri
-            OPTIONAL MATCH (c)<-[:DOMAIN]-(p:Property)
-            WITH c.name AS class, c.uri as uri, COLLECT([p.name, p.comment]) AS pairs
-            RETURN class, uri, apoc.map.fromPairs(pairs) AS properties
+            MATCH (c:n4sch__Class)
+            WHERE c.uri STARTS WITH $log_ontology_uri
+                OR EXISTS {
+                    MATCH (c)<-[:n4sch__subClassOf]-(d:n4sch__Class)
+                    WHERE d.uri STARTS WITH $log_ontology_uri
+                }
+            OPTIONAL MATCH (c)<-[:n4sch__domain]-(p:n4sch__Property)
+            RETURN REPLACE(n10s.rdf.shortFormFromFullUri(c.uri), '__', ':') AS class,
+                c.uri AS uri,
+                apoc.map.fromPairs(
+                    [pair IN COLLECT(
+                        CASE WHEN p IS NOT NULL
+                            THEN [REPLACE(n10s.rdf.shortFormFromFullUri(p.uri), '__', ':'), p.n4sch__name]
+                        ELSE NULL END
+                    ) WHERE pair IS NOT NULL]
+               ) AS properties
             """,
-            params={
-                "log_ontology_uri": self.__config.ontology_uri,
-                "time_instant_uri": INSTANT_CLASS_URI,
-            },
+            params={"log_ontology_uri": self.__config.ontology_uri},
         )
         nodes_dict = {
             row["uri"]: Node(id=row["uri"], type=row["class"], properties=row["properties"]) for row in nodes_with_props
@@ -91,23 +100,18 @@ class Ontology:
 
         triples = self.__graph_store.query(
             """
-            MATCH (n:Class)<-[:DOMAIN]-(r:Relationship)-[:RANGE]->(m:Class)
-            WHERE
-            (
-                n.uri STARTS WITH $log_ontology_uri
-                AND m.uri STARTS WITH $log_ontology_uri
-                AND r.uri STARTS WITH $log_ontology_uri
-            )
-            OR
-            (
-                n.uri STARTS WITH $log_ontology_uri
-                and m.uri = $time_instant_uri
-            )
-            RETURN n.uri AS subject_uri, r.name AS predicate, m.uri AS object_uri
+            MATCH (n:n4sch__Class)<-[:n4sch__domain]-(r:n4sch__Relationship)-[:n4sch__range]->(m:n4sch__Class)
+            WHERE n.uri IN $node_uris AND m.uri IN $node_uris
+            RETURN n.uri AS subject_uri,
+                REPLACE(n10s.rdf.shortFormFromFullUri(r.uri), '__', ':') AS predicate,
+                m.uri AS object_uri
+            UNION
+            MATCH (n:n4sch__Class)-[r]->(m:n4sch__Class)
+            WHERE n.uri IN $node_uris AND m.uri IN $node_uris AND type(r) STARTS WITH 'n4sch'
+            RETURN n.uri AS subject_uri, REPLACE(type(r), '__', ':') AS predicate, m.uri AS object_uri
             """,
             params={
-                "log_ontology_uri": self.__config.ontology_uri,
-                "time_instant_uri": INSTANT_CLASS_URI,
+                "node_uris": list(nodes_dict.keys()),
             },
         )
         relationships = [
@@ -161,7 +165,7 @@ class Ontology:
             WITH COLLECT(n) AS nodes
             CALL n10s.validation.shacl.validateSet(nodes)
             YIELD focusNode, nodeType, propertyShape, offendingValue, resultPath, severity
-            WHERE resultPath <> "uri" AND resultPath <> "embedding" AND resultPath <> "runName"
+            WHERE resultPath <> 'uri' AND NOT n10s.rdf.shortFormFromFullUri(resultPath) STARTS WITH 'n4sch'
             RETURN focusNode, nodeType, propertyShape, offendingValue, resultPath, severity
             """,
             params={"uris": nodes_uris},

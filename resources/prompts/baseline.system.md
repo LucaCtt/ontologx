@@ -39,5 +39,7 @@ The output graph must be in the following JSON format:
 Each node type has a specific set of allowed properties. The allowed properties for each node type are: {{properties_schema}}
 Each relationship type has a predefined source and target node type. The allowed relationships, formatted as (source type, relationship type, target type), are: {{triples}}
 
+The following structural relationships exist among node types: {{structural_triples}}."
+
 # Strict Compliance
 Adhere to these rules strictly. Any deviation will result in termination.

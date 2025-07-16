@@ -64,23 +64,40 @@ class _OntologyValidValues:
 
     @property
     def node_types(self) -> list[str]:
-        return [node.type for node in self.ontology.nodes]
+        return [node.type for node in self.ontology.nodes if not node.type.startswith("n4sch")]
 
     @property
     def relationship_types(self) -> list[str]:
-        return [rel.type for rel in self.ontology.relationships]
+        return [rel.type for rel in self.ontology.relationships if not rel.type.startswith("n4sch")]
+
+    @property
+    def structural_triples(self) -> list[tuple[str, str, str]]:
+        """Return the structural relationships in the ontology."""
+        return [
+            (rel.source.type, rel.type, rel.target.type)
+            for rel in self.ontology.relationships
+            if rel.type.startswith("n4sch")
+        ]
 
     @property
     def triples(self) -> list[tuple[str, str, str]]:
-        return [(rel.source.type, rel.type, rel.target.type) for rel in self.ontology.relationships]
+        return [
+            (rel.source.type, rel.type, rel.target.type)
+            for rel in self.ontology.relationships
+            if not rel.type.startswith("n4sch")
+        ]
 
     @property
     def properties_per_node(self) -> dict[str, list[str]]:
-        return {node.type: list(node.properties.keys()) for node in self.ontology.nodes}
+        return {
+            node.type: list(node.properties.keys()) for node in self.ontology.nodes if not node.type.startswith("n4sch")
+        }
 
     @property
     def properties(self) -> list[str]:
-        return list({prop for props in self.properties_per_node.values() for prop in props})
+        return list(
+            {prop for props in self.properties_per_node.values() for prop in props},
+        )
 
     @property
     def properties_schema(self) -> list[str]:
@@ -120,6 +137,7 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
             "A node in the event graph. "
             "Each node type has a specific set of allowed properties. "
             f"The allowed properties for each node type are: {valid.properties_schema} "
+            f"The following structural relationships exist among node types: {valid.structural_triples}."
         )
 
     class Relationship(BaseModel):
@@ -171,14 +189,14 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
 
             This method is a placeholder for any additional validation logic that may be needed.
             """
-            event_nodes = [node for node in self.nodes if node.type == "Event"]
+            event_nodes = [node for node in self.nodes if node.type == "log:Event"]
             if len(event_nodes) != 1:
                 msg = "The event graph must contain exactly one 'Event' node."
                 err_type = "IncorrectEventNodes"
                 raise PydanticCustomError(err_type, msg)
 
             event_node = event_nodes[0]
-            if not event_node.properties or not any(prop.type == "eventMessage" for prop in event_node.properties):
+            if not event_node.properties or not any(prop.type == "log:eventMessage" for prop in event_node.properties):
                 msg = "The 'Event' node must have a property of type 'eventMessage'."
                 err_type = "MissingEventProperty"
                 raise PydanticCustomError(err_type, msg)
@@ -196,4 +214,5 @@ def build_baseline_prompt(ontology: GraphDocument, base_prompt: str) -> str:
     prompt = prompt.replace("{{relationship_types}}", str(valid.relationship_types))
     prompt = prompt.replace("{{properties}}", str(valid.properties))
     prompt = prompt.replace("{{properties_schema}}", str(valid.properties_schema))
+    prompt = prompt.replace("{{structural_triples}}", str(valid.structural_triples))
     return prompt.replace("{{triples}}", str(valid.triples))

@@ -36,12 +36,12 @@ class Dataset:
             password=self.__config.neo4j_password,
             url=self.__config.neo4j_url,
             index_name=self.__config.events_index_name,
-            node_label="Event",
-            embedding_node_property="embedding",
+            node_label="log__Event",
+            embedding_node_property="n4sch__embedding",
             retrieval_query="""
-            RETURN node.eventMessage AS text,
+            RETURN node.log__eventMessage AS text,
             score,
-            {uri: node.uri, runName: node.runName, _embedding_: node.embedding} AS metadata
+            {uri: node.uri, n4sch__runName: node.n4sch__runName, _embedding_: node.n4sch__embedding} AS metadata
             """,
         )
 
@@ -49,7 +49,7 @@ class Dataset:
         # Check if the examples are already loaded
         result = self.__graph_store.query(
             """
-            MATCH (r:Run {runName: $run_name})-[:hasInput]->(d:Dataset)
+            MATCH (r:mls__Run {n4sch__runName: $run_name})-[:mls__hasInput]->(d:mls__Dataset)
             RETURN d
             LIMIT 1
             """,
@@ -69,9 +69,9 @@ class Dataset:
         # Attach the examples to the current run
         self.__graph_store.query(
             """
-            MATCH (d:Dataset), (r:Run {runName: $run_name})
+            MATCH (d:mls__Dataset), (r:mls__Run {n4sch__runName: $run_name})
             WHERE d.uri STARTS WITH $examples_uri
-            CREATE (r)-[:hasInput]->(d)
+            CREATE (r)-[:mls__hasInput]->(d)
             """,
             params={"run_name": self.__config.run_name, "examples_uri": self.__config.examples_uri},
         )
@@ -82,12 +82,12 @@ class Dataset:
         # Populate the embeddings for the examples
         to_populate = self.__graph_store.query(
             """
-            MATCH (d:Dataset)-[:hasPart]->(e:Event)
-            WHERE e.embedding IS NULL AND d.uri STARTS WITH $examples_uri
-            OPTIONAL MATCH (e)-[:hasParameter]->(s:Source)
-            SET e.runName = ''
-            RETURN elementId(e) AS id, e.eventMessage AS eventMessage, s.sourceName AS sourceName,
-            s.sourceDevice AS sourceDevice
+            MATCH (d:mls__Dataset)-[:mls__hasPart]->(e:log__Event)
+            WHERE e.n4sch__embedding IS NULL AND d.uri STARTS WITH $examples_uri
+            OPTIONAL MATCH (e)-[:log__hasParameter]->(s:log__Source)
+            SET e.n4sch__runName = ''
+            RETURN elementId(e) AS id, e.log__eventMessage AS eventMessage, s.log__sourceName AS sourceName,
+            s.log__sourceDevice AS sourceDevice
             """,
             params={
                 "run_name": self.__config.run_name,
@@ -108,9 +108,9 @@ class Dataset:
         self.__graph_store.query(
             """
             UNWIND $data AS row
-            MATCH (e:Event)
+            MATCH (e:log__Event)
             WHERE elementId(e) = row.id
-            CALL db.create.setNodeVectorProperty(e, 'embedding', row.embedding)
+            CALL db.create.setNodeVectorProperty(e, 'n4sch__embedding', row.embedding)
             """,
             params={
                 "data": [
@@ -128,9 +128,9 @@ class Dataset:
         )
         self.__graph_store.query(
             """
-            MATCH (d: Dataset), (r:Run {runName: $run_name})
-            WHERE d.runName IS NULL AND d.uri STARTS WITH $tests_uri
-            MERGE (r)-[:hasInput]->(d)
+            MATCH (d:mls__Dataset), (r:mls__Run {n4sch__runName: $run_name})
+            WHERE d.n4sch__runName IS NULL AND d.uri STARTS WITH $tests_uri
+            MERGE (r)-[:mls__hasInput]->(d)
             """,
             params={
                 "run_name": self.__config.run_name,
@@ -139,10 +139,10 @@ class Dataset:
         )
         self.__graph_store.query(
             """
-            MATCH (d:Dataset)-[:hasPart]->(e:Event)
-            WHERE e.embedding IS NULL AND d.uri STARTS WITH $tests_uri
-            SET e.runName = ''
-            SET e.embedding = ''
+            MATCH (d:mls__Dataset)-[:mls__hasPart]->(e:log__Event)
+            WHERE e.n4sch__embedding IS NULL AND d.uri STARTS WITH $tests_uri
+            SET e.n4sch__runName = ''
+            SET e.n4sch__embedding = ''
             """,
             params={
                 "run_name": self.__config.run_name,
@@ -153,9 +153,9 @@ class Dataset:
     def tests(self) -> list[GraphDocument]:
         test_nodes = self.__graph_store.query(
             """
-            MATCH (d:Dataset)-[:hasPart]->(e:Event)
+            MATCH (d:mls__Dataset)-[:mls__hasPart]->(e:log__Event)
             WHERE d.uri STARTS WITH $tests_uri
-            RETURN e.eventMessage as message, e.uri as uri
+            RETURN e.log__eventMessage as message, e.uri as uri
             ORDER BY e.uri
             """,
             params={"run_name": self.__config.run_name, "tests_uri": self.__config.tests_uri},
@@ -167,8 +167,8 @@ class Dataset:
             source_node = next((node for node in graph.nodes if node.type == "Source"), None)
             context = (
                 {
-                    "sourceName": source_node.properties.get("sourceName", ""),
-                    "sourceDevice": source_node.properties.get("sourceDevice", ""),
+                    "sourceName": source_node.properties.get("log__sourceName", ""),
+                    "sourceDevice": source_node.properties.get("log__sourceDevice", ""),
                 }
                 if source_node
                 else {}
@@ -191,7 +191,7 @@ class Dataset:
         # Check if result dataset exists, otherwise create it
         result_dataset = self.__graph_store.query(
             """
-            MATCH (r:Run {runName: $run_name})-[:hasOutput]->(d:Dataset)
+            MATCH (r:mls__Run {n4sch__runName: $run_name})-[:mls__hasOutput]->(d:mls__Dataset)
             RETURN d
             """,
             params={"run_name": self.__config.run_name},
@@ -199,41 +199,44 @@ class Dataset:
         if not result_dataset:
             self.__graph_store.query(
                 """
-                MATCH (r:Run {runName: $run_name})
-                CREATE (d:Dataset {uri: $out_dataset_uri})<-[:hasOutput]-(r)
+                MATCH (r:mls__Run {n4sch__runName: $run_name})
+                CREATE (d:mls__Dataset {uri: $out_dataset_uri})<-[:mls__hasOutput]-(r)
                 """,
                 params={"run_name": self.__config.run_name, "out_dataset_uri": self.__config.out_uri + "/out-dataset"},
             )
 
         for node in graph.nodes:
             node_id = f"{self.__config.out_uri}/{uuid.uuid4()}"
+            node_type = node.type.replace(":", "__")
             node.id = node_id
-            node.properties["uri"] = node_id
 
-            # Add the run_name and (for the Event nodes) the embedding.
-            node.properties["runName"] = self.__config.run_name
-            if node.type == "Event":
+            props = {k.replace(":", "__"): v for k, v in node.properties.items()} | {
+                "uri": node.id,
+                "n4sch__runName": self.__config.run_name,
+            }
+
+            if node_type == "log__Event":
                 # This will raise an exception if the LLM produces an Event node without a message property.
                 text = _compose_embeddings_text(
-                    node.properties["eventMessage"],
+                    props["log__eventMessage"],
                     graph.source.metadata,
                 )
-                node.properties["embedding"] = self.__embeddings.embed_query(text)
+                props["n4sch__embedding"] = self.__embeddings.embed_query(text)
 
             self.__graph_store.query(
                 f"""
-                MATCH (d:Dataset)
+                MATCH (d:mls__Dataset)
                 WHERE d.uri STARTS WITH $out_dataset_uri
-                CREATE (d)-[:hasPart]->(n:{node.type} $props)
+                CREATE (d)-[:mls__hasPart]->(n:{node_type} $props)
                 """,
-                params={"props": node.properties, "out_dataset_uri": self.__config.out_uri + "/out-dataset"},
+                params={"props": props, "out_dataset_uri": self.__config.out_uri + "/out-dataset"},
             )
 
         for relationship in graph.relationships:
             self.__graph_store.query(
                 f"""
                 MATCH (a {{uri: $source_uri}}), (b {{uri: $target_uri}})
-                CREATE (a)-[:{relationship.type}]->(b)
+                CREATE (a)-[:{relationship.type.replace(":", "__")}]->(b)
                 """,
                 params={
                     "source_uri": relationship.source.id,
@@ -269,9 +272,9 @@ class Dataset:
         # Examples will have no run name but an embedding,
         # Tests will have neither. Generated events will have both.
         run_name_filter = (
-            [{"runName": {"$eq": ""}}]
+            [{"n4sch__runName": {"$eq": ""}}]
             if not self.__config.generated_graphs_retrieval
-            else [{"runName": {"$eq": self.__config.run_name}}, {"runName": {"$eq": ""}}]
+            else [{"n4sch__runName": {"$eq": self.__config.run_name}}, {"n4sch__runName": {"$eq": ""}}]
         )
 
         query = _compose_embeddings_text(event, context or {})
@@ -282,7 +285,7 @@ class Dataset:
             lambda_mult=lambda_mult,
             filter={
                 "$or": run_name_filter,
-                "embedding": {"$ne": ""},
+                "n4sch__embedding": {"$ne": ""},
             },
             # Examples will have no run name but an embedding.
             # Tests will have neither. Generated events will have both.
@@ -298,24 +301,28 @@ class Dataset:
         if props_to_remove is None:
             props_to_remove = []
 
-        props_to_remove = [*props_to_remove, "runName", "embedding"]
+        props_to_remove = [*props_to_remove, "n4sch__runName", "n4sch__embedding"]
 
         # Ugly but quite efficient. Also filters out the embedding property and the Resource label.
         nodes_subgraphs = self.__graph_store.query(
             """
             MATCH (n {uri: $node_uri})
-            CALL apoc.path.subgraphAll(n, {labelFilter: '-Dataset'})
+            CALL apoc.path.subgraphAll(n, {labelFilter: '-mls__Dataset'})
             YIELD nodes, relationships
             RETURN
             [node IN nodes | {
             uri: node.uri,
-            type: HEAD([label IN LABELS(node) WHERE label <> 'Resource']),
-            properties: apoc.map.removeKeys(PROPERTIES(node), $props_to_remove)
+            type: REPLACE(HEAD([label IN LABELS(node) WHERE label <> 'Resource']), '__', ':'),
+            properties: apoc.map.fromPairs(
+                [key IN KEYS(apoc.map.removeKeys(PROPERTIES(node), $props_to_remove)) |
+                    [REPLACE(key, '__', ':'), apoc.map.removeKeys(PROPERTIES(node), $props_to_remove)[key]]
+                ]
+            )
             }] AS nodes,
             [rel IN relationships | {
             source: STARTNODE(rel).uri,
             target: ENDNODE(rel).uri,
-            type: TYPE(rel)
+            type: REPLACE(TYPE(rel), '__', ':')
             }] AS relationships
             """,
             params={"node_uri": node_uri, "props_to_remove": props_to_remove},
@@ -361,12 +368,12 @@ class Dataset:
         )
 
         # Create the context from the event source, if present.
-        event_node = next(node for node in nodes_dict.values() if node.type == "Event")
-        source_node = next((node for node in nodes_dict.values() if node.type == "Source"), None)
+        event_node = next(node for node in nodes_dict.values() if node.type == "log:Event")
+        source_node = next((node for node in nodes_dict.values() if node.type == "log:Source"), None)
         context = {key: value for key, value in source_node.properties.items() if key != "uri"} if source_node else {}
 
         return GraphDocument(
             nodes=list(nodes_dict.values()),
             relationships=relationships,
-            source=Document(page_content=event_node.properties["eventMessage"], metadata=context),
+            source=Document(page_content=event_node.properties["log:eventMessage"], metadata=context),
         )
