@@ -189,14 +189,14 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
 
             This method is a placeholder for any additional validation logic that may be needed.
             """
-            event_nodes = [node for node in self.nodes if node.type == "log:Event"]
+            event_nodes = [node for node in self.nodes if node.type == "olx:Event"]
             if len(event_nodes) != 1:
                 msg = "The event graph must contain exactly one 'Event' node."
                 err_type = "IncorrectEventNodes"
                 raise PydanticCustomError(err_type, msg)
 
             event_node = event_nodes[0]
-            if not event_node.properties or not any(prop.type == "log:eventMessage" for prop in event_node.properties):
+            if not event_node.properties or not any(prop.type == "olx:eventMessage" for prop in event_node.properties):
                 msg = "The 'Event' node must have a property of type 'eventMessage'."
                 err_type = "MissingEventProperty"
                 raise PydanticCustomError(err_type, msg)

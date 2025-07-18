@@ -368,12 +368,12 @@ class Dataset:
         )
 
         # Create the context from the event source, if present.
-        event_node = next(node for node in nodes_dict.values() if node.type == "log:Event")
-        source_node = next((node for node in nodes_dict.values() if node.type == "log:Source"), None)
+        event_node = next(node for node in nodes_dict.values() if node.type == "olx__Event")
+        source_node = next((node for node in nodes_dict.values() if node.type == "olx__Source"), None)
         context = {key: value for key, value in source_node.properties.items() if key != "uri"} if source_node else {}
 
         return GraphDocument(
             nodes=list(nodes_dict.values()),
             relationships=relationships,
-            source=Document(page_content=event_node.properties["log:eventMessage"], metadata=context),
+            source=Document(page_content=event_node.properties["olx__eventMessage"], metadata=context),
         )

@@ -1,5 +1,5 @@
-@prefix : <https://cyberseclab.unibs.it/ontologx/log/tests#>.
-@prefix log: <https://cyberseclab.unibs.it/ontologx/log/dictionary#>.
+@prefix : <https://cyberseclab.unibs.it/olx/tests#>.
+@prefix olx: <https://cyberseclab.unibs.it/olx/dictionary#>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix time: <http://www.w3.org/2006/time#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
@@ -7,41 +7,41 @@
 
 # dionaea,dionaea.json-20211130.gz,"{""connection"": {""protocol"": ""mssqld"", ""transport"": ""tcp"", ""type"": ""accept""}, ""dst_ip"": ""172.26.0.2"", ""dst_port"": 1433, ""src_hostname"": """", ""src_ip"": ""10.0.0.1"", ""src_port"": 59100, ""timestamp"": ""2021-11-29T14:34:04.377302"", ""credentials"": {""username"": [""sa""], ""password"": [""Password2014++""]}}"
 
-:timestamp-1 rdf:type log:TimeStamp;
+:timestamp-1 rdf:type olx:TimeStamp;
   time:inXSDDate "2021-11-29"^^xsd:date;
   time:inXSDDateTimeStamp "2021-11-29T14:34:04.377302Z"^^xsd:dateTimeStamp;
   time:inXSDgYear "2021"^^xsd:gYear;
   time:inXSDgYearMonth "2021-11"^^xsd:gYearMonth.
 
-:source-1 rdf:type log:Source;
-  log:sourceName "dionaea".
+:source-1 rdf:type olx:Source;
+  olx:sourceName "dionaea".
 
-:network-address-1-1 rdf:type log:NetworkAddress;
-  log:networkAddressIPV4 "172.26.0.2";
-  log:networkAddressPort 1433.
+:network-address-1-1 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "172.26.0.2";
+  olx:networkAddressPort 1433.
 
-:network-address-1-2 rdf:type log:NetworkAddress;
-  log:networkAddressIPV4 "10.0.0.1"; 
-  log:networkAddressPort 59100.
+:network-address-1-2 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "10.0.0.1"; 
+  olx:networkAddressPort 59100.
 
-:network-protocol-1-1 rdf:type log:NetworkProtocol;
-  log:networkProtocolName "mssqld".
+:network-protocol-1-1 rdf:type olx:NetworkProtocol;
+  olx:networkProtocolName "mssqld".
 
-:network-protocol-1-2 rdf:type log:NetworkProtocol;
-  log:networkProtocolName "tcp".
+:network-protocol-1-2 rdf:type olx:NetworkProtocol;
+  olx:networkProtocolName "tcp".
 
-:username-1 rdf:type log:UserCredential;
-  log:userCredentialValue "sa".
+:username-1 rdf:type olx:UserCredential;
+  olx:userCredentialValue "sa".
 
-:password-1 rdf:type log:UserCredential;
-  log:userCredentialValue "Password2014++".
+:password-1 rdf:type olx:UserCredential;
+  olx:userCredentialValue "Password2014++".
 
-:user-1 rdf:type log:User;
-  log:hasCredential :username-1, :password-1.
+:user-1 rdf:type olx:User;
+  olx:hasCredential :username-1, :password-1.
 
-:event-1 rdf:type log:Event;
-  log:eventMessage "{\"connection\": {\"protocol\": \"mssqld\", \"transport\": \"tcp\", \"type\": \"accept\"}, \"dst_ip\": \"172.26.0.2\", \"dst_port\": 1433, \"src_hostname\": \"\", \"src_ip\": \"10.0.0.1\", \"src_port\": 59100, \"timestamp\": \"2021-11-29T14:34:04.377302\", \"credentials\": {\"username\": [\"sa\"], \"password\": [\"Password2014++\"]}}";
-  log:hasParameter :timestamp-1,
+:event-1 rdf:type olx:Event;
+  olx:eventMessage "{\"connection\": {\"protocol\": \"mssqld\", \"transport\": \"tcp\", \"type\": \"accept\"}, \"dst_ip\": \"172.26.0.2\", \"dst_port\": 1433, \"src_hostname\": \"\", \"src_ip\": \"10.0.0.1\", \"src_port\": 59100, \"timestamp\": \"2021-11-29T14:34:04.377302\", \"credentials\": {\"username\": [\"sa\"], \"password\": [\"Password2014++\"]}}";
+  olx:hasParameter :timestamp-1,
     :source-1,
     :network-address-1-1,
     :network-address-1-2,
@@ -51,31 +51,31 @@
 
 # cowrie,cowrie.json.2021-04-11,"{""eventid"":""cowrie.direct-tcpip.request"",""dst_ip"":""35.190.214.48"",""dst_port"":443,""src_ip"":""45.227.255.207"",""src_port"":0,""message"":""direct-tcp connection request to 35.190.214.48:443 from 0.0.0.0:0"",""sensor"":""4f2220a17ee1"",""timestamp"":""2021-04-11T19:13:51.180173Z"",""session"":""e925470c3175""}"
 
-:timestamp-2 rdf:type log:TimeStamp;
+:timestamp-2 rdf:type olx:TimeStamp;
   time:inXSDDate "2021-04-11"^^xsd:date;
   time:inXSDDateTimeStamp "2021-04-11T19:13:51.180173Z"^^xsd:dateTimeStamp;
   time:inXSDgYear "2021"^^xsd:gYear;
   time:inXSDgYearMonth "2021-04"^^xsd:gYearMonth.
 
-:source-2 rdf:type log:Source;
-  log:sourceName "cowrie".
+:source-2 rdf:type olx:Source;
+  olx:sourceName "cowrie".
 
-:network-address-2-1 rdf:type log:NetworkAddress;
-  log:networkAddressIPV4 "35.190.214.48";
-  log:networkAddressPort 443.
+:network-address-2-1 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "35.190.214.48";
+  olx:networkAddressPort 443.
 
-:network-address-2-2 rdf:type log:NetworkAddress;
-  log:networkAddressIPV4 "45.227.255.207";
-  log:networkAddressPort 0.
+:network-address-2-2 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "45.227.255.207";
+  olx:networkAddressPort 0.
 
-:network-protocol-2 rdf:type log:NetworkProtocol;
-  log:networkProtocolName "tcp".
+:network-protocol-2 rdf:type olx:NetworkProtocol;
+  olx:networkProtocolName "tcp".
 
-:event-2 rdf:type log:Event;
-  log:eventMessage "{\"eventid\":\"cowrie.direct-tcpip.request\",\"dst_ip\":\"35.190.214.48\",\"dst_port\":443,\"src_ip\":\"45.227.255.207\",\"src_port\":0,\"message\":\"direct-tcp connection request to 35.190.214.48:443 from 0.0.0.0:0\",\"sensor\":\"4f2220a17ee1\",\"timestamp\":\"2021-04-11T19:13:51.180173Z\",\"session\":\"e925470c3175\"}";
-  log:eventID "cowrie.direct-tcpip.request";
-  log:eventSessionID "e925470c3175";
-  log:hasParameter :timestamp-2,
+:event-2 rdf:type olx:Event;
+  olx:eventMessage "{\"eventid\":\"cowrie.direct-tcpip.request\",\"dst_ip\":\"35.190.214.48\",\"dst_port\":443,\"src_ip\":\"45.227.255.207\",\"src_port\":0,\"message\":\"direct-tcp connection request to 35.190.214.48:443 from 0.0.0.0:0\",\"sensor\":\"4f2220a17ee1\",\"timestamp\":\"2021-04-11T19:13:51.180173Z\",\"session\":\"e925470c3175\"}";
+  olx:eventID "cowrie.direct-tcpip.request";
+  olx:eventSessionID "e925470c3175";
+  olx:hasParameter :timestamp-2,
     :source-2,
     :network-address-2-1,
     :network-address-2-2,
@@ -83,26 +83,26 @@
 
 #cowrie,cowrie.json.2021-04-22,"{""eventid"":""cowrie.session.params"",""arch"":""linux-powerpc-lsb"",""message"":[],""sensor"":""8bc94e80bc9b"",""timestamp"":""2021-04-22T14:12:42.388631Z"",""src_ip"":""164.90.172.66"",""session"":""d5950f79df24""}"
 
-:timestamp-3 rdf:type log:TimeStamp;
+:timestamp-3 rdf:type olx:TimeStamp;
   time:inXSDDate "2021-04-22"^^xsd:date;
   time:inXSDDateTimeStamp "2021-04-22T14:12:42.388631Z"^^xsd:dateTimeStamp;
   time:inXSDgYear "2021"^^xsd:gYear;
   time:inXSDgYearMonth "2021-04"^^xsd:gYearMonth.
 
-:source-3 rdf:type log:Source;
-  log:sourceName "cowrie".
+:source-3 rdf:type olx:Source;
+  olx:sourceName "cowrie".
 
-:network-address-3 rdf:type log:NetworkAddress;
-  log:addressIPV4 "164.90.172.66".
+:network-address-3 rdf:type olx:NetworkAddress;
+  olx:addressIPV4 "164.90.172.66".
 
-:network-protocol-3 rdf:type log:NetworkProtocol;
-  log:networkProtocolName "ssh".
+:network-protocol-3 rdf:type olx:NetworkProtocol;
+  olx:networkProtocolName "ssh".
 
-:event-3 rdf:type log:Event;
-  log:eventMessage "{\"eventid\":\"cowrie.session.params\",\"arch\":\"linux-powerpc-lsb\",\"message\":[],\"sensor\":\"8bc94e80bc9b\",\"timestamp\":\"2021-04-22T14:12:42.388631Z\",\"src_ip\":\"164.90.172.66\",\"session\":\"d5950f79df24\"}";
-  log:eventID "cowrie.session.params";
-  log:eventSessionID "d5950f79df24";
-  log:hasParameter :timestamp-3,
+:event-3 rdf:type olx:Event;
+  olx:eventMessage "{\"eventid\":\"cowrie.session.params\",\"arch\":\"linux-powerpc-lsb\",\"message\":[],\"sensor\":\"8bc94e80bc9b\",\"timestamp\":\"2021-04-22T14:12:42.388631Z\",\"src_ip\":\"164.90.172.66\",\"session\":\"d5950f79df24\"}";
+  olx:eventID "cowrie.session.params";
+  olx:eventSessionID "d5950f79df24";
+  olx:hasParameter :timestamp-3,
     :source-3,
     :network-address-3,
     :network-protocol-3.

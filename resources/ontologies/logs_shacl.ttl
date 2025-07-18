@@ -1,199 +1,206 @@
-@prefix log: <neo4j://graph.schema#>.
+@prefix olx: <https://cyberseclab.unibs.it/olx/dict#>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 
-log:EventShape rdf:type sh:NodeShape;
-  sh:targetClass log:Event;
+olx:EventShape rdf:type sh:NodeShape;
+  sh:targetClass olx:Event;
   sh:closed true;
   sh:property [
-    sh:path log:eventMessage;
+    sh:path olx:eventMessage;
     sh:datatype xsd:string;
     sh:minCount 1;
     sh:maxCount 1;
   ];
   sh:property [
-    sh:path log:eventSeverity;
+    sh:path olx:eventSeverity;
     sh:datatype xsd:string;
     sh:maxCount 1;
   ];
   sh:property [
-    sh:path log:eventID;
+    sh:path olx:eventID;
     sh:maxCount 1;
   ];
   sh:property [
-    sh:path log:eventSessionID;
+    sh:path olx:eventSessionID;
     sh:datatype xsd:string;
     sh:maxCount 1;
   ];
   sh:property [
-    sh:path log:hasParameter;
-    # sh:class log:Property;
+    sh:path olx:hasParameter;
+    # sh:class olx:Property;
     sh:nodeKind sh:IRI;
   ].
 
-log:SourceShape rdf:type sh:NodeShape;
-  sh:targetClass log:Source;
+olx:SourceShape rdf:type sh:NodeShape;
+  sh:targetClass olx:Source;
   sh:closed true;
-  sh:or ( [ sh:path log:sourceName ] [ sh:path log:sourceDevice ] );
+  sh:or ( [ sh:path olx:sourceName ] [ sh:path olx:sourceDevice ] );
   sh:property [
-    sh:path log:sourceName;
+    sh:path olx:sourceName;
     sh:datatype xsd:string;
     sh:maxCount 1;
   ];
   sh:property [
-    sh:path log:sourceDevice;
+    sh:path olx:sourceDevice;
     sh:datatype xsd:string;
     sh:maxCount 1;
   ].
 
-log:HashStringShape rdf:type sh:NodeShape;
-  sh:targetClass log:Hashing;
+olx:HashStringShape rdf:type sh:NodeShape;
+  sh:targetClass olx:Hashing;
   sh:closed true;
   sh:property [
-    sh:path log:hashStringAlgorithm;
+    sh:path olx:hashStringAlgorithm;
     sh:datatype xsd:string;
     sh:minCount 0;
     sh:maxCount 1;
   ];
   sh:property [
-    sh:path log:hashStringValue;
+    sh:path olx:hashStringValue;
     sh:datatype xsd:string;
     sh:minCount 1;
     sh:maxCount 1;
   ].
 
-log:NetworkProtocolShape rdf:type sh:NodeShape;
-  sh:targetClass log:NetworkProtocol;
+olx:NetworkProtocolShape rdf:type sh:NodeShape;
+  sh:targetClass olx:NetworkProtocol;
   sh:closed true;
   sh:property [
-    sh:path log:networkProtocolName;
+    sh:path olx:networkProtocolName;
     sh:datatype xsd:string;
     sh:minCount 1;
     sh:maxCount 1;
   ].
 
-log:NetworkAddressShape rdf:type sh:NodeShape;
-  sh:targetClass log:NetworkAddress;
+olx:NetworkAddressShape rdf:type sh:NodeShape;
+  sh:targetClass olx:NetworkAddress;
   sh:closed true;
   sh:or (
-    [ sh:path log:networkAddressIPV4 ]
-    [ sh:path log:networkAddressIPV6 ]
-    [ sh:path log:networkAddressMAC ]
-    [ sh:path log:networkAddressPort ]
-    [ sh:path log:networkAddressHostname ]
+    [ sh:path olx:networkAddressIPV4 ]
+    [ sh:path olx:networkAddressIPV6 ]
+    [ sh:path olx:networkAddressMAC ]
+    [ sh:path olx:networkAddressPort ]
+    [ sh:path olx:networkAddressHostname ]
   );
   sh:property [
-    sh:path log:networkAddressIPV4;
+    sh:path olx:networkAddressIPV4;
     sh:datatype xsd:string;
     sh:maxCount 1;
     sh:pattern "^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"^^xsd:string;
   ];
   sh:property [
-    sh:path log:networkAddressIPV6;
+    sh:path olx:networkAddressIPV6;
     sh:datatype xsd:string;
     sh:maxCount 1;
     sh:pattern "^([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}$"^^xsd:string;
   ];
   sh:property [
-    sh:path log:networkAddressMAC;
+    sh:path olx:networkAddressMAC;
     sh:datatype xsd:string;
     sh:maxCount 1;
     sh:pattern "^([0-9a-fA-F]{2}[:-]){5}([0-9a-fA-F]{2})$"^^xsd:string;
   ];
   sh:property [
-    sh:path log:networkAddressPort;
+    sh:path olx:networkAddressPort;
     sh:datatype xsd:integer;
     sh:maxCount 1;
   ];
   sh:property [
-    sh:path log:networkAddressHostname;
+    sh:path olx:networkAddressHostname;
     sh:datatype xsd:string;
     sh:maxCount 1;
   ].
 
-log:ApplicationShape rdf:type sh:NodeShape;
-  sh:targetClass log:Application;
+olx:ApplicationShape rdf:type sh:NodeShape;
+  sh:targetClass olx:Application;
   sh:closed true;
   sh:property [
-    sh:path log:applicationName;
+    sh:path olx:applicationName;
     sh:datatype xsd:string;
     sh:maxCount 1;
   ];
   sh:property [
-    sh:path log:applicationVersion;
+    sh:path olx:applicationVersion;
     sh:datatype xsd:string;
     sh:maxCount 1;
   ].
 
-log:SystemProcessShape rdf:type sh:NodeShape;
-  sh:targetClass log:SystemProcess;
+olx:SystemProcessShape rdf:type sh:NodeShape;
+  sh:targetClass olx:SystemProcess;
   sh:closed true;
-  sh:or ( [ sh:path log:systemProcessPID ] [ sh:path log:systemProcessSignal ] );
+  sh:or ( [ sh:path olx:systemProcessPID ] [ sh:path olx:systemProcessSignal ] );
   sh:property [
-    sh:path log:systemProcessPID;
+    sh:path olx:systemProcessPID;
     sh:or ( [ sh:datatype xsd:string ] [ sh:datatype xsd:integer ] );
     sh:maxCount 1;
   ];
   sh:property [
-    sh:path log:systemProcessSignal;
+    sh:path olx:systemProcessSignal;
     sh:datatype xsd:string;
     sh:maxCount 1;
   ].
 
-log:FileShape rdf:type sh:NodeShape;
-  sh:targetClass log:File;
+olx:ConcatenationOperatorShape rdf:type sh:NodeShape;
+  sh:targetClass olx:ConcatenationOperator;
   sh:closed true;
   sh:property [
-    sh:path log:filePath;
-    sh:datatype xsd:string;
-    sh:minCount 1;
-    sh:maxCount 1;
-  ];
-  sh:property [
-    sh:path log:fileLine;
-    sh:datatype xsd:integer;
-    sh:maxCount 1;
-  ].
-
-log:URLShape rdf:type sh:NodeShape;
-  sh:targetClass log:URL;
-  sh:closed true;
-  sh:property [
-    sh:path log:urlValue;
+    sh:path olx:concatenationOperatorValue;
     sh:datatype xsd:string;
     sh:minCount 1;
     sh:maxCount 1;
   ].
 
-log:UserShape rdf:type sh:NodeShape;
-  sh:targetClass log:User;
+olx:FileShape rdf:type sh:NodeShape;
+  sh:targetClass olx:File;
   sh:closed true;
-  sh:or (
-    [ sh:path log:userUID ]
-    [ sh:path log:userAUID ]
-  );
   sh:property [
-    sh:path log:userUID;
+    sh:path olx:filePath;
+    sh:datatype xsd:string;
+    sh:minCount 1;
+    sh:maxCount 1;
+  ];
+  sh:property [
+    sh:path olx:fileLine;
+    sh:datatype xsd:integer;
+    sh:maxCount 1;
+  ].
+
+olx:URLShape rdf:type sh:NodeShape;
+  sh:targetClass olx:URL;
+  sh:closed true;
+  sh:property [
+    sh:path olx:urlValue;
+    sh:datatype xsd:string;
+    sh:minCount 1;
+    sh:maxCount 1;
+  ].
+
+olx:UserShape rdf:type sh:NodeShape;
+  sh:targetClass olx:User;
+  sh:closed true;
+  sh:or ( [ sh:path olx:userUID ] [ sh:path olx:userAUID ] );
+  sh:property [
+    sh:path olx:userUID;
     sh:or ( [ sh:datatype xsd:string ] [ sh:datatype xsd:integer ] );
     sh:maxCount 1;
   ];
   sh:property [
-    sh:path log:userAUID;
+    sh:path olx:userAUID;
     sh:or ( [ sh:datatype xsd:string ] [ sh:datatype xsd:integer ] );
     sh:maxCount 1;
   ];
   sh:property [
-    sh:path log:hasCredential;
-    # sh:class log:IdentityCredential;
+    sh:path olx:hasCredential;
+    # sh:class olx:IdentityCredential;
     sh:nodeKind sh:IRI;
   ].
 
-log:UserCredentialShape rdf:type sh:NodeShape;
-  sh:targetClass log:UserCredential;
+olx:UserCredentialShape rdf:type sh:NodeShape;
+  sh:targetClass olx:UserCredential;
   sh:closed true;
   sh:property [
-    sh:path log:userCredentialValue;
+    sh:path olx:userCredentialValue;
     sh:datatype xsd:string;
     sh:minCount 1;
     sh:maxCount 1;

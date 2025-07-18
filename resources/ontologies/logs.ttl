@@ -1,5 +1,5 @@
-@base <https://cyberseclab.unibs.it/ontologx/log/dictionary>.
-@prefix : <https://cyberseclab.unibs.it/ontologx/log/dictionary#>.
+@base <https://cyberseclab.unibs.it/olx/dict>.
+@prefix : <https://cyberseclab.unibs.it/olx/dict#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
@@ -7,14 +7,14 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 @prefix p-plan: <http://purl.org/net/p-plan#>.
 
-<https://cyberseclab.unibs.it/ontologx/log/dictionary> rdf:type owl:Ontology;
-  owl:versionIRI <https://cyberseclab.unibs.it/ontologx/log/dictionary/1.0.0>;
+<https://cyberseclab.unibs.it/olx/dict> rdf:type owl:Ontology;
+  owl:versionIRI <https://cyberseclab.unibs.it/olx/dict/1.0.0>;
   <http://purl.org/dc/elements/1.1/creator> "Luca Cotti";
   <http://purl.org/dc/elements/1.1/description> "An ontology to represent log events.";
   <http://purl.org/dc/elements/1.1/rights> "http://creativecommons.org/licenses/by/4.0/";
   <http://purl.org/dc/elements/1.1/title> "The OntoLogX log event ontology.";
   <http://purl.org/dc/elements/1.1/language> "English";
-  <http://purl.org/vocab/vann/preferredNamespacePrefix> "log".
+  <http://purl.org/vocab/vann/preferredNamespacePrefix> "olx".
 
 #################################################################
 #    Annotation properties
@@ -247,6 +247,12 @@
   rdfs:range xsd:string;
   rdfs:comment "Signal sent to the process";
   rdfs:label "System Process Signal".
+
+:concatenationOperatorValue rdf:type owl:DatatypeProperty;
+  rdfs:domain :ConcatenationOperator;
+  rdfs:range xsd:string;
+  rdfs:comment "Value of the concatenation operator, such as '|', '&&', '||', ';'";
+  rdfs:label "Concatenation Operator Value".
 
 :filePath rdf:type owl:DatatypeProperty;
   rdfs:domain :File;

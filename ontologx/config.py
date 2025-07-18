@@ -57,8 +57,8 @@ def _get_uri_from_ttl(ttl_path: str) -> str:
 def _get_ontologies(log_ontology_path: str) -> dict[str, str]:
     """Get all the ontologies from the log ontology file.
 
-    The empty ":" namespace will be assigned to the "log" namespace.
-    If a "log" namespace is defined explicitly, it will override the empty namespace.
+    The empty ":" namespace will be assigned to the "olx" namespace.
+    If a "olx" namespace is defined explicitly, it will override the empty namespace.
     If neither are defined, an error will be raised.
 
     Args:
@@ -74,13 +74,13 @@ def _get_ontologies(log_ontology_path: str) -> dict[str, str]:
     namespaces = dict(graph.namespace_manager.namespaces())
 
     if "" in namespaces:
-        result["log"] = namespaces[""].toPython()
+        result["olx"] = namespaces[""].toPython()
 
     for prefix, uri in namespaces.items():
         result[prefix] = uri.toPython()
 
-    if "log" not in result:
-        msg = "No 'log' namespace found in the ontology. Please define it explicitly or use the empty namespace."
+    if "olx" not in result:
+        msg = "No 'olx' namespace found in the ontology. Please define it explicitly or use the empty namespace."
         raise ValueError(msg)
 
     return result
@@ -214,10 +214,10 @@ class Config:
     run_name = str(uuid.uuid4())
     """ The name of the run. A run is a single execution of the ontologx pipeline."""
 
-    run_uri = "https://cyberseclab.unibs.it/ontologx/log/run/" + run_name
+    run_uri = "https://cyberseclab.unibs.it/olx/run/" + run_name
     """The URI of the run node."""
 
-    out_uri = "https://cyberseclab.unibs.it/ontologx/log/out/" + run_name
+    out_uri = "https://cyberseclab.unibs.it/olx/out/" + run_name
     """The URI of the output nodes."""
 
     def __init__(self):
@@ -241,8 +241,8 @@ class Config:
     def new_run(self) -> None:
         """Create a new run by generating a new UUID and updating the run name."""
         self.run_name = str(uuid.uuid4())
-        self.run_uri = "https://cyberseclab.unibs.it/ontologx/log/run/" + self.run_name
-        self.out_uri = "https://cyberseclab.unibs.it/ontologx/log/out/" + self.run_name
+        self.run_uri = "https://cyberseclab.unibs.it/olx/run/" + self.run_name
+        self.out_uri = "https://cyberseclab.unibs.it/olx/out/" + self.run_name
 
     def hyperparameters(self) -> dict[str, str | int | float]:
         """Return the hyperparameters used in the experiment.
