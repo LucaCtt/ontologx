@@ -6,9 +6,7 @@ from langchain_neo4j import Neo4jGraph
 from ontologx.config import Config
 from ontologx.store import GraphDocument, Node, Relationship
 
-TIME_ONTOLOGY_URI = "http://www.w3.org/2006/time#"
-MLSCHEMA_ONTOLOGY_URI = "http://www.w3.org/ns/mls#"
-ONTOLOGY_PARAMS = {
+_ONTOLOGY_PARAMS = {
     "subClassOfRel": "subClassOf",
     "subPropertyOfRel": "subPropertyOf",
     "domainRel": "domain",
@@ -34,24 +32,26 @@ class Ontology:
             return
 
         # Init neosemantics plugin
-        self.__graph_store.query("CALL n10s.graphconfig.init($params)", params={"params": ONTOLOGY_PARAMS})
+        self.__graph_store.query("CALL n10s.graphconfig.init($params)", params={"params": _ONTOLOGY_PARAMS})
         self.__graph_store.query(
             f"""CREATE CONSTRAINT {self.__config.n10s_constraint_name} IF NOT EXISTS
             FOR (r:Resource) REQUIRE r.uri IS UNIQUE""",
         )
 
-        # Set the namespaces
-        self.__graph_store.query("CALL n10s.nsprefixes.add('log', $uri)", params={"uri": self.__config.ontology_uri})
-        self.__graph_store.query("CALL n10s.nsprefixes.add('time', $uri )", params={"uri": TIME_ONTOLOGY_URI})
-        self.__graph_store.query("CALL n10s.nsprefixes.add('mls', $uri)", params={"uri": MLSCHEMA_ONTOLOGY_URI})
-
-        # Load the ontologies
-        self.__graph_store.query(
-            "CALL n10s.onto.import.inline($ontology, 'Turtle')",
-            params={"ontology": Path(self.__config.ontology_path).read_text()},
-        )
-        self.__graph_store.query("CALL n10s.onto.import.fetch($url, 'Turtle')", params={"url": TIME_ONTOLOGY_URI})
-        self.__graph_store.query("CALL n10s.onto.import.fetch($url, 'Turtle')", params={"url": MLSCHEMA_ONTOLOGY_URI})
+        # Set the namespaces and load the ontologies
+        for namespace, uri in self.__config.ontologies_namespaces.items():
+            self.__graph_store.query(
+                "CALL n10s.nsprefixes.add($prefix, $uri)",
+                params={"prefix": namespace, "uri": uri},
+            )
+            path = Path(uri)
+            if path.exists():
+                self.__graph_store.query(
+                    "CALL n10s.onto.import.inline($prefix, $ontology)",
+                    params={"ontology": path.read_text()},
+                )
+            else:
+                self.__graph_store.query("CALL n10s.onto.import.fetch($ontology, 'Turtle')", params={"ontology": uri})
 
         # Load the SHACL constraints
         self.__graph_store.query(
