@@ -94,16 +94,17 @@ class Dataset:
                 "examples_uri": self.__config.examples_uri,
             },
         )
-        texts = [
-            _compose_embeddings_text(
-                el["eventMessage"],
-                {
-                    "sourceName": el.get("sourceName", ""),
-                    "sourceDevice": el["sourceDevice"] if el.get("sourceDevice") else "",  # Handle missing sourceDevice
-                },
-            )
-            for el in to_populate
-        ]
+
+        texts = []
+        for el in to_populate:
+            context = {}
+            if el.get("sourceName"):
+                context["sourceName"] = el["sourceName"]
+            if el.get("sourceDevice"):
+                context["sourceDevice"] = el["sourceDevice"]
+
+            texts.append(_compose_embeddings_text(el["eventMessage"], context))
+
         text_embeddings = self.__embeddings.embed_documents(texts)
         self.__graph_store.query(
             """

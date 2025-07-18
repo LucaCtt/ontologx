@@ -27,7 +27,7 @@ def _triples(graph: GraphDocument) -> list[_Triple]:
         for prop, value in node.properties.items():
             if prop in ("id", "uri") or prop.startswith("n4sch"):
                 continue
-            triples.append((node.type, prop, value))
+            triples.append((node.type, prop, value.lower() if isinstance(value, str) else value))
 
     triples.extend([(rel.source.type, rel.type, rel.target.type) for rel in graph.relationships])
 
