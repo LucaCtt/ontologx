@@ -124,47 +124,19 @@ log:ApplicationShape rdf:type sh:NodeShape;
     sh:path log:applicationVersion;
     sh:datatype xsd:string;
     sh:maxCount 1;
-  ];
-  sh:property [
-    sh:path log:hasArgument;
-    # sh:class log:Parameter;
-    sh:nodeKind sh:IRI;
-  ];
-  sh:property [
-    sh:path log:concatenatesWith;
-    sh:class log:ConcatenationOperator;
-    sh:maxCount 1;
-    sh:nodeKind sh:IRI;
   ].
 
-log:ConcatenationOperatorShape rdf:type sh:NodeShape;
-  sh:targetClass log:ConcatenationOperator;
+log:SystemProcessShape rdf:type sh:NodeShape;
+  sh:targetClass log:SystemProcess;
   sh:closed true;
+  sh:or ( [ sh:path log:systemProcessPID ] [ sh:path log:systemProcessSignal ] );
   sh:property [
-    sh:path log:concatenationOperatorType;
-    sh:datatype xsd:string;
-    sh:minCount 1;
-    sh:maxCount 1;
-  ];
-  sh:property [
-    sh:path log:concatenatesTo;
-    sh:class log:Application;
-    sh:minCount 1;
-    sh:maxCount 1;
-    sh:nodeKind sh:IRI;
-  ].
-
-log:ProcessShape rdf:type sh:NodeShape;
-  sh:targetClass log:Process;
-  sh:closed true;
-  sh:or ( [ sh:path log:processPID ] [ sh:path log:processSignal ] );
-  sh:property [
-    sh:path log:processPID;
+    sh:path log:systemProcessPID;
     sh:or ( [ sh:datatype xsd:string ] [ sh:datatype xsd:integer ] );
     sh:maxCount 1;
   ];
   sh:property [
-    sh:path log:processSignal;
+    sh:path log:systemProcessSignal;
     sh:datatype xsd:string;
     sh:maxCount 1;
   ].
