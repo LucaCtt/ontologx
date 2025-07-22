@@ -40,9 +40,6 @@ class Neo4jStore(Store):
         for index in indexes:
             self.__graph_store.query(f"DROP INDEX {index['name']}")
 
-    def ontology(self) -> GraphDocument:
-        return self.__onto.graph()
-
     def tests(self) -> list[GraphDocument]:
         return self.__dataset.tests()
 
@@ -61,6 +58,9 @@ class Neo4jStore(Store):
 
     def add_event_graph(self, event_graph: GraphDocument) -> None:
         self.__dataset.add_event_graph(event_graph)
+
+    def ontology(self) -> GraphDocument:
+        return self.__onto.graph()
 
     def total_constraints(self) -> int:
         return self.__onto.total_constraints()

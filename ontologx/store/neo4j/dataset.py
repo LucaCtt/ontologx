@@ -8,6 +8,7 @@ from langchain_neo4j import Neo4jGraph, Neo4jVector
 
 from ontologx.config import Config
 from ontologx.store import GraphDocument, Node, Relationship
+from ontologx.store.neo4j.utils import normalize_input_graph, normalize_output_graph
 
 
 def _compose_embeddings_text(event: str, context: dict[str, str]) -> str:
@@ -175,7 +176,7 @@ class Dataset:
                 else {}
             )
             graph.source = Document(page_content=test["message"], metadata=context)
-            tests.append(graph)
+            tests.append(normalize_output_graph(graph))
 
         return tests
 
@@ -189,6 +190,8 @@ class Dataset:
             graph (GraphDocument): The event graph to add.
 
         """
+        norm_graph = normalize_input_graph(graph)
+
         # Check if result dataset exists, otherwise create it
         result_dataset = self.__graph_store.query(
             """
@@ -206,38 +209,33 @@ class Dataset:
                 params={"run_name": self.__config.run_name, "out_dataset_uri": self.__config.out_uri + "/out-dataset"},
             )
 
-        for node in graph.nodes:
-            node_id = f"{self.__config.out_uri}/{uuid.uuid4()}"
-            node_type = node.type.replace(":", "__")
-            node.id = node_id
+        for node in norm_graph.nodes:
+            node.id = f"{self.__config.out_uri}/{uuid.uuid4()}"
+            node.properties["uri"] = node.id
+            node.properties["n4sch__runName"] = self.__config.run_name
 
-            props = {k.replace(":", "__"): v for k, v in node.properties.items()} | {
-                "uri": node.id,
-                "n4sch__runName": self.__config.run_name,
-            }
-
-            if node_type == "log__Event":
+            if node.type == "log__Event":
                 # This will raise an exception if the LLM produces an Event node without a message property.
                 text = _compose_embeddings_text(
-                    props["log__eventMessage"],
-                    graph.source.metadata,
+                    node.properties["log__eventMessage"],
+                    norm_graph.source.metadata,
                 )
-                props["n4sch__embedding"] = self.__embeddings.embed_query(text)
+                node.properties["n4sch__embedding"] = self.__embeddings.embed_query(text)
 
             self.__graph_store.query(
                 f"""
                 MATCH (d:mls__Dataset)
                 WHERE d.uri STARTS WITH $out_dataset_uri
-                CREATE (d)-[:mls__hasPart]->(n:{node_type} $props)
+                CREATE (d)-[:mls__hasPart]->(n:{node.type} $props)
                 """,
-                params={"props": props, "out_dataset_uri": self.__config.out_uri + "/out-dataset"},
+                params={"props": node.properties, "out_dataset_uri": self.__config.out_uri + "/out-dataset"},
             )
 
-        for relationship in graph.relationships:
+        for relationship in norm_graph.relationships:
             self.__graph_store.query(
                 f"""
                 MATCH (a {{uri: $source_uri}}), (b {{uri: $target_uri}})
-                CREATE (a)-[:{relationship.type.replace(":", "__")}]->(b)
+                CREATE (a)-[:{relationship.type}]->(b)
                 """,
                 params={
                     "source_uri": relationship.source.id,
@@ -313,17 +311,17 @@ class Dataset:
             RETURN
             [node IN nodes | {
             uri: node.uri,
-            type: REPLACE(HEAD([label IN LABELS(node) WHERE label <> 'Resource']), '__', ':'),
+            type: HEAD([label IN LABELS(node) WHERE label <> 'Resource']),
             properties: apoc.map.fromPairs(
                 [key IN KEYS(apoc.map.removeKeys(PROPERTIES(node), $props_to_remove)) |
-                    [REPLACE(key, '__', ':'), apoc.map.removeKeys(PROPERTIES(node), $props_to_remove)[key]]
+                    [key, apoc.map.removeKeys(PROPERTIES(node), $props_to_remove)[key]]
                 ]
             )
             }] AS nodes,
             [rel IN relationships | {
             source: STARTNODE(rel).uri,
             target: ENDNODE(rel).uri,
-            type: REPLACE(TYPE(rel), '__', ':')
+            type: TYPE(rel)
             }] AS relationships
             """,
             params={"node_uri": node_uri, "props_to_remove": props_to_remove},

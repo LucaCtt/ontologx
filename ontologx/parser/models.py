@@ -64,11 +64,11 @@ class _OntologyValidValues:
 
     @property
     def node_types(self) -> list[str]:
-        return [node.type for node in self.ontology.nodes if not node.type.startswith("n4sch")]
+        return [node.type for node in self.ontology.nodes if not node.type.startswith("schema")]
 
     @property
     def relationship_types(self) -> list[str]:
-        return [rel.type for rel in self.ontology.relationships if not rel.type.startswith("n4sch")]
+        return [rel.type for rel in self.ontology.relationships if not rel.type.startswith("schema")]
 
     @property
     def structural_triples(self) -> list[tuple[str, str, str]]:
@@ -76,7 +76,7 @@ class _OntologyValidValues:
         return [
             (rel.source.type, rel.type, rel.target.type)
             for rel in self.ontology.relationships
-            if rel.type.startswith("n4sch")
+            if rel.type.startswith("schema")
         ]
 
     @property
@@ -84,13 +84,15 @@ class _OntologyValidValues:
         return [
             (rel.source.type, rel.type, rel.target.type)
             for rel in self.ontology.relationships
-            if not rel.type.startswith("n4sch")
+            if not rel.type.startswith("schema")
         ]
 
     @property
     def properties_per_node(self) -> dict[str, list[str]]:
         return {
-            node.type: list(node.properties.keys()) for node in self.ontology.nodes if not node.type.startswith("n4sch")
+            node.type: list(node.properties.keys())
+            for node in self.ontology.nodes
+            if not node.type.startswith("schema")
         }
 
     @property

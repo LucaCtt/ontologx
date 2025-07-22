@@ -5,6 +5,7 @@ from langchain_neo4j import Neo4jGraph
 
 from ontologx.config import Config
 from ontologx.store import GraphDocument, Node, Relationship
+from ontologx.store.neo4j.utils import normalize_input_graph, normalize_output_graph
 
 _ONTOLOGY_PARAMS = {
     "subClassOfRel": "subClassOf",
@@ -73,6 +74,9 @@ class Ontology:
             and relationships are relationships between classes.
 
         """
+        # Retrieves all classes in the log ontology,
+        # along with any classes that have a first-degree subclass relationship with them.
+        # It also retrieves any properties associated with each class, if they exist.
         nodes_with_props = self.__graph_store.query(
             """
             MATCH (c:n4sch__Class)
@@ -82,12 +86,12 @@ class Ontology:
                     WHERE d.uri STARTS WITH $log_ontology_uri
                 }
             OPTIONAL MATCH (c)<-[:n4sch__domain]-(p:n4sch__Property)
-            RETURN REPLACE(n10s.rdf.shortFormFromFullUri(c.uri), '__', ':') AS class,
+            RETURN n10s.rdf.shortFormFromFullUri(c.uri) AS class,
                 c.uri AS uri,
                 apoc.map.fromPairs(
                     [pair IN COLLECT(
                         CASE WHEN p IS NOT NULL
-                            THEN [REPLACE(n10s.rdf.shortFormFromFullUri(p.uri), '__', ':'), p.n4sch__name]
+                            THEN [n10s.rdf.shortFormFromFullUri(p.uri), p.n4sch__name]
                         ELSE NULL END
                     ) WHERE pair IS NOT NULL]
                ) AS properties
@@ -98,17 +102,19 @@ class Ontology:
             row["uri"]: Node(id=row["uri"], type=row["class"], properties=row["properties"]) for row in nodes_with_props
         }
 
+        # Retrieves triples between the classes retrieved above,
+        # representing ontological and structural relationships between them.
         triples = self.__graph_store.query(
             """
             MATCH (n:n4sch__Class)<-[:n4sch__domain]-(r:n4sch__Relationship)-[:n4sch__range]->(m:n4sch__Class)
             WHERE n.uri IN $node_uris AND m.uri IN $node_uris
             RETURN n.uri AS subject_uri,
-                REPLACE(n10s.rdf.shortFormFromFullUri(r.uri), '__', ':') AS predicate,
+                n10s.rdf.shortFormFromFullUri(r.uri) AS predicate,
                 m.uri AS object_uri
             UNION
             MATCH (n:n4sch__Class)-[r]->(m:n4sch__Class)
             WHERE n.uri IN $node_uris AND m.uri IN $node_uris AND type(r) STARTS WITH 'n4sch'
-            RETURN n.uri AS subject_uri, REPLACE(type(r), '__', ':') AS predicate, m.uri AS object_uri
+            RETURN n.uri AS subject_uri, type(r) AS predicate, m.uri AS object_uri
             """,
             params={
                 "node_uris": list(nodes_dict.keys()),
@@ -123,7 +129,7 @@ class Ontology:
             for row in triples
         ]
 
-        return GraphDocument(
+        result = GraphDocument(
             nodes=list(nodes_dict.values()),
             relationships=relationships,
             source=Document(
@@ -131,6 +137,7 @@ class Ontology:
                 metadata={"ontology_uri": self.__config.ontology_uri},
             ),
         )
+        return normalize_output_graph(result)
 
     def total_constraints(self) -> int:
         """Return the total number of SHACL constraints in the ontology.
@@ -156,8 +163,9 @@ class Ontology:
             int: The number of validation errors found in the graph.
 
         """
-        nodes_uris = [node.id for node in graph.nodes]
+        norm_graph = normalize_input_graph(graph)
 
+        nodes_uris = [node.id for node in norm_graph.nodes]
         result = self.__graph_store.query(
             """
             MATCH (n)

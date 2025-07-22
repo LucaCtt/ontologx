@@ -25,7 +25,7 @@ def _triples(graph: GraphDocument) -> list[_Triple]:
     triples = []
     for node in graph.nodes:
         for prop, value in node.properties.items():
-            if prop in ("id", "uri") or prop.startswith("n4sch"):
+            if prop == "uri" or prop.startswith("schema"):
                 continue
             triples.append((node.type, prop, value.lower() if isinstance(value, str) else value))
 
@@ -64,12 +64,12 @@ def _entity_match(entity1: Node, entity2: Node) -> bool:
     props1 = {
         k: (v.lower() if isinstance(v, str) else v)
         for k, v in entity1.properties.items()
-        if (k not in {"id", "uri"} and not k.startswith("n4sch"))  # Exclude id, uri, and n4sch properties
+        if (k != "uri" and not k.startswith("schema"))  # Exclude uri and schema properties
     }
     props2 = {
         k: (v.lower() if isinstance(v, str) else v)
         for k, v in entity2.properties.items()
-        if (k not in {"id", "uri"} and not k.startswith("n4sch"))  # Exclude id, uri, and n4sch properties
+        if (k != "uri" and not k.startswith("schema"))  # Exclude uri and schema properties
     }
 
     return entity1.type == entity2.type and props1 == props2
