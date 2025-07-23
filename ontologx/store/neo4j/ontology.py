@@ -7,6 +7,8 @@ from ontologx.config import Config
 from ontologx.store import GraphDocument, Node, Relationship
 from ontologx.store.neo4j.utils import normalize_input_graph, normalize_output_graph
 
+_TIME_ONTOLOGY_URI = "http://www.w3.org/2006/time#"
+_MLSCHEMA_ONTOLOGY_URI = "http://www.w3.org/ns/mls#"
 _ONTOLOGY_PARAMS = {
     "subClassOfRel": "subClassOf",
     "subPropertyOfRel": "subPropertyOf",
@@ -39,20 +41,18 @@ class Ontology:
             FOR (r:Resource) REQUIRE r.uri IS UNIQUE""",
         )
 
-        # Set the namespaces and load the ontologies
-        for namespace, uri in self.__config.ontologies_namespaces.items():
-            self.__graph_store.query(
-                "CALL n10s.nsprefixes.add($prefix, $uri)",
-                params={"prefix": namespace, "uri": uri},
-            )
-            path = Path(uri)
-            if path.exists():
-                self.__graph_store.query(
-                    "CALL n10s.onto.import.inline($prefix, $ontology)",
-                    params={"ontology": path.read_text()},
-                )
-            else:
-                self.__graph_store.query("CALL n10s.onto.import.fetch($ontology, 'Turtle')", params={"ontology": uri})
+        # Set the namespaces
+        self.__graph_store.query("CALL n10s.nsprefixes.add('olx', $uri)", params={"uri": self.__config.ontology_uri})
+        self.__graph_store.query("CALL n10s.nsprefixes.add('time', $uri )", params={"uri": _TIME_ONTOLOGY_URI})
+        self.__graph_store.query("CALL n10s.nsprefixes.add('mls', $uri)", params={"uri": _MLSCHEMA_ONTOLOGY_URI})
+
+        # Load the ontologies
+        self.__graph_store.query(
+            "CALL n10s.onto.import.inline($ontology, 'Turtle')",
+            params={"ontology": Path(self.__config.ontology_path).read_text()},
+        )
+        self.__graph_store.query("CALL n10s.onto.import.fetch($url, 'Turtle')", params={"url": _TIME_ONTOLOGY_URI})
+        self.__graph_store.query("CALL n10s.onto.import.fetch($url, 'Turtle')", params={"url": _MLSCHEMA_ONTOLOGY_URI})
 
         # Load the SHACL constraints
         self.__graph_store.query(

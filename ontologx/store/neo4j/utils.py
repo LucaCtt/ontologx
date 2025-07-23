@@ -1,4 +1,4 @@
-from ontologx.store import GraphDocument
+from ontologx.store import GraphDocument, Node, Relationship
 
 
 def normalize_output_graph(graph: GraphDocument) -> GraphDocument:
@@ -12,11 +12,11 @@ def normalize_output_graph(graph: GraphDocument) -> GraphDocument:
 
     """
     for node in graph.nodes:
-        # Remove embedding property
-        node.properties.pop("n4sch__embedding", None)
-
         # Convert namespace separator for node
         node.type = node.type.replace("__", ":")
+
+        # Remove embedding property
+        node.properties.pop("n4sch__embedding", None)
 
         # Convert namespace separator for properties, rename "n4sch" to "schema"
         for key in list(node.properties.keys()):
@@ -45,22 +45,35 @@ def normalize_input_graph(graph: GraphDocument) -> GraphDocument:
         GraphDocument: The normalized graph document.
 
     """
+    # Create a new normalized graph document, so the original is not modified
+    norm = GraphDocument(nodes=[], relationships=[], source=graph.source)
+
+    nodes_dict = {}
     for node in graph.nodes:
-        # Convert namespace separator for node
-        node.type = node.type.replace(":", "__")
+        # Copy node without properties for normalization
+        node_norm = Node(id=node.id, type=node.type.replace(":", "__"), properties={})
 
         # Convert namespace separator for properties, rename "schema" to "n4sch"
         for key in list(node.properties.keys()):
-            new_key = key.replace(":", "__").replace("schema", "n4sch")
-            node.properties[new_key] = node.properties.pop(key)
+            new_key = key.replace("schema", "n4sch").replace(":", "__")
+            node_norm.properties[new_key] = node.properties[key]
+
+        nodes_dict[node.id] = node_norm
+
+    norm.nodes = list(nodes_dict.values())
 
     for relationship in graph.relationships:
         # Convert namespace separator for relationship type
-        relationship.type = relationship.type.replace(":", "__")
+        rel_norm = Relationship(
+            type=relationship.type.replace(":", "__"),
+            source=nodes_dict[relationship.source.id],
+            target=nodes_dict[relationship.target.id],
+            properties={},
+        )
 
         # Convert namespace separator for properties, rename "schema" to "n4sch"
-        for key in list(relationship.properties.keys()):
-            new_key = key.replace(":", "__").replace("schema", "n4sch")
-            relationship.properties[new_key] = relationship.properties.pop(key)
+        for key in list(rel_norm.properties.keys()):
+            new_key = key.replace("schema", "n4sch").replace(":", "__")
+            rel_norm.properties[new_key] = relationship.properties[key]
 
-    return graph
+    return norm

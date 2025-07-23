@@ -1,5 +1,5 @@
 @prefix : <https://cyberseclab.unibs.it/olx/tests#>.
-@prefix olx: <https://cyberseclab.unibs.it/olx/dictionary#>.
+@prefix olx: <https://cyberseclab.unibs.it/olx/dict#>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix time: <http://www.w3.org/2006/time#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
@@ -27,9 +27,6 @@
 :network-protocol-1-1 rdf:type olx:NetworkProtocol;
   olx:networkProtocolName "mssqld".
 
-:network-protocol-1-2 rdf:type olx:NetworkProtocol;
-  olx:networkProtocolName "tcp".
-
 :username-1 rdf:type olx:UserCredential;
   olx:userCredentialValue "sa".
 
@@ -46,7 +43,6 @@
     :network-address-1-1,
     :network-address-1-2,
     :network-protocol-1-1,
-    :network-protocol-1-2,
     :user-1.
 
 # cowrie,cowrie.json.2021-04-11,"{""eventid"":""cowrie.direct-tcpip.request"",""dst_ip"":""35.190.214.48"",""dst_port"":443,""src_ip"":""45.227.255.207"",""src_port"":0,""message"":""direct-tcp connection request to 35.190.214.48:443 from 0.0.0.0:0"",""sensor"":""4f2220a17ee1"",""timestamp"":""2021-04-11T19:13:51.180173Z"",""session"":""e925470c3175""}"

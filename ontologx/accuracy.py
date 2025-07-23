@@ -45,7 +45,7 @@ def _triples_without_event_message(graph: GraphDocument) -> list[_Triple]:
                                   excluding 'eventMessage' predicates.
 
     """
-    return [t for t in _triples(graph) if t[1] != "eventMessage"]
+    return [t for t in _triples(graph) if t[1] != "olx:eventMessage"]
 
 
 def _entity_match(entity1: Node, entity2: Node) -> bool:

@@ -54,38 +54,6 @@ def _get_uri_from_ttl(ttl_path: str) -> str:
     return uri.toPython()
 
 
-def _get_ontologies(log_ontology_path: str) -> dict[str, str]:
-    """Get all the ontologies from the log ontology file.
-
-    The empty ":" namespace will be assigned to the "olx" namespace.
-    If a "olx" namespace is defined explicitly, it will override the empty namespace.
-    If neither are defined, an error will be raised.
-
-    Args:
-        log_ontology_path (str): The path to the log ontology file.
-
-    Returns:
-        dict[str, str]: A dictionary with the ontology prefixes as keys and their uris as values.
-
-    """
-    graph = Graph()
-    graph.parse(log_ontology_path, format="turtle")
-    result = {}
-    namespaces = dict(graph.namespace_manager.namespaces())
-
-    if "" in namespaces:
-        result["olx"] = namespaces[""].toPython()
-
-    for prefix, uri in namespaces.items():
-        result[prefix] = uri.toPython()
-
-    if "olx" not in result:
-        msg = "No 'olx' namespace found in the ontology. Please define it explicitly or use the empty namespace."
-        raise ValueError(msg)
-
-    return result
-
-
 class Config:
     """Configuration class for setting up variables used in the log graph building."""
 
@@ -198,9 +166,6 @@ class Config:
 
     prompt_build_graph = Path(prompt_path).read_text()
     """The prompt used to build the graph."""
-
-    ontologies_namespaces = _get_ontologies(ontology_path)
-    """A dict with the ontology prefixes as keys and their uris as values."""
 
     ontology_uri = _get_uri_from_ttl(ontology_path)
     """The URI of the log ontology."""

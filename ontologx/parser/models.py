@@ -90,7 +90,7 @@ class _OntologyValidValues:
     @property
     def properties_per_node(self) -> dict[str, list[str]]:
         return {
-            node.type: list(node.properties.keys())
+            node.type: [k for k in node.properties if not k.startswith("schema")]
             for node in self.ontology.nodes
             if not node.type.startswith("schema")
         }

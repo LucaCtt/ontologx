@@ -37,10 +37,10 @@ class Dataset:
             password=self.__config.neo4j_password,
             url=self.__config.neo4j_url,
             index_name=self.__config.events_index_name,
-            node_label="log__Event",
+            node_label="olx__Event",
             embedding_node_property="n4sch__embedding",
             retrieval_query="""
-            RETURN node.log__eventMessage AS text,
+            RETURN node.olx__eventMessage AS text,
             score,
             {uri: node.uri, n4sch__runName: node.n4sch__runName, _embedding_: node.n4sch__embedding} AS metadata
             """,
@@ -83,12 +83,12 @@ class Dataset:
         # Populate the embeddings for the examples
         to_populate = self.__graph_store.query(
             """
-            MATCH (d:mls__Dataset)-[:mls__hasPart]->(e:log__Event)
+            MATCH (d:mls__Dataset)-[:mls__hasPart]->(e:olx__Event)
             WHERE e.n4sch__embedding IS NULL AND d.uri STARTS WITH $examples_uri
-            OPTIONAL MATCH (e)-[:log__hasParameter]->(s:log__Source)
+            OPTIONAL MATCH (e)-[:olx__hasParameter]->(s:olx__Source)
             SET e.n4sch__runName = ''
-            RETURN elementId(e) AS id, e.log__eventMessage AS eventMessage, s.log__sourceName AS sourceName,
-            s.log__sourceDevice AS sourceDevice
+            RETURN elementId(e) AS id, e.olx__eventMessage AS eventMessage, s.olx__sourceName AS sourceName,
+            s.olx__sourceDevice AS sourceDevice
             """,
             params={
                 "run_name": self.__config.run_name,
@@ -110,7 +110,7 @@ class Dataset:
         self.__graph_store.query(
             """
             UNWIND $data AS row
-            MATCH (e:log__Event)
+            MATCH (e:olx__Event)
             WHERE elementId(e) = row.id
             CALL db.create.setNodeVectorProperty(e, 'n4sch__embedding', row.embedding)
             """,
@@ -141,7 +141,7 @@ class Dataset:
         )
         self.__graph_store.query(
             """
-            MATCH (d:mls__Dataset)-[:mls__hasPart]->(e:log__Event)
+            MATCH (d:mls__Dataset)-[:mls__hasPart]->(e:olx__Event)
             WHERE e.n4sch__embedding IS NULL AND d.uri STARTS WITH $tests_uri
             SET e.n4sch__runName = ''
             SET e.n4sch__embedding = ''
@@ -155,9 +155,9 @@ class Dataset:
     def tests(self) -> list[GraphDocument]:
         test_nodes = self.__graph_store.query(
             """
-            MATCH (d:mls__Dataset)-[:mls__hasPart]->(e:log__Event)
+            MATCH (d:mls__Dataset)-[:mls__hasPart]->(e:olx__Event)
             WHERE d.uri STARTS WITH $tests_uri
-            RETURN e.log__eventMessage as message, e.uri as uri
+            RETURN e.olx__eventMessage as message, e.uri as uri
             ORDER BY e.uri
             """,
             params={"run_name": self.__config.run_name, "tests_uri": self.__config.tests_uri},
@@ -167,14 +167,13 @@ class Dataset:
             graph = self.__get_subgraph_from_node(test["uri"])
 
             source_node = next((node for node in graph.nodes if node.type == "Source"), None)
-            context = (
-                {
-                    "sourceName": source_node.properties.get("log__sourceName", ""),
-                    "sourceDevice": source_node.properties.get("log__sourceDevice", ""),
-                }
-                if source_node
-                else {}
-            )
+            context = {}
+            if source_node:
+                if source_node.properties.get("olx__sourceName"):
+                    context["sourceName"] = source_node.properties["olx__sourceName"]
+                if source_node.properties.get("olx__sourceDevice"):
+                    context["sourceDevice"] = source_node.properties["olx__sourceDevice"]
+
             graph.source = Document(page_content=test["message"], metadata=context)
             tests.append(normalize_output_graph(graph))
 
@@ -214,10 +213,10 @@ class Dataset:
             node.properties["uri"] = node.id
             node.properties["n4sch__runName"] = self.__config.run_name
 
-            if node.type == "log__Event":
+            if node.type == "olx__Event":
                 # This will raise an exception if the LLM produces an Event node without a message property.
                 text = _compose_embeddings_text(
-                    node.properties["log__eventMessage"],
+                    node.properties["olx__eventMessage"],
                     norm_graph.source.metadata,
                 )
                 node.properties["n4sch__embedding"] = self.__embeddings.embed_query(text)
@@ -296,6 +295,18 @@ class Dataset:
         """Get the subgraph of a node in the store.
 
         The subgraph will contain all the nodes and relationships connected to the given node, even indirectly.
+
+        Args:
+            node_uri (str): The URI of the node to get the subgraph from.
+            props_to_remove (list[str] | None): The list of properties to remove from the nodes in the subgraph.
+                If None, the default properties to remove are used.
+
+        Returns:
+            GraphDocument: The subgraph of the node, with nodes and relationships.
+
+        Raises:
+            ValueError: If no subgraph is found for the given node URI.
+
         """
         if props_to_remove is None:
             props_to_remove = []
@@ -312,11 +323,7 @@ class Dataset:
             [node IN nodes | {
             uri: node.uri,
             type: HEAD([label IN LABELS(node) WHERE label <> 'Resource']),
-            properties: apoc.map.fromPairs(
-                [key IN KEYS(apoc.map.removeKeys(PROPERTIES(node), $props_to_remove)) |
-                    [key, apoc.map.removeKeys(PROPERTIES(node), $props_to_remove)[key]]
-                ]
-            )
+            properties: apoc.map.removeKeys(PROPERTIES(node), $props_to_remove)
             }] AS nodes,
             [rel IN relationships | {
             source: STARTNODE(rel).uri,
@@ -328,7 +335,8 @@ class Dataset:
         )
 
         if not nodes_subgraphs:
-            return GraphDocument(nodes=[], relationships=[], source=Document(page_content="", metadata={}))
+            msg = f"No subgraph found for node with URI: {node_uri}"
+            raise ValueError(msg)
 
         nodes_subgraph = nodes_subgraphs[0]
 
