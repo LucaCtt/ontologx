@@ -7,9 +7,10 @@ Your goal is to maximize information extraction from the event while maintaining
 You MUST adhere to the following constraints at all times:
 - The graph must contain exactly one "Event" node, with a property "eventMessage" that holds the original event text.
 - Do not introduce any new node types, relationship types, or property types. Only use the available types.
+- Use the most specific type available for nodes and relationships, e.g. "UserPassword" instead of "UserCredential".
 - Respect the appropriate casing for all types.
 - Use the appropriate node prefix for properties, e.g. "userUID" instead of "uid".
-- The graph must be connected: there should be no isolated nodes.
+- Omit properties with empty values.
 - The output must contain only the JSON graph. No other text, comments, or explanations should be included. The output must be valid JSON and parsable, without any escape characters or newlines. The JSON must be formatted correctly, with all necessary commas and brackets in place.
 
 # Output Format
