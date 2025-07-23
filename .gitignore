@@ -3,6 +3,6 @@
 __pycache__/
 .ruff_cache/
 .vscode/
-dumps/
-docker/exps/
+
 .deepeval
+exps/
