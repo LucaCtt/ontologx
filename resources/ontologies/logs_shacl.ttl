@@ -13,11 +13,6 @@ olx:EventShape rdf:type sh:NodeShape;
     sh:maxCount 1;
   ];
   sh:property [
-    sh:path olx:eventSeverity;
-    sh:datatype xsd:string;
-    sh:maxCount 1;
-  ];
-  sh:property [
     sh:path olx:eventID;
     sh:maxCount 1;
   ];

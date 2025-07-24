@@ -446,7 +446,6 @@
 
 :event-21 rdf:type olx:Event;
   olx:eventMessage '20/1/2022 -- 13:16:23 - <Notice> - This is Suricata version 6.0.4 RELEASE running in SYSTEM mode';
-  olx:eventSeverity "NOTICE";
   olx:hasParameter :timestamp-21, :source-21, :application-31.
 
 # vpn, syslog.1.csv, Jan 24 22:42:32 vpn 50-motd-news[2769]:  * Super-optimized for small spaces - read how we shrank the memory
@@ -532,7 +531,6 @@
 
 :event-25 rdf:type olx:Event;
   olx:eventMessage "25/1/2022 -- 06:57:01 - <Notice> - Stats for ''eth0'':  pkts: 780375, drop: 0 (0.00%), invalid chksum: 0";
-  olx:eventSeverity "NOTICE";
   olx:hasParameter :timestamp-25, :source-25, :application-25.
 
 # vpn, suricata.log.csv, "20/1/2022 -- 13:12:37 - <Config> - stream.reassembly ""toserver-chunk-size"": 2560"
@@ -587,7 +585,6 @@
 
 :event-28 rdf:type olx:Event;
   olx:eventMessage '[Mon Jan 24 06:25:16.644970 2022] [mpm_prefork:notice] [pid 29640] AH00171: Graceful restart requested, doing restart';
-  olx:eventSeverity "NOTICE";
   olx:hasParameter :timestamp-28, :source-28, :system-process-28.
 
 # inet-firewall, shorewall-init.log.1.csv, Jan 20 11:22:30
@@ -835,8 +832,7 @@
 
 :event-41 rdf:type olx:Event;
   olx:eventMessage '_._';
-  olx:eventSeverity "INFO";
-  olx:hasSource :source-41.
+  olx:hasParameter :source-41.
 
 # intranet_server,error.log.2.csv,bash: 196: Bad file descriptor
 :source-42 rdf:type olx:Source;
@@ -907,7 +903,6 @@
 
 :event-45 rdf:type olx:Event;
   olx:eventMessage '20/1/2022 -- 13:16:23 - <Info> - CPUs/cores online: 1';
-  olx:eventSeverity "INFO";
   olx:hasParameter :timestamp-45, :source-45, :application-45.
 
 # vpn,openvpn.log.csv,2022-01-22 12:44:02 jhall/192.168.230.165:59814 VERIFY EKU OK

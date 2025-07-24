@@ -35,7 +35,6 @@
 
 :event-2 rdf:type olx:Event;
   olx:eventMessage "20/1/2022 -- 13:16:23 - <Info> - Found an MTU of 1450 for 'ens3'";
-  olx:eventSeverity "INFO";
   olx:hasParameter :timestamp-2, :source-2, :application-2.
 
 # morris_mail, syslog.4.csv, Jan 20 12:20:53 morris-mail exim4[30354]: Stopping MTA: exim4_listener.
@@ -205,7 +204,6 @@
 
 :event-10 rdf:type olx:Event;
   olx:eventMessage "[Sun Jan 23 06:25:13.804652 2022] [core:notice] [pid 29640] AH00094: Command line: '/usr/sbin/apache2'";
-  olx:eventSeverity "NOTICE";
   olx:hasParameter :timestamp-10, :source-10, :system-process-10.
 
 # Dataset

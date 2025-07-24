@@ -49,7 +49,7 @@ class Schema:
             # Create the measure node if it does not exist
             self.__graph_store.query(
                 """
-                CREATE (m:EvaluationMeasure {n4sch__name: $name, uri: $uri})
+                CREATE (m:mls__EvaluationMeasure {n4sch__name: $name, uri: $uri})
                 """,
                 params={"name": measure_camel, "uri": self.__gen_uri()},
             )

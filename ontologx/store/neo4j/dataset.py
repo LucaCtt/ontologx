@@ -166,7 +166,7 @@ class Dataset:
         for test in test_nodes:
             graph = self.__get_subgraph_from_node(test["uri"])
 
-            source_node = next((node for node in graph.nodes if node.type == "Source"), None)
+            source_node = next((node for node in graph.nodes if node.type == "olx__Source"), None)
             context = {}
             if source_node:
                 if source_node.properties.get("olx__sourceName"):

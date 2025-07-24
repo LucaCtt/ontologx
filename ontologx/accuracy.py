@@ -184,6 +184,8 @@ class OntologyGraphMetrics:
 
         triples_pred = _triples(self.__pred)
         triples_true = _triples(self.__true)
+        print(f"Predicted triples: {triples_pred}")
+        print(f"True triples: {triples_true}")
 
         for triple_pred in triples_pred:
             if triple_pred not in triples_true:

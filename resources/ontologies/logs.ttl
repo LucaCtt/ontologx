@@ -158,12 +158,6 @@
   rdfs:comment "Event session ID, used to group related events together.";
   rdfs:label "Event Session ID".
 
-:eventSeverity rdf:type owl:DatatypeProperty;
-  rdfs:domain :Event;
-  rdfs:range xsd:string;
-  rdfs:comment "Event priority (e.g. ERROR, WARN, DEBUG, CRIT)";
-  rdfs:label "Event Severity".
-
 :sourceName rdf:type owl:DatatypeProperty;
   rdfs:domain :Source;
   rdfs:range xsd:string;
