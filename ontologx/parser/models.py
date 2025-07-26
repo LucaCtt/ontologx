@@ -197,12 +197,6 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
                 err_type = "IncorrectEventNodes"
                 raise PydanticCustomError(err_type, msg)
 
-            event_node = event_nodes[0]
-            if not event_node.properties or not any(prop.type == "olx:eventMessage" for prop in event_node.properties):
-                msg = "The 'Event' node must have a property of type 'eventMessage'."
-                err_type = "MissingEventProperty"
-                raise PydanticCustomError(err_type, msg)
-
             return self
 
     return EventGraph

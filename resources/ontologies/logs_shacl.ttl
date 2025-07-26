@@ -7,13 +7,12 @@ olx:EventShape rdf:type sh:NodeShape;
   sh:targetClass olx:Event;
   sh:closed true;
   sh:property [
-    sh:path olx:eventMessage;
-    sh:datatype xsd:string;
-    sh:minCount 1;
+    sh:path olx:eventID;
     sh:maxCount 1;
   ];
   sh:property [
-    sh:path olx:eventID;
+    sh:path olx:eventSeverity;
+    sh:datatype xsd:string;
     sh:maxCount 1;
   ];
   sh:property [
@@ -23,7 +22,12 @@ olx:EventShape rdf:type sh:NodeShape;
   ];
   sh:property [
     sh:path olx:hasParameter;
-    # sh:class olx:Property;
+    sh:class olx:Property;
+    sh:nodeKind sh:IRI;
+  ];
+  sh:property [
+    sh:path olx:wasLoggedBy;
+    sh:class olx:Source;
     sh:nodeKind sh:IRI;
   ].
 
@@ -187,7 +191,7 @@ olx:UserShape rdf:type sh:NodeShape;
   ];
   sh:property [
     sh:path olx:hasCredential;
-    # sh:class olx:IdentityCredential;
+    sh:class olx:IdentityCredential;
     sh:nodeKind sh:IRI;
   ].
 

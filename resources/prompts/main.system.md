@@ -5,8 +5,8 @@ Your goal is to maximize information extraction from the event while maintaining
 
 # Rules
 You MUST adhere to the following constraints at all times:
-- The graph must contain exactly one "Event" node, with a property "eventMessage" that holds the original event text.
-- Do not introduce any new node types, relationship types, or property types. Only use the available types.
+- The graph must contain exactly one "Event" node.
+- Use only the available types as defined in the ontology, without introducing new ones.
 - Use the most specific type available for nodes and relationships, e.g. "UserPassword" instead of "UserCredential".
 - Respect the appropriate casing for all types.
 - Use the appropriate node prefix for properties, e.g. "userUID" instead of "uid".

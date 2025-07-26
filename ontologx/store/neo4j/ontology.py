@@ -54,12 +54,6 @@ class Ontology:
         self.__graph_store.query("CALL n10s.onto.import.fetch($url, 'Turtle')", params={"url": _TIME_ONTOLOGY_URI})
         self.__graph_store.query("CALL n10s.onto.import.fetch($url, 'Turtle')", params={"url": _MLSCHEMA_ONTOLOGY_URI})
 
-        # Load the SHACL constraints
-        self.__graph_store.query(
-            "CALL n10s.validation.shacl.import.inline($constraints, 'Turtle')",
-            params={"constraints": Path(self.__config.shacl_path).read_text()},
-        )
-
     def graph(self) -> GraphDocument:
         """Return the ontology graph as a GraphDocument.
 

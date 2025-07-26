@@ -158,7 +158,7 @@ class Config:
     parser_temperature = float(os.getenv("PARSER_TEMPERATURE", "0.7"))
     """The temperature of the LLM used to parse logs. Must be between 0 and 1."""
 
-    events_index_name = os.getenv("EVENTS_INDEX_NAME", "eventMessageIndex")
+    events_index_name = os.getenv("EVENTS_INDEX_NAME", "eventsIndex")
     """The name of the vector index to use for the events in the graph store."""
 
     n10s_constraint_name = os.getenv("N10S_CONSTRAINT_NAME", "n10s_unique_uri")

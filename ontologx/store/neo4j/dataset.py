@@ -40,7 +40,7 @@ class Dataset:
             node_label="olx__Event",
             embedding_node_property="n4sch__embedding",
             retrieval_query="""
-            RETURN node.olx__eventMessage AS text,
+            RETURN node.mls__implements AS text,
             score,
             {uri: node.uri, n4sch__runName: node.n4sch__runName, _embedding_: node.n4sch__embedding} AS metadata
             """,
@@ -85,9 +85,9 @@ class Dataset:
             """
             MATCH (d:mls__Dataset)-[:mls__hasPart]->(e:olx__Event)
             WHERE e.n4sch__embedding IS NULL AND d.uri STARTS WITH $examples_uri
-            OPTIONAL MATCH (e)-[:olx__hasParameter]->(s:olx__Source)
+            OPTIONAL MATCH (e)-[:olx__wasLoggedBy]->(s:olx__Source)
             SET e.n4sch__runName = ''
-            RETURN elementId(e) AS id, e.olx__eventMessage AS eventMessage, s.olx__sourceName AS sourceName,
+            RETURN elementId(e) AS id, e.mls__implements AS eventMessage, s.olx__sourceName AS sourceName,
             s.olx__sourceDevice AS sourceDevice
             """,
             params={
@@ -157,7 +157,7 @@ class Dataset:
             """
             MATCH (d:mls__Dataset)-[:mls__hasPart]->(e:olx__Event)
             WHERE d.uri STARTS WITH $tests_uri
-            RETURN e.olx__eventMessage as message, e.uri as uri
+            RETURN e.mls__implements as eventMessage, e.uri as uri
             ORDER BY e.uri
             """,
             params={"run_name": self.__config.run_name, "tests_uri": self.__config.tests_uri},
@@ -174,7 +174,7 @@ class Dataset:
                 if source_node.properties.get("olx__sourceDevice"):
                     context["sourceDevice"] = source_node.properties["olx__sourceDevice"]
 
-            graph.source = Document(page_content=test["message"], metadata=context)
+            graph.source = Document(page_content=test["eventMessage"], metadata=context)
             tests.append(normalize_output_graph(graph))
 
         return tests
@@ -216,7 +216,7 @@ class Dataset:
             if node.type == "olx__Event":
                 # This will raise an exception if the LLM produces an Event node without a message property.
                 text = _compose_embeddings_text(
-                    node.properties["olx__eventMessage"],
+                    node.properties["mls__implements"],
                     norm_graph.source.metadata,
                 )
                 node.properties["n4sch__embedding"] = self.__embeddings.embed_query(text)
@@ -382,5 +382,5 @@ class Dataset:
         return GraphDocument(
             nodes=list(nodes_dict.values()),
             relationships=relationships,
-            source=Document(page_content=event_node.properties["olx__eventMessage"], metadata=context),
+            source=Document(page_content=event_node.properties["mls__implements"], metadata=context),
         )

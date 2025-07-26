@@ -13,16 +13,14 @@
   time:inXSDgYear "2022"^^xsd:gYear;
   time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
 
-:application-1 rdf:type olx:Application;
-  olx:applicationName "shorewall".
-
 :source-1 rdf:type olx:Source;
   olx:sourceName "shorewall";
   olx:sourceDevice "inet-firewall".
 
 :event-1 rdf:type olx:Event;
-  olx:eventMessage "Jan 20 11:22:30    Chain tcpost deleted";
-  olx:hasParameter :timestamp-1, :application-1, :source-1.
+  mls:implements "Jan 20 11:22:30    Chain tcpost deleted";
+  olx:hasParameter :timestamp-1;
+  olx:wasLoggedBy :source-1.
 
 # webserver, suricata.log.csv, "20/1/2022 -- 13:12:35 - <Perf> - OTHER toserver: 0 proto groups, 0 unique SGH's, 0 copies"
 :timestamp-2 rdf:type olx:TimeStamp;
@@ -35,20 +33,12 @@
   olx:sourceName "suricata";
   olx:sourceDevice "webserver".
 
-:application-2 rdf:type olx:Application;
-  olx:applicationName "suricata".
-
 :event-2 rdf:type olx:Event;
-  olx:eventMessage "20/1/2022 -- 13:12:35 - <Perf> - OTHER toserver: 0 proto groups, 0 unique SGH's, 0 copies";
-  olx:hasParameter :timestamp-2, :source-2, :application-2.
+  mls:implements "20/1/2022 -- 13:12:35 - <Perf> - OTHER toserver: 0 proto groups, 0 unique SGH's, 0 copies";
+  olx:hasParameter :timestamp-2;
+  olx:wasLoggedBy :source-2.
 
 # cloud_share, error.log.3.csv, mkdir failed on directory /var/run/samba/msg.lock: Permission denied
-:timestamp-3 rdf:type olx:TimeStamp;
-  time:inXSDDate "2022-01-22"^^xsd:date;
-  time:inXSDDateTimeStamp "2022-01-22T17:41:56"^^xsd:dateTime;
-  time:inXSDgYear "2022"^^xsd:gYear;
-  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
-
 :source-3 rdf:type olx:Source;
   olx:sourceDevice "cloud_share".
 
@@ -62,11 +52,11 @@
   p-plan:isStepOfPlan :applications-chain-3.
 
 :event-3 rdf:type olx:Event;
-  olx:eventMessage "mkdir failed on directory /var/run/samba/msg.lock: Permission denied";
+  mls:implements "mkdir failed on directory /var/run/samba/msg.lock: Permission denied";
   olx:hasParameter :timestamp-3,
-    :source-3,
     :applications-chain-3,
-    :shell-command-3.
+    :shell-command-3;
+  olx:wasLoggedBy :source-3.
 
 # vpn, openvpn.log.csv, 2022-01-23 13:48:11 twhite/192.168.230.95:40288 Outgoing Data Channel: Using 160 bit message hash 'SHA1' for HMAC authentication
 :timestamp-4 rdf:type olx:TimeStamp;
@@ -79,6 +69,9 @@
   olx:sourceName "openvpn";
   olx:sourceDevice "vpn".
 
+:hash-string-4 rdf:type olx:HashString;
+  olx:hashStringAlgorithm "SHA1".
+
 :network-address-4 rdf:type olx:NetworkAddress;
   olx:networkAddressIPV4 "192.168.230.95";
   olx:networkAddressPort 40288.
@@ -90,8 +83,9 @@
   olx:hasCredential :username-4.
 
 :event-4 rdf:type olx:Event;
-  olx:eventMessage "2022-01-23 13:48:11 twhite/192.168.230.95:40288 Outgoing Data Channel: Using 160 bit message hash 'SHA1' for HMAC authentication";
-  olx:hasParameter :timestamp-4, :source-4, :network-address-4, :user-4.
+  mls:implements "2022-01-23 13:48:11 twhite/192.168.230.95:40288 Outgoing Data Channel: Using 160 bit message hash 'SHA1' for HMAC authentication";
+  olx:hasParameter :timestamp-4, :network-address-4, :user-4, :hash-string-4;
+  olx:wasLoggedBy :source-4.
 
 # mail, mainlog.3.csv, 2022-01-23 05:53:06 1nBVoI-00073L-0p => rebecca.blake <rebecca.blake@smith.russellmitchell.com> R=local_user T=maildir_home
 :timestamp-5 rdf:type olx:TimeStamp;
@@ -113,8 +107,9 @@
   olx:hasCredential :username-5, :email-5.
 
 :event-5 rdf:type olx:Event;
-  olx:eventMessage "2022-01-23 05:53:06 1nBVoI-00073L-0p => rebecca.blake <rebecca.blake@smith.russellmitchell.com> R=local_user T=maildir_home";
-  olx:hasParameter :timestamp-5, :source-5, :user-5.
+  mls:implements "2022-01-23 05:53:06 1nBVoI-00073L-0p => rebecca.blake <rebecca.blake@smith.russellmitchell.com> R=local_user T=maildir_home";
+  olx:hasParameter :timestamp-5, :user-5;
+  olx:wasLoggedBy :source-5.
 
 # morris_mail, syslog.2.csv, Jan 23 20:25:24 morris-mail freshclam[29586]: Sun Jan 23 20:25:24 2022 -> ClamAV update process started at Sun Jan 23 20:25:24 2022
 :timestamp-6 rdf:type olx:TimeStamp;
@@ -131,9 +126,13 @@
   olx:applicationName "freshclam";
   olx:systemProcessPID 29586.
 
+:application-6 rdf:type olx:Application;
+  olx:applicationName "ClamAV".
+
 :event-6 rdf:type olx:Event;
-  olx:eventMessage "Jan 23 20:25:24 morris-mail freshclam[29586]: Sun Jan 23 20:25:24 2022 -> ClamAV update process started at Sun Jan 23 20:25:24 2022";
-  olx:hasParameter :timestamp-6, :source-6, :system-process-6.
+  mls:implements "Jan 23 20:25:24 morris-mail freshclam[29586]: Sun Jan 23 20:25:24 2022 -> ClamAV update process started at Sun Jan 23 20:25:24 2022";
+  olx:hasParameter :timestamp-6, :system-process-6, :application-6;
+  olx:wasLoggedBy :source-6.
 
 # davey_mail, horde-access.log.csv, "192.168.230.122 - - [24/Jan/2022:03:57:16 +0000] ""GET / HTTP/1.0"" 302 4095 ""-"" ""-"""
 :timestamp-7 rdf:type olx:TimeStamp;
@@ -143,6 +142,7 @@
   time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
 
 :source-7 rdf:type olx:Source;
+  olx:sourceName "horde";
   olx:sourceDevice "davey_mail".
 
 :network-address-7 rdf:type olx:NetworkAddress;
@@ -152,16 +152,11 @@
   olx:urlValueValue "/".
 
 :event-7 rdf:type olx:Event;
-  olx:eventMessage '192.168.230.122 - - [24/Jan/2022:03:57:16 +0000] ""GET / HTTP/1.0"" 302 4095 ""-"" ""-""';
-  olx:hasParameter :timestamp-7, :source-7, :network-address-7, :url-7.
+  mls:implements '192.168.230.122 - - [24/Jan/2022:03:57:16 +0000] ""GET / HTTP/1.0"" 302 4095 ""-"" ""-""';
+  olx:hasParameter :timestamp-7, :network-address-7, :url-7;
+  olx:wasLoggedBy :source-7.
 
 # intranet_server, error.log.2.csv, Length: 139921500 (133M) [text/plain]
-:timestamp-8 rdf:type olx:TimeStamp;
-  time:inXSDDate "2022-01-24"^^xsd:date;
-  time:inXSDDateTimeStamp "2022-01-24T03:57:16"^^xsd:dateTime;
-  time:inXSDgYear "2022"^^xsd:gYear;
-  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
-
 :source-8 rdf:type olx:Source;
   olx:sourceDevice "intranet_server".
 
@@ -169,14 +164,14 @@
   olx:fileSize 139921500.
 
 :event-8 rdf:type olx:Event;
-  olx:eventMessage "Length: 139921500 (133M) [text/plain]";
-  olx:hasParameter :timestamp-8, :source-8, :file-8.
+  mls:implements "Length: 139921500 (133M) [text/plain]";
+  olx:hasParameter :file-8;
+  olx:wasLoggedBy :source-8.
 
 # internal_share, syslog.4.csv, Jan 21 06:21:33 internal-share systemd[1]: message repeated 2 times: [ Reloading.]
 :timestamp-9 rdf:type olx:TimeStamp;
   time:inXSDDate "2022-01-21"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-21T06:21:33"^^xsd:dateTime;
-  time:inXSDgYear "2022"^^xsd:gYear;
   time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
 
 :source-9 rdf:type olx:Source;
@@ -188,8 +183,9 @@
   olx:systemProcessPID 1.
 
 :event-9 rdf:type olx:Event;
-  olx:eventMessage "Jan 21 06:21:33 internal-share systemd[1]: message repeated 2 times: [ Reloading.]";
-  olx:hasParameter :timestamp-9, :source-9, :system-process-9.
+  mls:implements "Jan 21 06:21:33 internal-share systemd[1]: message repeated 2 times: [ Reloading.]";
+  olx:hasParameter :timestamp-9, :system-process-9;
+  olx:wasLoggedBy :source-9.
 
 # vpn, syslog.4.csv, Jan 21 06:54:05 vpn os-prober: debug: running /usr/lib/os-probes/mounted/10freedos on mounted /dev/vda15
 :timestamp-10 rdf:type olx:TimeStamp;
@@ -202,15 +198,24 @@
   olx:sourceName "syslog";
   olx:sourceDevice "vpn".
 
-:shell-command-10 rdf:type olx:ShellCommand;
-  olx:applicationName "os-prober".
+:applications-chain-10 rdf:type olx:ApplicationsChain.
 
-:file-10 rdf:type olx:File;
+:file-10-1 rdf:type olx:File;
   olx:filePath "/usr/lib/os-probes/mounted/10freedos".
 
+:file-10-2 rdf:type olx:File;
+  olx:filePath "/dev/vda15".
+
+:shell-command-10 rdf:type olx:ShellCommand;
+  p-plan:hasInputVar :file-10-1, :file-10-2;
+  p-plan:isStepOfPlan :applications-chain-10;
+  olx:applicationName "os-prober".
+
 :event-10 rdf:type olx:Event;
-  olx:eventMessage "Jan 21 06:54:05 vpn os-prober: debug: running /usr/lib/os-probes/mounted/10freedos on mounted /dev/vda15";
-  olx:hasParameter :timestamp-10, :source-10, :shell-command-10, :file-10.
+  mls:implements "Jan 21 06:54:05 vpn os-prober: debug: running /usr/lib/os-probes/mounted/10freedos on mounted /dev/vda15";
+  olx:eventSeverity "debug";
+  olx:hasParameter :timestamp-10, :shell-command-10, :file-10-1, :file-10-2;
+  olx:wasLoggedBy :source-10.
 
 # intranet_server, intranet.smith.russellmitchell.com-access.log.2.csv, "172.19.131.174 - - [24/Jan/2022:03:57:34 +0000] ""GET /paypal HTTP/1.1"" 404 363 ""-"" ""Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)"""
 :timestamp-11 rdf:type olx:TimeStamp;
@@ -232,12 +237,12 @@
   olx:applicationName "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)".
 
 :event-11 rdf:type olx:Event;
-  olx:eventMessage '172.19.131.174 - - [24/Jan/2022:03:57:34 +0000] ""GET /paypal HTTP/1.1"" 404 363 ""-"" ""Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)""';
+  mls:implements '172.19.131.174 - - [24/Jan/2022:03:57:34 +0000] ""GET /paypal HTTP/1.1"" 404 363 ""-"" ""Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)""';
   olx:hasParameter :timestamp-11,
-    :source-11,
     :network-address-11,
     :url-11,
-    :application-21.
+    :application-21;
+  olx:wasLoggedBy :source-11.
 
 # vpn, suricata-start.log.csv, 20/1/2022 -- 13:16:23 - <Config> - Protocol detection and parser disabled for modbus protocol.
 :timestamp-12 rdf:type olx:TimeStamp;
@@ -251,8 +256,9 @@
   olx:sourceDevice "vpn".
 
 :event-12 rdf:type olx:Event;
-  olx:eventMessage "20/1/2022 -- 13:16:23 - <Config> - Protocol detection and parser disabled for modbus protocol.";
-  olx:hasParameter :timestamp-22, :source-22.
+  mls:implements "20/1/2022 -- 13:16:23 - <Config> - Protocol detection and parser disabled for modbus protocol.";
+  olx:hasParameter :timestamp-22;
+  olx:wasLoggedBy :source-12.
 
 # inet-firewall, kern.log.1.csv, Jan 20 11:12:27 inet-firewall kernel: [    1.060522] uhci_hcd 0000:00:01.2: UHCI Host Controller
 :timestamp-13 rdf:type olx:TimeStamp;
@@ -265,15 +271,24 @@
   olx:sourceName "kernel";
   olx:sourceDevice "inet-firewall".
 
+:application-13-1 rdf:type olx:Application;
+  olx:applicationName "uhci_hcd".
+
+:application-13-2 rdf:type olx:Application;
+  olx:applicationName "inet-firewall".
+
+:application-13-3 rdf:type olx:Application;
+  olx:applicationName "kernel".
+
 :event-13 rdf:type olx:Event;
-  olx:eventMessage "Jan 20 11:12:27 inet-firewall kernel: [    1.060522] uhci_hcd 0000:00:01.2: UHCI Host Controller";
-  olx:hasParameter :timestamp-13, :source-13.
+  mls:implements "Jan 20 11:12:27 inet-firewall kernel: [    1.060522] uhci_hcd 0000:00:01.2: UHCI Host Controller";
+  olx:hasParameter :timestamp-13, :application-13-1, :application-13-2, :application-13-3;
+  olx:wasLoggedBy :source-13.
 
 # inet-dns, syslog.csv, Jan 25 07:02:50 inet-dns systemd[16839]: Stopped target Timers.
 :timestamp-14 rdf:type olx:TimeStamp;
   time:inXSDDate "2022-01-25"^^xsd:date;
   time:inXSDDateTimeStamp "2022-01-25T07:02:50"^^xsd:dateTime;
-  time:inXSDgYear "2022"^^xsd:gYear;
   time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
 
 :source-14 rdf:type olx:Source;
@@ -285,8 +300,9 @@
   olx:systemProcessPID 16839.
 
 :event-14 rdf:type olx:Event;
-  olx:eventMessage "Jan 25 07:02:50 inet-dns systemd[16839]: Stopped target Timers.";
-  olx:hasParameter :timestamp-14, :source-14, :system-process-14.
+  mls:implements "Jan 25 07:02:50 inet-dns systemd[16839]: Stopped target Timers.";
+  olx:hasParameter :timestamp-14, :system-process-14;
+  olx:wasLoggedBy :source-14.
 
 # inet-firewall, shorewall-init.log.1.csv, Jan 20 11:22:30 ..End inline action /usr/share/shorewall/action.Broadcast
 :timestamp-15 rdf:type olx:TimeStamp;
@@ -303,8 +319,9 @@
   olx:filePath "/usr/share/shorewall/action.Broadcast".
 
 :event-15 rdf:type olx:Event;
-  olx:eventMessage "Jan 20 11:22:30 ..End inline action /usr/share/shorewall/action.Broadcast";
-  olx:hasParameter :timestamp-15, :source-15, :file-15.
+  mls:implements "Jan 20 11:22:30 ..End inline action /usr/share/shorewall/action.Broadcast";
+  olx:hasParameter :timestamp-15, :file-15;
+  olx:wasLoggedBy :source-15.
 
 # cloud_share, suricata.log.csv, "20/1/2022 -- 13:16:29 - <Error> - [ERRCODE: SC_ERR_UNDEFINED_VAR(101)] - Variable ""SQL_SERVERS"" is not defined in configuration file"
 :timestamp-16 rdf:type olx:TimeStamp;
@@ -318,8 +335,10 @@
   olx:sourceDevice "cloud_share".
 
 :event-16 rdf:type olx:Event;
-  olx:eventMessage '20/1/2022 -- 13:16:29 - <Error> - [ERRCODE: SC_ERR_UNDEFINED_VAR(101)] - Variable ""SQL_SERVERS"" is not defined in configuration file';
-  olx:hasParameter :timestamp-16, :source-16.
+  mls:implements '20/1/2022 -- 13:16:29 - <Error> - [ERRCODE: SC_ERR_UNDEFINED_VAR(101)] - Variable ""SQL_SERVERS"" is not defined in configuration file';
+  olx:eventSeverity "error";
+  olx:hasParameter :timestamp-16, :source-16;
+  olx:wasLoggedBy :source-16.
 
 # morris_mail, auth.log.1.csv, Jan 20 12:17:27 morris-mail sudo: pam_unix(sudo:session): session opened for user root by ait(uid=0)
 :timestamp-17 rdf:type olx:TimeStamp;
@@ -348,12 +367,12 @@
   olx:userUID 0.
 
 :event-17 rdf:type olx:Event;
-  olx:eventMessage "Jan 20 12:17:27 morris-mail sudo: pam_unix(sudo:session): session opened for user root by ait(uid=0)";
+  mls:implements "Jan 20 12:17:27 morris-mail sudo: pam_unix(sudo:session): session opened for user root by ait(uid=0)";
   olx:hasParameter :timestamp-17,
-    :source-17,
     :shell-command-17,
     :user-17-1,
-    :user-17-2.
+    :user-17-2;
+  olx:wasLoggedBy :source-17.
 
 # mail, syslog.2.csv, "Jan 23 11:27:31 mail HORDE: [horde] Login success for dorothy.ellis to horde (172.19.130.68) [pid 29777 on line 163 of ""/usr/share/horde/login.php""]"
 :timestamp-18 rdf:type olx:TimeStamp;
@@ -367,7 +386,7 @@
   olx:sourceDevice "mail".
 
 :system-process-18 rdf:type olx:SystemProcess;
-  olx:applicationName "Horde";
+  olx:applicationName "horde";
   olx:systemProcessPID 29777.
 
 :network-address-18 rdf:type olx:NetworkAddress;
@@ -384,13 +403,13 @@
   olx:fileLine 163.
 
 :event-18 rdf:type olx:Event;
-  olx:eventMessage 'Jan 23 11:27:31 mail HORDE: [horde] Login success for dorothy.ellis to horde (172.19.130.68) [pid 29777 on line 163 of ""/usr/share/horde/login.php""]';
+  mls:implements 'Jan 23 11:27:31 mail HORDE: [horde] Login success for dorothy.ellis to horde (172.19.130.68) [pid 29777 on line 163 of ""/usr/share/horde/login.php""]';
   olx:hasParameter :timestamp-18,
-    :source-18,
     :system-process-18,
     :network-address-18,
     :user-18,
-    :file-18.
+    :file-18;
+  olx:wasLoggedBy :source-18.
 
 # cloud_share, syslog.1.csv, "Jan 24 14:15:03 cloud-share CRON[12638]: (CRON) info (No MTA installed, discarding output)"
 :timestamp-19 rdf:type olx:TimeStamp;
@@ -408,8 +427,10 @@
   olx:systemProcessPID 12638.
 
 :event-19 rdf:type olx:Event;
-  olx:eventMessage 'Jan 24 14:15:03 cloud-share CRON[12638]: (CRON) info (No MTA installed, discarding output)';
-  olx:hasParameter :timestamp-19, :source-19, :system-process-19.
+  mls:implements 'Jan 24 14:15:03 cloud-share CRON[12638]: (CRON) info (No MTA installed, discarding output)';
+  olx:eventSeverity "info";
+  olx:hasParameter :timestamp-19, :system-process-19;
+  olx:wasLoggedBy :source-19.
 
 # cloud_share, suricata.log.csv, 20/1/2022 -- 13:16:43 - <Config> - using 1 flow manager threads
 :timestamp-20 rdf:type olx:TimeStamp;
@@ -422,12 +443,10 @@
   olx:sourceName "suricata";
   olx:sourceDevice "cloud_share".
 
-:application-20 rdf:type olx:Application;
-  olx:applicationName "suricata".
-
 :event-20 rdf:type olx:Event;
-  olx:eventMessage "20/1/2022 -- 13:16:43 - <Config> - using 1 flow manager threads";
-  olx:hasParameter :timestamp-20, :source-20, :application-20.
+  mls:implements "20/1/2022 -- 13:16:43 - <Config> - using 1 flow manager threads";
+  olx:hasParameter :timestamp-20, :application-20;
+  olx:wasLoggedBy :source-20.
 
 # webserver, suricata-start.log.csv, 20/1/2022 -- 13:16:23 - <Notice> - This is Suricata version 6.0.4 RELEASE running in SYSTEM mode
 :timestamp-21 rdf:type olx:TimeStamp;
@@ -445,8 +464,10 @@
   olx:applicationVersion "6.0.4".
 
 :event-21 rdf:type olx:Event;
-  olx:eventMessage '20/1/2022 -- 13:16:23 - <Notice> - This is Suricata version 6.0.4 RELEASE running in SYSTEM mode';
-  olx:hasParameter :timestamp-21, :source-21, :application-31.
+  mls:implements '20/1/2022 -- 13:16:23 - <Notice> - This is Suricata version 6.0.4 RELEASE running in SYSTEM mode';
+  olx:eventSeverity "notice";
+  olx:hasParameter :timestamp-21, :application-31;
+  olx:wasLoggedBy :source-21.
 
 # vpn, syslog.1.csv, Jan 24 22:42:32 vpn 50-motd-news[2769]:  * Super-optimized for small spaces - read how we shrank the memory
 :timestamp-22 rdf:type olx:TimeStamp;
@@ -464,8 +485,9 @@
   olx:systemProcessPID 2769.
 
 :event-22 rdf:type olx:Event;
-  olx:eventMessage 'Jan 24 22:42:32 vpn 50-motd-news[2769]:  * Super-optimized for small spaces - read how we shrank the memory';
-  olx:hasParameter :timestamp-22, :source-22, :system-process-22.
+  mls:implements 'Jan 24 22:42:32 vpn 50-motd-news[2769]:  * Super-optimized for small spaces - read how we shrank the memory';
+  olx:hasParameter :timestamp-22, :system-process-22;
+  olx:wasLoggedBy :source-22.
 
 # intranet_server, error.log.2.csv, ./wphashcrack-0.1/wphashcrack.sh: line 68: cd: HOME not set
 :timestamp-23 rdf:type olx:TimeStamp;
@@ -489,12 +511,12 @@
   olx:fileLine 68.
 
 :event-23 rdf:type olx:Event;
-  olx:eventMessage './wphashcrack-0.1/wphashcrack.sh: line 68: cd: HOME not set';
+  mls:implements './wphashcrack-0.1/wphashcrack.sh: line 68: cd: HOME not set';
   olx:hasParameter :timestamp-23,
-    :source-23,
     :shell-command-23-1,
     :shell-command-23-2,
-    :file-23.
+    :file-23;
+  olx:wasLoggedBy :source-23.
 
 # vpn, syslog.4.csv, Jan 21 06:52:59 vpn kernel: [70791.313280] systemd[1]: Stopped Journal Service.
 :timestamp-24 rdf:type olx:TimeStamp;
@@ -511,9 +533,13 @@
   olx:applicationName "systemd";
   olx:systemProcessPID 1.
 
+:application-24 rdf:type olx:Application;
+  olx:applicationName "kernel".
+
 :event-24 rdf:type olx:Event;
-  olx:eventMessage "Jan 21 06:52:59 vpn kernel: [70791.313280] systemd[1]: Stopped Journal Service.";
-  olx:hasParameter :timestamp-24, :source-24, :system-process-24.
+  mls:implements "Jan 21 06:52:59 vpn kernel: [70791.313280] systemd[1]: Stopped Journal Service.";
+  olx:hasParameter :timestamp-24, :system-process-24, :application-24;
+  olx:wasLoggedBy :source-24.
 
 # mail, suricata.log.csv, "25/1/2022 -- 06:57:01 - <Notice> - Stats for 'eth0':  pkts: 780375, drop: 0 (0.00%), invalid chksum: 0"
 :timestamp-25 rdf:type olx:TimeStamp;
@@ -526,12 +552,11 @@
   olx:sourceName "suricata";
   olx:sourceDevice "mail".
 
-:application-25 rdf:type olx:Application;
-  olx:applicationName "suricata".
-
 :event-25 rdf:type olx:Event;
-  olx:eventMessage "25/1/2022 -- 06:57:01 - <Notice> - Stats for ''eth0'':  pkts: 780375, drop: 0 (0.00%), invalid chksum: 0";
-  olx:hasParameter :timestamp-25, :source-25, :application-25.
+  mls:implements "25/1/2022 -- 06:57:01 - <Notice> - Stats for ''eth0'':  pkts: 780375, drop: 0 (0.00%), invalid chksum: 0";
+  olx:eventSeverity "notice";
+  olx:hasParameter :timestamp-25;
+  olx:wasLoggedBy :source-25.
 
 # vpn, suricata.log.csv, "20/1/2022 -- 13:12:37 - <Config> - stream.reassembly ""toserver-chunk-size"": 2560"
 :timestamp-26 rdf:type olx:TimeStamp;
@@ -544,12 +569,10 @@
   olx:sourceName "suricata";
   olx:sourceDevice "vpn".
 
-:application-26 rdf:type olx:Application;
-  olx:applicationName "suricata".
-
 :event-26 rdf:type olx:Event;
-  olx:eventMessage '20/1/2022 -- 13:12:37 - <Config> - stream.reassembly ""toserver-chunk-size"": 2560';
-  olx:hasParameter :timestamp-26, :source-26, :application-26.
+  mls:implements '20/1/2022 -- 13:12:37 - <Config> - stream.reassembly ""toserver-chunk-size"": 2560';
+  olx:hasParameter :timestamp-26;
+  olx:wasLoggedBy :source-26.
 
 # inet-firewall, shorewall-init.log.1.csv, "Jan 20 11:22:30     Rule ""PARAM - - tcp 53"" Compiled"
 :timestamp-27 rdf:type olx:TimeStamp;
@@ -562,12 +585,13 @@
   olx:sourceName "shorewall";
   olx:sourceDevice "inet-firewall".
 
-:application-27 rdf:type olx:Application;
-  olx:applicationName "shorewall".
+:network-protocol-27 rdf:type olx:NetworkProtocol;
+  olx:networkProtocol "tcp".
 
 :event-27 rdf:type olx:Event;
-  olx:eventMessage 'Jan 20 11:22:30     Rule ""PARAM - - tcp 53"" Compiled';
-  olx:hasParameter :timestamp-27, :source-27, :application-27.
+  mls:implements 'Jan 20 11:22:30     Rule ""PARAM - - tcp 53"" Compiled';
+  olx:hasParameter :timestamp-27, :network-protocol-27;
+  olx:wasLoggedBy :source-27.
 
 # webserver, error.log.2.csv, "[Mon Jan 24 06:25:16.644970 2022] [mpm_prefork:notice] [pid 29640] AH00171: Graceful restart requested, doing restart"
 :timestamp-28 rdf:type olx:TimeStamp;
@@ -580,12 +604,14 @@
   olx:sourceDevice "webserver".
 
 :system-process-28 rdf:type olx:SystemProcess;
-  olx:applicationName "apache";
+  olx:applicationName "mpm_prefork";
   olx:systemProcessPID 29640.
 
 :event-28 rdf:type olx:Event;
-  olx:eventMessage '[Mon Jan 24 06:25:16.644970 2022] [mpm_prefork:notice] [pid 29640] AH00171: Graceful restart requested, doing restart';
-  olx:hasParameter :timestamp-28, :source-28, :system-process-28.
+  mls:implements '[Mon Jan 24 06:25:16.644970 2022] [mpm_prefork:notice] [pid 29640] AH00171: Graceful restart requested, doing restart';
+  olx:eventSeverity "notice";
+  olx:hasParameter :timestamp-28, :system-process-28;
+  olx:wasLoggedBy :source-28.
 
 # inet-firewall, shorewall-init.log.1.csv, Jan 20 11:22:30
 :timestamp-29 rdf:type olx:TimeStamp;
@@ -598,12 +624,10 @@
   olx:sourceName "shorewall";
   olx:sourceDevice "inet-firewall".
 
-:application-29 rdf:type olx:Application;
-  olx:applicationName "shorewall".
-
 :event-29 rdf:type olx:Event;
-  olx:eventMessage 'Jan 20 11:22:30';
-  olx:hasParameter :timestamp-29, :source-29, :application-29.
+  mls:implements 'Jan 20 11:22:30';
+  olx:hasParameter :timestamp-29;
+  olx:wasLoggedBy :source-29.
 
 # inet-firewall, shorewall-init.log.1.csv, Jan 20 11:22:30    Policy for dmz to lan is REJECT using chain all-all
 :timestamp-30 rdf:type olx:TimeStamp;
@@ -616,12 +640,10 @@
   olx:sourceName "shorewall";
   olx:sourceDevice "inet-firewall".
 
-:application-30 rdf:type olx:Application;
-  olx:applicationName "shorewall".
-
 :event-30 rdf:type olx:Event;
-  olx:eventMessage 'Jan 20 11:22:30    Policy for dmz to lan is REJECT using chain all-all';
-  olx:hasParameter :timestamp-30, :source-30, :application-30.
+  mls:implements 'Jan 20 11:22:30    Policy for dmz to lan is REJECT using chain all-all';
+  olx:hasParameter :timestamp-30;
+  olx:wasLoggedBy :source-30.
 
 # vpn, suricata-start.log.csv, 20/1/2022 -- 13:16:23 - <Config> - luajit states preallocated: 128
 :timestamp-31 rdf:type olx:TimeStamp;
@@ -634,12 +656,10 @@
   olx:sourceName "suricata";
   olx:sourceDevice "vpn".
 
-:application-31 rdf:type olx:Application;
-  olx:applicationName "suricata".
-
 :event-31 rdf:type olx:Event;
-  olx:eventMessage '20/1/2022 -- 13:16:23 - <Config> - luajit states preallocated: 128';
-  olx:hasParameter :timestamp-31, :source-31, :application-31.
+  mls:implements '20/1/2022 -- 13:16:23 - <Config> - luajit states preallocated: 128';
+  olx:hasParameter :timestamp-31;
+  olx:wasLoggedBy :source-31.
 
 # intranet_server, error.log.2.csv, rm: cannot remove 'john.pot': No such file or directory
 :timestamp-32 rdf:type olx:TimeStamp;
@@ -651,15 +671,20 @@
 :source-32 rdf:type olx:Source;
   olx:sourceDevice "intranet_server".
 
-:shell-command-32 rdf:type olx:ShellCommand;
-  olx:applicationName "rm".
+:applications-chain-32 rdf:type olx:ApplicationsChain.
 
 :file-32 rdf:type olx:File;
   olx:filePath "john.pot".
 
+:shell-command-32 rdf:type olx:ShellCommand;
+  p-plan:hasInputVar :file-32;
+  p-plan:isStepOfPlan :applications-chain-32;
+  olx:applicationName "rm".
+
 :event-32 rdf:type olx:Event;
-  olx:eventMessage "rm: cannot remove 'john.pot': No such file or directory";
-  olx:hasParameter :timestamp-32, :source-32, :shell-command-32, :file-32.
+  mls:implements "rm: cannot remove 'john.pot': No such file or directory";
+  olx:hasParameter :timestamp-32, :applications-chain-32;
+  olx:wasLoggedBy :source-32.
 
 # inet-firewall, suricata.log.csv, "20/1/2022 -- 13:12:47 - <Perf> - Builtin MPM ""toclient UDP packet"": 0"
 :timestamp-33 rdf:type olx:TimeStamp;
@@ -672,12 +697,10 @@
   olx:sourceName "suricata";
   olx:sourceDevice "inet-firewall".
 
-:application-33 rdf:type olx:Application;
-  olx:applicationName "suricata".
-
 :event-33 rdf:type olx:Event;
-  olx:eventMessage '20/1/2022 -- 13:12:47 - <Perf> - Builtin MPM ""toclient UDP packet"": 0';
-  olx:hasParameter :timestamp-33, :source-33, :application-33.
+  mls:implements '20/1/2022 -- 13:12:47 - <Perf> - Builtin MPM ""toclient UDP packet"": 0';
+  olx:hasParameter :timestamp-33;
+  olx:wasLoggedBy :source-33.
 
 # cloud_share, redis-server.log.1.csv, 5030:M 20 Jan 12:30:58.908 * Ready to accept connections
 :timestamp-34 rdf:type olx:TimeStamp;
@@ -691,12 +714,12 @@
   olx:sourceDevice "cloud_share".
 
 :system-process-34 rdf:type olx:SystemProcess;
-  olx:applicationName "redis-server";
   olx:systemProcessPID 5030.
 
 :event-34 rdf:type olx:Event;
-  olx:eventMessage '5030:M 20 Jan 12:30:58.908 * Ready to accept connections';
-  olx:hasParameter :timestamp-34, :source-34, :system-process-34.
+  mls:implements '5030:M 20 Jan 12:30:58.908 * Ready to accept connections';
+  olx:hasParameter :timestamp-34, :system-process-34;
+  olx:wasLoggedBy :source-34.
 
 # cloud_share, redis-server.log.1.csv, 5030:M 20 Jan 12:38:12.421 * Saving the final RDB snapshot before exiting.
 :timestamp-35 rdf:type olx:TimeStamp;
@@ -710,12 +733,12 @@
   olx:sourceDevice "cloud_share".
 
 :system-process-35 rdf:type olx:SystemProcess;
-  olx:applicationName "redis-server";
   olx:systemProcessPID 5030.
 
 :event-35 rdf:type olx:Event;
-  olx:eventMessage '5030:M 20 Jan 12:38:12.421 * Saving the final RDB snapshot before exiting.';
-  olx:hasParameter :timestamp-35, :source-35, :system-process-35.
+  mls:implements '5030:M 20 Jan 12:38:12.421 * Saving the final RDB snapshot before exiting.';
+  olx:hasParameter :timestamp-35, :system-process-35;
+  olx:wasLoggedBy :source-35.
 
 # internal_share, auth.log.1.csv, Jan 21 06:21:01 internal-share sshd[1018]: Received signal 15; terminating.
 :timestamp-36 rdf:type olx:TimeStamp;
@@ -725,7 +748,6 @@
   time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
 
 :source-36 rdf:type olx:Source;
-  olx:sourceName "auth.log.1";
   olx:sourceDevice "internal_share".
 
 :system-process-36 rdf:type olx:SystemProcess;
@@ -733,8 +755,9 @@
   olx:systemProcessPID 1018.
 
 :event-36 rdf:type olx:Event;
-  olx:eventMessage 'Jan 21 06:21:01 internal-share sshd[1018]: Received signal 15; terminating.';
-  olx:hasParameter :timestamp-36, :source-36, :system-process-36.
+  mls:implements 'Jan 21 06:21:01 internal-share sshd[1018]: Received signal 15; terminating.';
+  olx:hasParameter :timestamp-36, :system-process-36;
+  olx:wasLoggedBy :source-36.
 
 # intranet_server, error.log.2.csv, Connecting to github.com (github.com)|140.82.121.3|:443... connected.
 :timestamp-37 rdf:type olx:TimeStamp;
@@ -754,8 +777,9 @@
   olx:networkAddressPort 443.
 
 :event-37 rdf:type olx:Event;
-  olx:eventMessage 'Connecting to github.com (github.com)|140.82.131.3|:443... connected.';
-  olx:hasParameter :timestamp-37, :source-37, :url-37, :network-address-37.
+  mls:implements 'Connecting to github.com (github.com)|140.82.131.3|:443... connected.';
+  olx:hasParameter :timestamp-37, :url-37, :network-address-37;
+  olx:wasLoggedBy :source-37.
 
 # inet-firewall, shorewall-init.log.1.csv, Jan 20 11:22:30    Table filter Optimized -- Passes =
 :timestamp-38 rdf:type olx:TimeStamp;
@@ -768,12 +792,10 @@
   olx:sourceName "shorewall";
   olx:sourceDevice "inet-firewall".
 
-:application-38 rdf:type olx:Application;
-  olx:applicationName "shorewall".
-
 :event-38 rdf:type olx:Event;
-  olx:eventMessage 'Jan 20 11:22:30    Table filter Optimized -- Passes =';
-  olx:hasParameter :timestamp-38, :source-38, :application-38.
+  mls:implements 'Jan 20 11:22:30    Table filter Optimized -- Passes =';
+  olx:hasParameter :timestamp-38, :application-38;
+  olx:wasLoggedBy :source-38.
 
 # vpn, openvpn.log.csv, 2022-01-23 22:43:34 twhite/192.168.230.95:36864 Validating certificate extended key usage
 :timestamp-39 rdf:type olx:TimeStamp;
@@ -786,9 +808,6 @@
   olx:sourceName "openvpn";
   olx:sourceDevice "vpn".
 
-:application-39 rdf:type olx:Application;
-  olx:applicationName "openvpn".
-
 :network-address-39 rdf:type olx:NetworkAddress;
   olx:networkAddressIPV4 "192.168.230.95";
   olx:networkAddressPort 36864.
@@ -800,12 +819,12 @@
   olx:hasCredential :username-39.
 
 :event-39 rdf:type olx:Event;
-  olx:eventMessage '2022-01-23 22:43:34 twhite/192.168.230.95:36864 Validating certificate extended key usage';
+  mls:implements '2022-01-23 22:43:34 twhite/192.168.230.95:36864 Validating certificate extended key usage';
   olx:hasParameter :timestamp-39,
-    :source-39,
     :application-39,
     :network-address-39,
-    :user-39.
+    :user-39;
+  olx:wasLoggedBy :source-39.
 
 # intranet_server, suricata.log.csv, 20/1/2022 -- 13:16:23 - <Config> - enabling 'eve-log' module 'ssh'
 :timestamp-40 rdf:type olx:TimeStamp;
@@ -819,11 +838,12 @@
   olx:sourceDevice "intranet_server".
 
 :application-40 rdf:type olx:Application;
-  olx:applicationName "suricata".
+  olx:applicationName "eve-log".
 
 :event-40 rdf:type olx:Event;
-  olx:eventMessage "20/1/2022 -- 13:16:23 - <Config> - enabling ''eve-log'' module ''ssh''";
-  olx:hasParameter :timestamp-40, :source-40, :application-40.
+  mls:implements "20/1/2022 -- 13:16:23 - <Config> - enabling ''eve-log'' module ''ssh''";
+  olx:hasParameter :timestamp-40, :application-40;
+  olx:wasLoggedBy :source-40.
 
 # cloud_share,redis-server.log.1.csv,_._
 :source-41 rdf:type olx:Source;
@@ -831,24 +851,23 @@
   olx:sourceDevice "cloud_share".
 
 :event-41 rdf:type olx:Event;
-  olx:eventMessage '_._';
-  olx:hasParameter :source-41.
+  mls:implements '_._';
+  olx:wasLoggedBy :source-41.
 
 # intranet_server,error.log.2.csv,bash: 196: Bad file descriptor
 :source-42 rdf:type olx:Source;
   olx:sourceDevice "intranet_server".
 
-:application-42 rdf:type olx:Application;
+:shell-command-42 rdf:type olx:ShellCommand;
   olx:applicationName "bash".
 
 :file-42 rdf:type olx:File;
   olx:fileLine 196.
 
 :event-42 rdf:type olx:Event;
-  olx:eventMessage 'bash: 196: Bad file descriptor';
-  olx:hasParameter :source-42,
-    :application-42,
-    :file-42.
+  mls:implements 'bash: 196: Bad file descriptor';
+  olx:hasParameter :application-42, :file-42;
+  olx:wasLoggedBy :source-42.
 
 # morris_mail,syslog.4.csv,Jan 20 12:19:28 morris-mail php7.0-cli: php_invoke ftp: already enabled for PHP 7.0 cli sapi
 :timestamp-43 rdf:type olx:TimeStamp;
@@ -865,9 +884,13 @@
   olx:applicationName "php7.0-cli";
   olx:applicationVersion "7.0".
 
+:network-protocol-43 rdf:type olx:NetworkProtocol;
+  olx:networkProtocol "ftp".
+
 :event-43 rdf:type olx:Event;
-  olx:eventMessage 'Jan 20 12:19:28 morris-mail php7.0-cli: php_invoke ftp: already enabled for PHP 7.0 cli sapi';
-  olx:hasParameter :timestamp-43, :source-43, :application-43.
+  mls:implements 'Jan 20 12:19:28 morris-mail php7.0-cli: php_invoke ftp: already enabled for PHP 7.0 cli sapi';
+  olx:hasParameter :timestamp-43, :application-43, :network-protocol-43;
+  olx:wasLoggedBy :source-43.
 
 # vpn,suricata.log.csv,"20/1/2022 -- 13:16:42 - <Perf> - AppLayer MPM ""toserver http_user_agent (http)"": 6"
 :timestamp-44 rdf:type olx:TimeStamp;
@@ -880,12 +903,16 @@
   olx:sourceName "suricata";
   olx:sourceDevice "vpn".
 
+:network-protocol-44 rdf:type olx:NetworkProtocol;
+  olx:networkProtocol "http".
+
 :application-44 rdf:type olx:Application;
-  olx:applicationName "suricata".
+  olx:applicationName "AppLayer MPM".
 
 :event-44 rdf:type olx:Event;
-  olx:eventMessage '20/1/2022 -- 13:16:42 - <Perf> - AppLayer MPM ""toserver http_user_agent (http)"": 6';
-  olx:hasParameter :timestamp-44, :source-44, :application-44.
+  mls:implements '20/1/2022 -- 13:16:42 - <Perf> - AppLayer MPM ""toserver http_user_agent (http)"": 6';
+  olx:hasParameter :timestamp-44, :network-protocol-44, :application-44;
+  olx:wasLoggedBy :source-44.
 
 # cloud_share,suricata-start.log.csv,20/1/2022 -- 13:16:23 - <Info> - CPUs/cores online: 1
 :timestamp-45 rdf:type olx:TimeStamp;
@@ -898,12 +925,11 @@
   olx:sourceName "suricata";
   olx:sourceDevice "cloud_share".
 
-:application-45 rdf:type olx:Application;
-  olx:applicationName "suricata".
-
 :event-45 rdf:type olx:Event;
-  olx:eventMessage '20/1/2022 -- 13:16:23 - <Info> - CPUs/cores online: 1';
-  olx:hasParameter :timestamp-45, :source-45, :application-45.
+  mls:implements '20/1/2022 -- 13:16:23 - <Info> - CPUs/cores online: 1';
+  olx:eventSeverity "info";
+  olx:hasParameter :timestamp-45;
+  olx:wasLoggedBy :source-45.
 
 # vpn,openvpn.log.csv,2022-01-22 12:44:02 jhall/192.168.230.165:59814 VERIFY EKU OK
 :timestamp-46 rdf:type olx:TimeStamp;
@@ -926,16 +952,13 @@
 :user-46 rdf:type olx:User;
   olx:hasCredential :username-46.
 
-:application-46 rdf:type olx:Application;
-  olx:applicationName "openvpn".
-
 :event-46 rdf:type olx:Event;
-  olx:eventMessage '2022-01-22 12:44:02 jhall/192.168.230.165:59814 VERIFY EKU OK';
+  mls:implements '2022-01-22 12:44:02 jhall/192.168.230.165:59814 VERIFY EKU OK';
   olx:hasParameter :timestamp-46,
     :source-46,
     :network-address-46,
-    :user-46,
-    :application-46.
+    :user-46;
+  olx:wasLoggedBy :source-46.
 
 # vpn,openvpn.log.csv,2022-01-22 11:56:06 ahayes/192.168.231.127:37135 peer info: IV_LZO=1
 :timestamp-47 rdf:type olx:TimeStamp;
@@ -958,16 +981,13 @@
 :user-47 rdf:type olx:User;
   olx:hasCredential :username-47.
 
-:application-47 rdf:type olx:Application;
-  olx:applicationName "openvpn".
-
 :event-47 rdf:type olx:Event;
-  olx:eventMessage '2022-01-22 11:56:06 ahayes/192.168.231.127:37135 peer info: IV_LZO=1';
+  mls:implements '2022-01-22 11:56:06 ahayes/192.168.231.127:37135 peer info: IV_LZO=1';
   olx:hasParameter :timestamp-47,
     :source-47,
     :network-address-47,
-    :user-47,
-    :application-47.
+    :user-47;
+  olx:wasLoggedBy :source-47.
 
 # morris_mail,syslog.4.csv,Jan 20 11:13:29 morris-mail kernel: [    2.185874] ACPI: PCI Interrupt Link [LNKB] enabled at IRQ 11
 :timestamp-48 rdf:type olx:TimeStamp;
@@ -980,12 +1000,16 @@
   olx:sourceName "syslog";
   olx:sourceDevice "morris_mail".
 
-:application-48 rdf:type olx:Application;
+:application-48-1 rdf:type olx:Application;
   olx:applicationName "acpi".
 
+:application-48-2 rdf:type olx:Application;
+  olx:applicationName "kernel".
+
 :event-48 rdf:type olx:Event;
-  olx:eventMessage 'Jan 20 11:13:29 morris-mail kernel: [    2.185874] ACPI: PCI Interrupt Link [LNKB] enabled at IRQ 11';
-  olx:hasParameter :timestamp-48, :source-48, :application-48.
+  mls:implements 'Jan 20 11:13:29 morris-mail kernel: [    2.185874] ACPI: PCI Interrupt Link [LNKB] enabled at IRQ 11';
+  olx:hasParameter :timestamp-48, :application-48-1, :application-48-2;
+  olx:wasLoggedBy :source-48.
 
 # internal_share,suricata-start.log.csv,20/1/2022 -- 13:16:23 - <Config> - Adding interface ens3 from config file
 :timestamp-49 rdf:type olx:TimeStamp;
@@ -998,24 +1022,19 @@
   olx:sourceName "suricata-start.log";
   olx:sourceDevice "internal_share".
 
-:application-49 rdf:type olx:Application;
-  olx:applicationName "suricata".
-
 :event-49 rdf:type olx:Event;
-  olx:eventMessage '20/1/2022 -- 13:16:23 - <Config> - Adding interface ens3 from config file';
-  olx:hasParameter :timestamp-49, :source-49, :application-49.
+  mls:implements '20/1/2022 -- 13:16:23 - <Config> - Adding interface ens3 from config file';
+  olx:hasParameter :timestamp-49, :application-49;
+  olx:wasLoggedBy :source-49.
 
 # cloud_share,redis-server.log.1.csv,"(    '      ,       .-`  | `,    )     Running in standalone mode"
 :source-50 rdf:type olx:Source;
   olx:sourceName "redis";
   olx:sourceDevice "cloud_share".
 
-:application-50 rdf:type olx:Application;
-  olx:applicationName "redis-server".
-
 :event-50 rdf:type olx:Event;
-  olx:eventMessage "(    '      ,       .-`  | `,    )     Running in standalone mode";
-  olx:hasParameter :source-50, :application-50.
+  mls:implements "(    '      ,       .-`  | `,    )     Running in standalone mode";
+  olx:wasLoggedBy :source-50.
 
 # Dataset
 :test-dataset rdf:type mls:Dataset;
