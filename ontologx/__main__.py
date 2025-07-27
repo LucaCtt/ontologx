@@ -69,12 +69,14 @@ app = typer.Typer(pretty_exceptions_show_locals=False)
 
 @app.command()
 def clear() -> None:
+    """Clear the store."""
     store.clear()
     logger.info("Store cleared.")
 
 
 @app.command()
 def run() -> None:
+    """Run the log knowledge graph builder."""
     logger.info("Experiment: '%s'", config.experiment_name)
     logger.info("Embeddings model: '%s'", config.embeddings_model)
     logger.info("Language model: '%s'", config.llm_model)
@@ -157,6 +159,7 @@ def run() -> None:
 
 
 def main() -> None:
+    """Run the main entry point for OntoLogX."""
     app()
 
 

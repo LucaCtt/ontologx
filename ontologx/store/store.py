@@ -1,9 +1,13 @@
+"""Store module interface for managing event graphs."""
+
 from abc import ABC, abstractmethod
 
 from ontologx.store import GraphDocument
 
 
 class Store(ABC):
+    """Abstract base class for a store module that manages the storage and retrieval of event graphs."""
+
     @abstractmethod
     def initialize(self) -> None:
         """Initialize the store module by creating the necessary nodes, relationships, constraints, and indexes.

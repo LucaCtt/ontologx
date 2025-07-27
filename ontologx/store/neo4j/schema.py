@@ -1,3 +1,5 @@
+"""Internal schema management for the Neo4j store in OntoLogX."""
+
 import uuid
 
 from langchain_neo4j import Neo4jGraph

@@ -138,7 +138,7 @@ class MainParser(Parser):
                 },
             )
 
-            raw_schema = cast(dict, raw_schema)
+            raw_schema = cast("dict", raw_schema)
 
             # Error handling for when the output is not parsed correctly
             if not raw_schema.get("parsed"):
@@ -149,7 +149,7 @@ class MainParser(Parser):
                 logger.debug("LLM output invalid. Checking for corrections.")
 
                 try:
-                    llm_answer = cast(AIMessage, raw_schema["raw"])
+                    llm_answer = cast("AIMessage", raw_schema["raw"])
                     # Create a new AIMessage with the same content and tool_calls,
                     # but without all the unnecessary stuff
                     corrections.extend(
@@ -170,7 +170,7 @@ class MainParser(Parser):
 
                 # If there are parsing errors, use them as corrections
                 if raw_schema.get("parsing_error") and getattr(raw_schema["parsing_error"], "errors", None):
-                    parsing_error = cast(ValidationError, raw_schema["parsing_error"])
+                    parsing_error = cast("ValidationError", raw_schema["parsing_error"])
                     errors = [
                         {
                             "location": ".".join(map(str, err.get("loc"))),

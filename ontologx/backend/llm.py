@@ -6,7 +6,8 @@ from langchain_core.language_models import BaseChatModel
 
 
 def hf_llm(model: str, temperature: float) -> BaseChatModel:
-    from langchain_huggingface import ChatHuggingFace, HuggingFacePipeline  # type: ignore[attr-defined]
+    """Create a Hugging Face LLM instance using the specified model and temperature."""
+    from langchain_huggingface import ChatHuggingFace, HuggingFacePipeline  # type: ignore[import]
 
     parser_pipeline = HuggingFacePipeline.from_model_id(
         model_id=model,
@@ -20,12 +21,14 @@ def hf_llm(model: str, temperature: float) -> BaseChatModel:
 
 
 def ollama_llm(model: str, temperature: float, url: str) -> BaseChatModel:
+    """Create an Ollama LLM instance using the specified model and URL."""
     from langchain_ollama.chat_models import ChatOllama  # type: ignore[import]
 
     return ChatOllama(model=model, base_url=url, temperature=temperature)
 
 
 def vllm_llm(model: str, temperature: float, url: str) -> BaseChatModel:
+    """Create a VLLM instance using the specified model and URL."""
     from langchain_openai import ChatOpenAI  # type: ignore[import]
 
     return ChatOpenAI(
@@ -36,8 +39,9 @@ def vllm_llm(model: str, temperature: float, url: str) -> BaseChatModel:
 
 
 def bedrock_llm(model: str, temperature: float) -> BaseChatModel:
-    import boto3  # type: ignore[attr-defined]
-    from botocore.config import Config  # type: ignore[attr-defined]
+    """Create a Bedrock LLM instance using temporary credentials from AWS STS."""
+    import boto3  # type: ignore[import]
+    from botocore.config import Config  # type: ignore[import]
     from langchain_aws import ChatBedrockConverse  # type: ignore[import]
 
     sts_client = boto3.client(
@@ -68,6 +72,8 @@ def bedrock_llm(model: str, temperature: float) -> BaseChatModel:
 
 
 class LLMFactory:
+    """Factory class for creating LLM instances."""
+
     @classmethod
     def create(
         cls,

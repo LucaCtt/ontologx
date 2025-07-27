@@ -1,3 +1,5 @@
+"""Module for managing event graphs in a Neo4j store."""
+
 import uuid
 from pathlib import Path
 
@@ -47,6 +49,7 @@ class Dataset:
         )
 
     def initialize(self) -> None:
+        """Initialize the dataset by loading the examples and tests, and creating the vector index for events."""
         # Check if the examples are already loaded
         result = self.__graph_store.query(
             """
@@ -153,6 +156,7 @@ class Dataset:
         )
 
     def tests(self) -> list[GraphDocument]:
+        """Return a list of test documents from the dataset."""
         test_nodes = self.__graph_store.query(
             """
             MATCH (d:mls__Dataset)-[:mls__hasPart]->(e:olx__Event)

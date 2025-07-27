@@ -1,3 +1,5 @@
+"""Ontology metrics module."""
+
 import functools
 
 from ontologx.store import GraphDocument, Node, Relationship

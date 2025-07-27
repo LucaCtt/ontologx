@@ -1,3 +1,5 @@
+"""SHACL metrics computation module."""
+
 import functools
 
 import pyshacl
@@ -7,6 +9,8 @@ from ontologx.store import GraphDocument
 
 
 class SHACLMetrics:
+    """Class to calculate SHACL metrics for a given graph."""
+
     def __init__(self, graph: GraphDocument, ontology_path: str, shacl_path: str) -> None:
         self.__data_graph = self.__convert_to_rdflib(graph)
         self.__ontology_graph = rdflib.Graph()

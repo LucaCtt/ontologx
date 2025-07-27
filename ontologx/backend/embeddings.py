@@ -4,24 +4,29 @@ from langchain_core.embeddings import Embeddings
 
 
 def hf_embeddings(model: str) -> Embeddings:
+    """Create a Hugging Face embeddings instance."""
     from langchain_huggingface.embeddings import HuggingFaceEmbeddings  # type: ignore[attr-defined]
 
     return HuggingFaceEmbeddings(model_name=model, model_kwargs={"trust_remote_code": True})
 
 
 def infinity_embeddings(model: str, url: str) -> Embeddings:
+    """Create an Infinity embeddings instance."""
     from langchain_community.embeddings import InfinityEmbeddings  # type: ignore[attr-defined]
 
     return InfinityEmbeddings(model=model, infinity_api_url=url)
 
 
 def ollama_embeddings(model: str, url: str) -> Embeddings:
+    """Create an Ollama embeddings instance."""
     from langchain_ollama.embeddings import OllamaEmbeddings  # type: ignore[import]
 
     return OllamaEmbeddings(model=model, base_url=url)
 
 
 class EmbeddingsFactory:
+    """Factory class for creating embeddings instances based on backend type."""
+
     @classmethod
     def create(
         cls,

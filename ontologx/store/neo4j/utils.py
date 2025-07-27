@@ -1,3 +1,5 @@
+"""Utility functions for graph documents in the Neo4j store."""
+
 from copy import deepcopy
 
 from ontologx.store import GraphDocument

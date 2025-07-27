@@ -1,3 +1,5 @@
+"""Parser factory module."""
+
 from langchain_core.language_models import BaseChatModel
 
 from ontologx.parser.baseline_parser import BaselineParser

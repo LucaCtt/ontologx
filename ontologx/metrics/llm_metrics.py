@@ -1,3 +1,5 @@
+"""LLM metrics for evaluating graphs."""
+
 import functools
 
 from deepeval.metrics.g_eval.g_eval import GEval
@@ -18,6 +20,8 @@ def _stringify_graph(graph: GraphDocument) -> str:
 
 
 class GEvalGraphAlignmentMetrics:
+    """G-Eval metrics for evaluating graph alignment with LLMs."""
+
     @functools.cached_property
     def __measures(self) -> list[float]:
         result = []
@@ -100,7 +104,3 @@ class GEvalGraphAlignmentMetrics:
             )
             for graph in y_pred
         ]
-
-
-class TTPMetrics:
-    pass

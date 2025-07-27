@@ -1,3 +1,5 @@
+"""Metrics evaluation module for OntologX."""
+
 import functools
 
 from deepeval.models.base_model import DeepEvalBaseLLM

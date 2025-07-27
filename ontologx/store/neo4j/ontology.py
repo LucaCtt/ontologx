@@ -1,3 +1,5 @@
+"""Ontology store for managing and querying ontologies in a Neo4j database."""
+
 from pathlib import Path
 
 from langchain_core.documents import Document
@@ -28,6 +30,7 @@ class Ontology:
         self.__graph_store = graph_store
 
     def initialize(self) -> None:
+        """Import the log ontology (and dependencies) into the store."""
         # Check if the neosemantics configuration is present,
         # if it is, assume the ontology is already loaded.
         result = self.__graph_store.query("MATCH (n:_GraphConfig) RETURN COUNT(n) AS count")

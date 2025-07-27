@@ -7,6 +7,8 @@ from ontologx.backend.llm import LLMFactory
 
 
 class TestsFactory:
+    """Factory class for creating test models for DeepEval."""
+
     @classmethod
     def create(
         cls,

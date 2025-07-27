@@ -1,12 +1,28 @@
+"""Baseline parser for constructing a knowledge graph using a language model with plain prompting."""
+
 import json
 
 from langchain_core.documents import Document
 from langchain_core.language_models import BaseChatModel
+from langchain_core.messages import BaseMessage
 from langchain_core.prompts import ChatPromptTemplate
 
 from ontologx.parser.models import build_baseline_prompt
 from ontologx.parser.parser import Parser
 from ontologx.store import GraphDocument, Node, Relationship, Store
+
+
+def _parse_json(llm_output: BaseMessage) -> dict:
+    """Parse the LLM output as JSON."""
+    try:
+        return json.loads(
+            llm_output.content.replace("\n", "")
+            if isinstance(llm_output.content, str)
+            else json.dumps(llm_output.content),
+        )
+    except json.JSONDecodeError:
+        # If the output is not in json format, return an empty dict
+        return {}
 
 
 class BaselineParser(Parser):
@@ -38,18 +54,7 @@ class BaselineParser(Parser):
 
         """
         out = self.chain.invoke({"event": event, "context": context})
-
-        # If not using tools, the output is hopefully in json format
-        try:
-            raw_schema = json.loads(
-                out.content.replace("\n", "") if isinstance(out.content, str) else json.dumps(out.content),
-            )
-        except json.JSONDecodeError:
-            # If the output is not in json format, return None
-            return None
-
-        if "nodes" not in raw_schema or not isinstance(raw_schema["nodes"], list):
-            return None
+        raw_schema = _parse_json(out)
 
         output_graph = GraphDocument(nodes=[], relationships=[], source=Document(page_content=event, metadata=context))
 
