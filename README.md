@@ -61,8 +61,6 @@ TTL paths and prompts configuration. You should not need to change them unless y
 - `TESTS_PATH`: The path to the tests file to use for the logs. This should be a valid TTL file. Default is `resources/logs/test.ttl`.
 - `SHACL_PATH`: The path to the SHACL file to use for the logs. This should be a valid TTL file. Default is `resources/ontologies/logs-shacl.ttl`.
 - PROMPT_PATH: The path to the prompt file to use for the generation phase. This should be a valid TTL file. Default is `resources/prompts/main.md` if `PARSER_TYPE` is set to `main`, or `resources/prompts/baseline.md` if `PARSER_TYPE` is set to `baseline`.
-- `EVENTS_INDEX_NAME`: Name of the Neo4j vector index. Default is `eventsIndex`.
-- `N10S_CONSTRAINT_NAME`: Name of the Neo4j constraint for the N10S plugin. Default is `n10s_unique_uri`.
 
 ## Backends
 

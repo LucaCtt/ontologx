@@ -40,8 +40,7 @@ class Ontology:
         # Init neosemantics plugin
         self.__graph_store.query("CALL n10s.graphconfig.init($params)", params={"params": _ONTOLOGY_PARAMS})
         self.__graph_store.query(
-            f"""CREATE CONSTRAINT {self.__config.n10s_constraint_name} IF NOT EXISTS
-            FOR (r:Resource) REQUIRE r.uri IS UNIQUE""",
+            "CREATE CONSTRAINT n10s_unique_uri IF NOT EXISTS FOR (r:Resource) REQUIRE r.uri IS UNIQUE",
         )
 
         # Set the namespaces

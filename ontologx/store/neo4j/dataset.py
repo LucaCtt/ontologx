@@ -38,7 +38,7 @@ class Dataset:
             username=self.__config.neo4j_username,
             password=self.__config.neo4j_password,
             url=self.__config.neo4j_url,
-            index_name=self.__config.events_index_name,
+            index_name="eventsIndex",
             node_label="olx__Event",
             embedding_node_property="n4sch__embedding",
             retrieval_query="""
