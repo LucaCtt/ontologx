@@ -11,9 +11,9 @@ import typer
 from rich.logging import RichHandler
 from rich.progress import track
 
-from ontologx import accuracy
 from ontologx.backend import EmbeddingsFactory, LLMFactory, TestsFactory
 from ontologx.config import Config
+from ontologx.metrics import MetricsEvaluator
 from ontologx.parser import ParserFactory
 from ontologx.store import GraphDocument
 from ontologx.store.neo4j import Neo4jStore
@@ -135,20 +135,20 @@ def run() -> None:
         logger.info("-------------------------")
         logger.info("Log parsing done.")
 
-        metrics = accuracy.AccuracyEvaluator(graphs_pred, graphs_true, tests_evaluator, store)
+        metrics = MetricsEvaluator(graphs_pred, graphs_true, tests_evaluator, config.ontology_path, config.shacl_path)
 
         results = [
             ("run_total_time", total_time),
-            ("average_generation_time", total_time / len(test_events)),
-            ("generation_success_percentage", total_success / len(test_events)),
-            ("SHACL_violations_percentage", metrics.shacl_violations_percentage),
+            ("mean_generation_time", total_time / len(test_events)),
+            ("generation_success_ratio", total_success / len(test_events)),
+            ("SHACL_violations_ratio", metrics.shacl_violations_ratio),
             ("precision", metrics.precision),
             ("recall", metrics.recall),
             ("f1_score", metrics.f1),
             ("entity_linking_accuracy", metrics.entity_linking_accuracy),
             ("relationship_linking_accuracy", metrics.relationship_linking_accuracy),
             ("g-eval_mean_all", metrics.geval_mean),
-            ("g-eval_mean_valid_only", metrics.geval_mean_valid_only),
+            ("g-eval_mean_with_compliance", metrics.geval_mean_with_compliance),
         ]
 
         for name, value in results:

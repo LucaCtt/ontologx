@@ -5,7 +5,7 @@ from langchain_neo4j import Neo4jGraph
 
 from ontologx.config import Config
 from ontologx.store import GraphDocument, Node, Relationship
-from ontologx.store.neo4j.utils import normalize_input_graph, normalize_output_graph
+from ontologx.store.neo4j.utils import normalize_output_graph
 
 _TIME_ONTOLOGY_URI = "http://www.w3.org/2006/time#"
 _MLSCHEMA_ONTOLOGY_URI = "http://www.w3.org/ns/mls#"
@@ -132,45 +132,3 @@ class Ontology:
             ),
         )
         return normalize_output_graph(result)
-
-    def total_constraints(self) -> int:
-        """Return the total number of SHACL constraints in the ontology.
-
-        Returns:
-            int: The total number of SHACL constraints.
-
-        """
-        result = self.__graph_store.query(
-            "CALL n10s.validation.shacl.listShapes() YIELD target RETURN COUNT(target) AS count",
-        )
-        return result[0]["count"] if result else 0
-
-    def validate(self, graph: GraphDocument) -> int:
-        """Validate the given graph against the SHACL constraints.
-
-        The nodes in the graph must already be present in the store.
-
-        Args:
-            graph (GraphDocument): The graph to validate.
-
-        Returns:
-            int: The number of validation errors found in the graph.
-
-        """
-        norm_graph = normalize_input_graph(graph)
-
-        nodes_uris = [node.id for node in norm_graph.nodes]
-        result = self.__graph_store.query(
-            """
-            MATCH (n)
-            WHERE n.uri IN $uris
-            WITH COLLECT(n) AS nodes
-            CALL n10s.validation.shacl.validateSet(nodes)
-            YIELD focusNode, nodeType, propertyShape, offendingValue, resultPath, severity
-            WHERE resultPath <> 'uri' AND NOT n10s.rdf.shortFormFromFullUri(resultPath) STARTS WITH 'n4sch'
-            RETURN focusNode, nodeType, propertyShape, offendingValue, resultPath, severity
-            """,
-            params={"uris": nodes_uris},
-        )
-
-        return len(result)
