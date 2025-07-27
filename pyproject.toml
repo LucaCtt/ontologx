@@ -23,7 +23,6 @@ dependencies = [
 olx = "ontologx.__main__:main"
 
 [tool.poetry.group.dev.dependencies]
-ipykernel = "^6.29.5"
 ruff = "^0.12.4"
 pre-commit = "^4.1.0"
 
