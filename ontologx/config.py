@@ -164,13 +164,16 @@ class Config:
     ontology_uri = _get_uri_from_ttl(ontology_path)
     """The URI of the log ontology."""
 
-    run_name = str(uuid.uuid4())
-    """ The name of the run. A run is a single execution of the ontologx pipeline."""
+    examples_uri = _get_uri_from_ttl(examples_path)
+    """The URI of the examples log graphs."""
 
-    run_uri = "https://cyberseclab.unibs.it/olx/run/" + run_name
+    tests_uri = _get_uri_from_ttl(tests_path)
+    """The URI of the tests log graphs."""
+
+    run_uri = "https://cyberseclab.unibs.it/olx/run/" + str(uuid.uuid4())
     """The URI of the run node."""
 
-    out_uri = "https://cyberseclab.unibs.it/olx/out/" + run_name
+    out_uri = run_uri + "/out"
     """The URI of the output nodes."""
 
     def __init__(self):
@@ -193,9 +196,8 @@ class Config:
 
     def new_run(self) -> None:
         """Create a new run by generating a new UUID and updating the run name."""
-        self.run_name = str(uuid.uuid4())
-        self.run_uri = "https://cyberseclab.unibs.it/olx/run/" + self.run_name
-        self.out_uri = "https://cyberseclab.unibs.it/olx/out/" + self.run_name
+        self.run_uri = "https://cyberseclab.unibs.it/olx/run/" + str(uuid.uuid4())
+        self.out_uri = self.run_uri + "/out"
 
     def hyperparameters(self) -> dict[str, str | int | float]:
         """Return the hyperparameters used in the experiment.

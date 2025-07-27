@@ -44,7 +44,7 @@ class Dataset:
             retrieval_query="""
             RETURN node.mlsx__eventMessage AS text,
             score,
-            {uri: node.uri, n4sch__runName: node.n4sch__runName, _embedding_: node.embedding} AS metadata
+            {uri: node.uri, _embedding_: node.embedding} AS metadata
             """,
         )
 
@@ -53,11 +53,11 @@ class Dataset:
         # Check if the examples are already loaded
         result = self.__graph_store.query(
             """
-            MATCH (r:mlsx__Run {n4sch__runName: $run_name})-[:mlsx__hasInput]->(d:mlsx__ExampleDataset)
+            MATCH (r:mlsx__Run {uri: $run_uri})-[:mlsx__hasInput]->(d:mlsx__ExampleDataset)
             RETURN d
             LIMIT 1
             """,
-            params={"run_name": self.__config.run_name},
+            params={"run_uri": self.__config.run_uri},
         )
         if result:
             return
@@ -73,10 +73,10 @@ class Dataset:
         # Attach the examples to the current run
         self.__graph_store.query(
             """
-            MATCH (d:mlsx__ExampleDataset), (r:mlsx__Run {n4sch__runName: $run_name})
+            MATCH (d:mlsx__ExampleDataset), (r:mlsx__Run {uri: $run_uri})
             CREATE (r)-[:mlsx__hasInput]->(d)
             """,
-            params={"run_name": self.__config.run_name},
+            params={"run_uri": self.__config.run_uri},
         )
 
         # Create the index for the event messages
@@ -88,7 +88,6 @@ class Dataset:
             MATCH (d:mlsx__ExampleDataset)-[:mlsx__hasPart]->(r:mlsx__DatasetRow)
             WHERE r.embedding IS NULL
             OPTIONAL MATCH (r)-[:mlsx__hasContext]->(s:olx__Source)
-            SET r.n4sch__runName = ''
             RETURN elementId(r) AS id, r.mlsx__eventMessage AS eventMessage, s.olx__sourceName AS sourceName,
             s.olx__sourceDevice AS sourceDevice
             """,
@@ -128,23 +127,19 @@ class Dataset:
         )
         self.__graph_store.query(
             """
-            MATCH (d:mlsx__TestDataset), (r:mlsx__Run {n4sch__runName: $run_name})
+            MATCH (d:mlsx__TestDataset), (r:mlsx__Run {uri: $run_uri})
             MERGE (r)-[:mlsx__hasInput]->(d)
             """,
             params={
-                "run_name": self.__config.run_name,
+                "run_uri": self.__config.run_uri,
             },
         )
         self.__graph_store.query(
             """
             MATCH (d:mlsx__TestDataset)-[:mlsx__hasPart]->(r:mlsx__DatasetRow)-[:mlsx__hasLabel]->(e:olx__Event)
             WHERE r.embedding IS NULL
-            SET r.n4sch__runName = ''
             SET r.embedding = ''
             """,
-            params={
-                "run_name": self.__config.run_name,
-            },
         )
 
     def tests(self) -> list[GraphDocument]:
@@ -155,7 +150,6 @@ class Dataset:
             RETURN r.mlsx__eventMessage as eventMessage, e.uri as uri
             ORDER BY e.uri
             """,
-            params={"run_name": self.__config.run_name},
         )
         tests = []
         for test in test_nodes:
@@ -195,23 +189,26 @@ class Dataset:
         # Check if result dataset exists, otherwise create it
         result_dataset = self.__graph_store.query(
             """
-            MATCH (r:mlsx__Run {n4sch__runName: $run_name})-[:mlsx__hasOutput]->(d:mlsx__OutputDataset)
+            MATCH (r:mlsx__Run {uri: $run_uri})-[:mlsx__hasOutput]->(d:mlsx__OutputDataset)
             RETURN d
             """,
-            params={"run_name": self.__config.run_name},
+            params={"run_uri": self.__config.run_uri},
         )
         if not result_dataset:
             self.__graph_store.query(
                 """
-                MATCH (r:mlsx__Run {n4sch__runName: $run_name})
+                MATCH (r:mlsx__Run {uri: $run_uri})
                 CREATE (d:mlsx__OutputDataset {uri: $out_dataset_uri})<-[:mlsx__hasOutput]-(r)
                 """,
-                params={"run_name": self.__config.run_name, "out_dataset_uri": self.__config.out_uri + "/out-dataset"},
+                params={"run_uri": self.__config.run_uri, "out_dataset_uri": self.__config.out_uri + "/out-dataset"},
             )
 
         event_node = next(node for node in norm_graph.nodes if node.type == "olx__Event")
         event_node.id = f"{self.__config.out_uri}/{uuid.uuid4()}"
         event_node.properties["uri"] = event_node.id
+        for node in norm_graph.nodes:
+            node.id = f"{self.__config.out_uri}/{uuid.uuid4()}"
+            node.properties["uri"] = node.id
 
         text = _compose_embeddings_text(
             norm_graph.source.page_content,
@@ -220,7 +217,6 @@ class Dataset:
 
         dataset_row_properties = {
             "eventMessage": graph.source.page_content,
-            "n4sch__runName": self.__config.run_name,
             "embedding": self.__embeddings.embed_query(text),
             "uri": f"{self.__config.out_uri}/{uuid.uuid4()}",
         }
@@ -286,10 +282,10 @@ class Dataset:
         # or examples + generated events.
         # Examples will have no run name but an embedding,
         # Tests will have neither. Generated events will have both.
-        run_name_filter = (
-            [{"n4sch__runName": {"$eq": ""}}]
+        uri_filter = (
+            [{"uri": {"$like": self.__config.examples_uri}}]
             if not self.__config.generated_graphs_retrieval
-            else [{"n4sch__runName": {"$eq": self.__config.run_name}}, {"n4sch__runName": {"$eq": ""}}]
+            else [{"uri": {"$like": self.__config.examples_uri}}, {"uri": {"$like": self.__config.out_uri}}]
         )
 
         query = _compose_embeddings_text(event, context or {})
@@ -299,7 +295,7 @@ class Dataset:
             fetch_k=fetch_k,
             lambda_mult=lambda_mult,
             filter={
-                "$or": run_name_filter,
+                "$or": uri_filter,
                 "embedding": {"$ne": ""},
             },
             # Examples will have no run name but an embedding.

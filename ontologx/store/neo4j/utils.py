@@ -24,7 +24,7 @@ def normalize_output_graph(graph: GraphDocument) -> GraphDocument:
         # Convert namespace separator for properties, rename "n4sch" to "rdfs",
         for key in list(node.properties.keys()):
             # Remove internal-only properties
-            if key in ["uri", "embedding", "n4sch__runName"]:
+            if key in ["uri", "embedding"]:
                 node.properties.pop(key)
                 continue
 

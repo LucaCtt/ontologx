@@ -57,13 +57,13 @@ class Schema:
         # Create the evaluation node
         self.__graph_store.query(
             """
-            MATCH (r:mlsx__Run {n4sch__runName: $run_name}), (m:mlsx__EvaluationMeasure {n4sch__name: $name})
+            MATCH (r:mlsx__Run {uri: $run_uri}), (m:mlsx__EvaluationMeasure {n4sch__name: $name})
             CREATE (r)-[:mlsx__hasOutput]->(e:mlsx__ModelEvaluation {mlsx__hasValue: $value})-[:mlsx__specifiedBy]->(m)
             """,
             params={
                 "name": measure_camel,
                 "value": evaluation,
-                "run_name": self.__config.run_name,
+                "run_uri": self.__config.run_uri,
             },
         )
 
@@ -144,17 +144,14 @@ class Schema:
             experiment_uri (str): The URI of the experiment node.
 
         """
-        # Create the run node and attach it to the experiment node
-        run_uri = self.__gen_uri(self.__config.run_name)
-
         # Create run
         self.__graph_store.query(
             """
             MATCH (e:mlsx__Experiment {uri: $experiment_uri})
-            CREATE (r:mlsx__Run $details)<-[:mlsx__hasPart]-(e)
+            CREATE (r:mls__Run {uri: $run_uri})<-[:mls__hasPart]-(e)
             """,
             params={
-                "details": {"uri": run_uri, "n4sch__runName": self.__config.run_name},
+                "uri": self.__config.run_uri,
                 "experiment_uri": experiment_uri,
             },
         )
@@ -184,7 +181,7 @@ class Schema:
                 CREATE (r)-[:mlsx__hasInput]->(s:mlsx__HyperParameterSetting {mlsx__hasValue: $value})
                 -[:mlsx__specifiedBy]->(h)
                 """,
-                params={"name": name_camel, "value": value, "run_uri": run_uri},
+                params={"name": name_camel, "value": value, "run_uri": self.__config.run_uri},
             )
 
     def __gen_uri(self, node_id: str = str(uuid.uuid4())) -> str:

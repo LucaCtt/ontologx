@@ -82,10 +82,10 @@ def run() -> None:
     logger.info("Language model: '%s'", config.llm_model)
     logger.info("Parser type: '%s'", config.parser_type)
 
-    for _ in range(config.n_runs):
+    for run_index in range(config.n_runs):
         config.new_run()
         logger.info("----------------------")
-        logger.info("Run: '%s'", config.run_name)
+        logger.info("Run: '%s'", run_index + 1)
 
         store.initialize()
         logger.info("Store at '%s' initialized.", config.neo4j_url)
