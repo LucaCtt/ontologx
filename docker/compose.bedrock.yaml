@@ -1,11 +1,11 @@
-name: ontologx-bedrock
+name: ${EXPERIMENT_NAME:-default}
 
 services:
   ontologx:
     build:
       context: ..
       dockerfile: docker/ontologx.dockerfile
-    container_name: ${COMPOSE_PROJECT_NAME:-default}_olx
+    container_name: ${EXPERIMENT_NAME:-default}_olx
     environment:
       - LLM_BACKEND=bedrock
       - EMBEDDINGS_BACKEND=infinity
@@ -27,9 +27,9 @@ services:
 
   embs:
     image: michaelf34/infinity:0.0.76
-    container_name: ${COMPOSE_PROJECT_NAME:-default}_embs
+    container_name: ${EXPERIMENT_NAME:-default}_embs
     volumes:
-      - ../exps/${COMPOSE_PROJECT_NAME:-default}/embs:/app/.cache
+      - ../exps/${EXPERIMENT_NAME:-default}/embs:/app/.cache
     restart: on-failure:3
     runtime: nvidia
     command: v2 --model-id ${EMBEDDINGS_MODEL} --dtype float16 --port 9000
@@ -55,7 +55,7 @@ services:
 
   neo4j:
     image: neo4j:5.20.0
-    container_name: ${COMPOSE_PROJECT_NAME:-default}_neo4j
+    container_name: ${EXPERIMENT_NAME:-default}_neo4j
     environment:
       - NEO4J_PLUGINS=["apoc", "n10s"]
       - NEO4J_dbms_security_procedures_allowlist=apoc.*,n10s.*
@@ -65,9 +65,9 @@ services:
       - NEO4J_apoc_import_file_enabled=true
       - NEO4J_apoc_import_file_use__neo4j__config=true
     volumes:
-      - ../exps/${COMPOSE_PROJECT_NAME:-default}/neo4j/data:/data
-      - ../exps/${COMPOSE_PROJECT_NAME:-default}/neo4j/logs:/logs
-      - ../exps/${COMPOSE_PROJECT_NAME:-default}/neo4j/plugins:/plugins
+      - ../exps/${EXPERIMENT_NAME:-default}/neo4j/data:/data
+      - ../exps/${EXPERIMENT_NAME:-default}/neo4j/logs:/logs
+      - ../exps/${EXPERIMENT_NAME:-default}/neo4j/plugins:/plugins
     networks:
       - ontologx
     expose:
