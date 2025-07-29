@@ -58,7 +58,6 @@ services:
     container_name: ${EXPERIMENT_NAME:-default}_neo4j
     environment:
       - NEO4J_PLUGINS=["apoc", "n10s"]
-      - NEO4J_dbms_security_procedures_allowlist=apoc.*,n10s.*
       - NEO4J_dbms_usage__report_enabled=false
       - NEO4J_AUTH=neo4j/password
       - NEO4J_apoc_export_file_enabled=true

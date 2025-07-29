@@ -10,7 +10,7 @@ from ontologx.store import GraphDocument, Node, Relationship
 from ontologx.store.neo4j.utils import normalize_output_graph
 
 _TIME_ONTOLOGY_URI = "http://www.w3.org/2006/time#"
-_MLSCHEMA_ONTOLOGY_URI = "http://www.w3.org/ns/mls#"
+_MLSX_ONTOLOGY_URI = "https://cyberseclab.unibs.it/mlsx/dict#"
 _ONTOLOGY_PARAMS = {
     "subClassOfRel": "subClassOf",
     "subPropertyOfRel": "subPropertyOf",
@@ -46,7 +46,7 @@ class Ontology:
         # Set the namespaces
         self.__graph_store.query("CALL n10s.nsprefixes.add('olx', $uri)", params={"uri": self.__config.ontology_uri})
         self.__graph_store.query("CALL n10s.nsprefixes.add('time', $uri )", params={"uri": _TIME_ONTOLOGY_URI})
-        self.__graph_store.query("CALL n10s.nsprefixes.add('mls', $uri)", params={"uri": _MLSCHEMA_ONTOLOGY_URI})
+        self.__graph_store.query("CALL n10s.nsprefixes.add('mlsx', $uri)", params={"uri": _MLSX_ONTOLOGY_URI})
 
         # Load the ontologies
         self.__graph_store.query(
@@ -54,7 +54,6 @@ class Ontology:
             params={"ontology": Path(self.__config.ontology_path).read_text()},
         )
         self.__graph_store.query("CALL n10s.onto.import.fetch($url, 'Turtle')", params={"url": _TIME_ONTOLOGY_URI})
-        self.__graph_store.query("CALL n10s.onto.import.fetch($url, 'Turtle')", params={"url": _MLSCHEMA_ONTOLOGY_URI})
 
     def graph(self) -> GraphDocument:
         """Return the ontology graph as a GraphDocument.

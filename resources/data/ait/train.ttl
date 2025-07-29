@@ -1,5 +1,5 @@
 @prefix : <https://cyberseclab.unibs.it/olx/examples/#>.
-@prefix mlsx: <https://cyberseclab.unibs.it/olx/examples/#>.
+@prefix mlsx: <https://cyberseclab.unibs.it/mlsx/dict#>.
 @prefix olx: <https://cyberseclab.unibs.it/olx/dict#>.
 @prefix p-plan: <http://purl.org/net/p-plan#>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
@@ -58,7 +58,7 @@
   olx:wasLoggedBy :source-1.
 
 :example-1 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-1;
+  mlsx:hasLabel :event-1;
   mlsx:eventMessage "Jan 25 06:17:01 inet-dns CRON[16314]: (root) CMD (   cd / && run-parts --report /etc/cron.hourly)";
   mlsx:hasContext :source-1.
 
@@ -78,7 +78,7 @@
   olx:wasLoggedBy :source-2.
 
 :example-2 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-2;
+  mlsx:hasLabel :event-2;
   mlsx:eventMessage "20/1/2022 -- 13:16:23 - <Perf> - using shared mpm ctx' for http_stat_msg";
   mlsx:hasContext :source-2.
 
@@ -106,7 +106,7 @@
   olx:wasLoggedBy :source-3.
 
 :example-3 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-3;
+  mlsx:hasLabel :event-3;
   mlsx:eventMessage "Jan 20 13:47:21 dnsmasq[3326]: query[AAAA] d1zkz3k4cclnv6.cloudfront.net from 192.168.231.180";
   mlsx:hasContext :source-3.
 
@@ -134,7 +134,7 @@
   olx:wasLoggedBy :source-4.
 
 :example-4 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-4;
+  mlsx:hasLabel :event-4;
   mlsx:eventMessage "Jan 23 08:06:19 mail dovecot: imap(traci.stevenson): Logged out in=70 out=599";
   mlsx:hasContext :source-4.
 
@@ -157,7 +157,7 @@
   olx:wasLoggedBy :source-5.
 
 :example-5 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-5;
+  mlsx:hasLabel :event-5;
   mlsx:eventMessage "Jan 22 19:12:09 vpn systemd[1]: Starting Daily apt download activities...";
   mlsx:hasContext :source-5.
 
@@ -176,7 +176,7 @@
   olx:wasLoggedBy :source-6.
 
 :example-6 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-6;
+  mlsx:hasLabel :event-6;
   mlsx:eventMessage "Date: 1/23/2022 -- 06:42:05 (uptime: 2d, 17h 25m 39s)";
   mlsx:hasContext :source-6.
 
@@ -203,7 +203,7 @@
   olx:wasLoggedBy :source-7.
 
 :example-7 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-7;
+  mlsx:hasLabel :event-7;
   mlsx:eventMessage "Jan 25 06:57:57 morris-mail systemd[1993]: Closed GnuPG cryptographic agent (access for web browsers).";
   mlsx:hasContext :source-7.
 
@@ -226,7 +226,7 @@
   olx:wasLoggedBy :source-8.
 
 :example-8 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-8;
+  mlsx:hasLabel :event-8;
   mlsx:eventMessage "Jan 20 11:12:22 inet-dns kernel: [    3.552456] raid6: using avx2x2 recovery algorithm";
   mlsx:hasContext :source-8.
 
@@ -249,7 +249,7 @@
   olx:wasLoggedBy :source-9.
 
 :example-9 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-9;
+  mlsx:hasLabel :event-9;
   mlsx:eventMessage "Jan 24 22:48:53 webserver systemd-timesyncd[30824]: Network configuration changed, trying to establish connection.";
   mlsx:hasContext :source-9.
 
@@ -271,7 +271,7 @@
   olx:wasLoggedBy :source-10.
 
 :example-10 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-10;
+  mlsx:hasLabel :event-10;
   mlsx:eventMessage "5030:signal-handler (1642682292) Received SIGTERM scheduling shutdown...";
   mlsx:hasContext :source-10.
 

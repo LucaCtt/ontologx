@@ -1,6 +1,6 @@
 @prefix : <https://cyberseclab.unibs.it/olx/tests#>.
 @prefix olx: <https://cyberseclab.unibs.it/olx/dict#>.
-@prefix mlsx: <https://cyberseclab.unibs.it/olx/examples/#>.
+@prefix mlsx: <https://cyberseclab.unibs.it/mlsx/dict#>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix time: <http://www.w3.org/2006/time#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
@@ -20,7 +20,7 @@
   olx:wasLoggedBy :source-1.
 
 :val-1 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-1;
+  mlsx:hasLabel :event-1;
   mlsx:eventMessage "2022-01-22 13:54:21 1nBGqT-0005kq-CQ Completed";
   mlsx:hasContext :source-1.
 
@@ -41,7 +41,7 @@
   olx:wasLoggedBy :source-2.
 
 :val-2 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-2;
+  mlsx:hasLabel :event-2;
   mlsx:eventMessage "20/1/2022 -- 13:16:23 - <Info> - Found an MTU of 1450 for 'ens3'";
   mlsx:hasContext :source-2.
 
@@ -65,7 +65,7 @@
   olx:wasLoggedBy :source-3.
 
 :val-3 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-3;
+  mlsx:hasLabel :event-3;
   mlsx:eventMessage "Jan 20 12:20:53 morris-mail exim4[30354]: Stopping MTA: exim4_listener.";
   mlsx:hasContext :source-3.
 
@@ -96,7 +96,7 @@
   olx:wasLoggedBy :source-4.
 
 :val-4 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-4;
+  mlsx:hasLabel :event-4;
   mlsx:eventMessage "type=LOGIN msg=audit(1642770541.877:2345): pid=12030 uid=0 old-auid=4294967295 auid=0 tty=(none) old-ses=4294967295 ses=102 res=1";
   mlsx:hasContext :source-4.
 
@@ -116,7 +116,7 @@
   olx:wasLoggedBy :source-5.
 
 :val-5 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-5;
+  mlsx:hasLabel :event-5;
   mlsx:eventMessage "25792:M 22 Jan 17:41:56.137 * Background saving terminated with success";
   mlsx:hasContext :source-5.
 
@@ -148,7 +148,7 @@
   olx:wasLoggedBy :source-6.
 
 :val-6 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-6;
+  mlsx:hasLabel :event-6;
   mlsx:eventMessage "Jan 20 11:14:02 davey-mail ec2: 256 SHA256:wZvMsGOInOVqvsOlhNmCH7PNFaKk0EZfNcFDcFLShk8 root@davey-mail (ED25519)";
   mlsx:hasContext :source-6.
 
@@ -171,7 +171,7 @@
   olx:wasLoggedBy :source-7.
 
 :val-7 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-7;
+  mlsx:hasLabel :event-7;
   mlsx:eventMessage "20/1/2022 -- 13:16:28 - <Config> - Loading rule file: /etc/suricata/rules/ciarmy.rules";
   mlsx:hasContext :source-7.
 
@@ -198,7 +198,7 @@
   olx:wasLoggedBy :source-8.
 
 :val-8 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-8;
+  mlsx:hasLabel :event-8;
   mlsx:eventMessage "Jan 25 06:57:58 davey-mail systemd[1]: Starting User Manager for UID 1001...";
   mlsx:hasContext :source-8.
 
@@ -220,7 +220,7 @@
   olx:wasLoggedBy :source-9.
 
 :val-9 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-9;
+  mlsx:hasLabel :event-9;
   mlsx:eventMessage "Jan 24 22:48:53 webserver systemd-timesyncd[30824]: Network configuration changed, trying to establish connection.";
   mlsx:hasContext :source-9.
 
@@ -247,7 +247,7 @@
   olx:wasLoggedBy :source-10.
 
 :val-10 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-10;
+  mlsx:hasLabel :event-10;
   mlsx:eventMessage "[Sun Jan 23 06:25:13.804652 2022] [core:notice] [pid 29640] AH00094: Command line: '/usr/sbin/apache2'";
   mlsx:hasContext :source-10. 
 

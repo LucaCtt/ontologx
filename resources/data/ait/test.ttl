@@ -1,5 +1,5 @@
 @prefix : <https://cyberseclab.unibs.it/olx/tests#>.
-@prefix mlsx: <https://cyberseclab.unibs.it/olx/examples/#>.
+@prefix mlsx: <https://cyberseclab.unibs.it/mlsx/dict#>.
 @prefix olx: <https://cyberseclab.unibs.it/olx/dict#>.
 @prefix p-plan: <http://purl.org/net/p-plan#>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
@@ -22,7 +22,7 @@
   olx:wasLoggedBy :source-1.
 
 :test-1 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-1;
+  mlsx:hasLabel :event-1;
   mlsx:eventMessage "Jan 20 11:22:30    Chain tcpost deleted";
   mlsx:hasContext :source-1.
 
@@ -42,7 +42,7 @@
   olx:wasLoggedBy :source-2.
 
 :test-2 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-2;
+  mlsx:hasLabel :event-2;
   mlsx:eventMessage "20/1/2022 -- 13:12:35 - <Perf> - OTHER toserver: 0 proto groups, 0 unique SGH's, 0 copies";
   mlsx:hasContext :source-2.
 
@@ -64,7 +64,7 @@
   olx:wasLoggedBy :source-3.
 
 :test-3 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-3;
+  mlsx:hasLabel :event-3;
   mlsx:eventMessage "mkdir failed on directory /var/run/samba/msg.lock: Permission denied";
   mlsx:hasContext :source-3.
 
@@ -97,7 +97,7 @@
   olx:wasLoggedBy :source-4.
 
 :test-4 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-4;
+  mlsx:hasLabel :event-4;
   mlsx:eventMessage "2022-01-23 13:48:11 twhite/192.168.230.95:40288 Outgoing Data Channel: Using 160 bit message hash 'SHA1' for HMAC authentication";
   mlsx:hasContext :source-4.
 
@@ -125,7 +125,7 @@
   olx:wasLoggedBy :source-5.
 
 :test-5 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-5;
+  mlsx:hasLabel :event-5;
   mlsx:eventMessage "2022-01-23 05:53:06 1nBVoI-00073L-0p => rebecca.blake <rebecca.blake@smith.russellmitchell.com> R=local_user T=maildir_home";
   mlsx:hasContext :source-5.
 
@@ -152,7 +152,7 @@
   olx:wasLoggedBy :source-6.
 
 :test-6 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-6;
+  mlsx:hasLabel :event-6;
   mlsx:eventMessage "Jan 23 20:25:24 morris-mail freshclam[29586]: Sun Jan 23 20:25:24 2022 -> ClamAV update process started at Sun Jan 23 20:25:24 2022";
   mlsx:hasContext :source-6.
 
@@ -178,7 +178,7 @@
   olx:wasLoggedBy :source-7.
 
 :test-7 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-7;
+  mlsx:hasLabel :event-7;
   mlsx:eventMessage '192.168.230.122 - - [24/Jan/2022:03:57:16 +0000] ""GET / HTTP/1.0"" 302 4095 ""-"" ""-""';
   mlsx:hasContext :source-7.
 
@@ -194,7 +194,7 @@
   olx:wasLoggedBy :source-8.
 
 :test-8 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-8;
+  mlsx:hasLabel :event-8;
   mlsx:eventMessage "Length: 139921500 (133M) [text/plain]";
   mlsx:hasContext :source-8.
 
@@ -217,7 +217,7 @@
   olx:wasLoggedBy :source-9.
 
 :test-9 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-9;
+  mlsx:hasLabel :event-9;
   mlsx:eventMessage "Jan 21 06:21:33 internal-share systemd[1]: message repeated 2 times: [ Reloading.]";
   mlsx:hasContext :source-9.
 
@@ -250,7 +250,7 @@
   olx:wasLoggedBy :source-10.
 
 :test-10 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-10;
+  mlsx:hasLabel :event-10;
   mlsx:eventMessage "Jan 21 06:54:05 vpn os-prober: debug: running /usr/lib/os-probes/mounted/10freedos on mounted /dev/vda15";
   mlsx:hasContext :source-10.
 
@@ -278,7 +278,7 @@
   olx:wasLoggedBy :source-11.
 
 :test-11 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-11;
+  mlsx:hasLabel :event-11;
   mlsx:eventMessage '172.19.131.174 - - [24/Jan/2022:03:57:34 +0000] ""GET /paypal HTTP/1.1"" 404 363 ""-"" ""Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)""';
   mlsx:hasContext :source-11.
 
@@ -298,7 +298,7 @@
   olx:wasLoggedBy :source-12.
 
 :test-12 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-12;
+  mlsx:hasLabel :event-12;
   mlsx:eventMessage "20/1/2022 -- 13:16:23 - <Config> - Protocol detection and parser disabled for modbus protocol.";
   mlsx:hasContext :source-12.
 
@@ -330,7 +330,7 @@
   olx:wasLoggedBy :source-13.
 
 :test-13 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-13;
+  mlsx:hasLabel :event-13;
   mlsx:eventMessage "Jan 20 11:12:27 inet-firewall kernel: [    1.060522] uhci_hcd 0000:00:01.2: UHCI Host Controller";
   mlsx:hasContext :source-13.
 
@@ -353,7 +353,7 @@
   olx:wasLoggedBy :source-14.
 
 :test-14 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-14;
+  mlsx:hasLabel :event-14;
   mlsx:eventMessage "Jan 25 07:02:50 inet-dns systemd[16839]: Stopped target Timers.";
   mlsx:hasContext :source-14.
 
@@ -376,7 +376,7 @@
   olx:wasLoggedBy :source-15.
 
 :test-15 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-15;
+  mlsx:hasLabel :event-15;
   mlsx:eventMessage "Jan 20 11:22:30 ..End inline action /usr/share/shorewall/action.Broadcast";
   mlsx:hasContext :source-15.
 
@@ -397,7 +397,7 @@
   olx:wasLoggedBy :source-16.
 
 :test-16 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-16;
+  mlsx:hasLabel :event-16;
   mlsx:eventMessage '20/1/2022 -- 13:16:29 - <Error> - [ERRCODE: SC_ERR_UNDEFINED_VAR(101)] - Variable ""SQL_SERVERS"" is not defined in configuration file';
   mlsx:hasContext :source-16.
 
@@ -432,7 +432,7 @@
   olx:wasLoggedBy :source-17.
 
 :test-17 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-17;
+  mlsx:hasLabel :event-17;
   mlsx:eventMessage "Jan 20 12:17:27 morris-mail sudo: pam_unix(sudo:session): session opened for user root by ait(uid=0)";
   mlsx:hasContext :source-17.
 
@@ -473,7 +473,7 @@
   olx:wasLoggedBy :source-18.
 
 :test-18 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-18;
+  mlsx:hasLabel :event-18;
   mlsx:eventMessage 'Jan 23 11:27:31 mail HORDE: [horde] Login success for dorothy.ellis to horde (172.19.130.68) [pid 29777 on line 163 of ""/usr/share/horde/login.php""]';
   mlsx:hasContext :source-18.
 
@@ -498,7 +498,7 @@
   olx:wasLoggedBy :source-19.
 
 :test-19 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-19;
+  mlsx:hasLabel :event-19;
   mlsx:eventMessage 'Jan 24 14:15:03 cloud-share CRON[12638]: (CRON) info (No MTA installed, discarding output)';
   mlsx:hasContext :source-19.
 
@@ -518,7 +518,7 @@
   olx:wasLoggedBy :source-20.
 
 :test-20 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-20;
+  mlsx:hasLabel :event-20;
   mlsx:eventMessage "20/1/2022 -- 13:16:43 - <Config> - using 1 flow manager threads";
   mlsx:hasContext :source-20.
 
@@ -543,7 +543,7 @@
   olx:wasLoggedBy :source-21.
 
 :test-21 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-21;
+  mlsx:hasLabel :event-21;
   mlsx:eventMessage '20/1/2022 -- 13:16:23 - <Notice> - This is Suricata version 6.0.4 RELEASE running in SYSTEM mode';
   mlsx:hasContext :source-21.
 
@@ -567,7 +567,7 @@
   olx:wasLoggedBy :source-22.
 
 :test-22 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-22;
+  mlsx:hasLabel :event-22;
   mlsx:eventMessage 'Jan 24 22:42:32 vpn 50-motd-news[2769]:  * Super-optimized for small spaces - read how we shrank the memory';
   mlsx:hasContext :source-22.
 
@@ -600,7 +600,7 @@
   olx:wasLoggedBy :source-23.
 
 :test-23 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-23;
+  mlsx:hasLabel :event-23;
   mlsx:eventMessage './wphashcrack-0.1/wphashcrack.sh: line 68: cd: HOME not set';
   mlsx:hasContext :source-23.
 
@@ -627,7 +627,7 @@
   olx:wasLoggedBy :source-24.
 
 :test-24 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-24;
+  mlsx:hasLabel :event-24;
   mlsx:eventMessage "Jan 21 06:52:59 vpn kernel: [70791.313280] systemd[1]: Stopped Journal Service.";
   mlsx:hasContext :source-24.
 
@@ -648,7 +648,7 @@
   olx:wasLoggedBy :source-25.
 
 :test-25 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-25;
+  mlsx:hasLabel :event-25;
   mlsx:eventMessage "25/1/2022 -- 06:57:01 - <Notice> - Stats for ''eth0'':  pkts: 780375, drop: 0 (0.00%), invalid chksum: 0";
   mlsx:hasContext :source-25.
 
@@ -668,7 +668,7 @@
   olx:wasLoggedBy :source-26.
 
 :test-26 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-26;
+  mlsx:hasLabel :event-26;
   mlsx:eventMessage '20/1/2022 -- 13:12:37 - <Config> - stream.reassembly ""toserver-chunk-size"": 2560';
   mlsx:hasContext :source-26.
 
@@ -691,7 +691,7 @@
   olx:wasLoggedBy :source-27.
 
 :test-27 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-27;
+  mlsx:hasLabel :event-27;
   mlsx:eventMessage 'Jan 20 11:22:30     Rule ""PARAM - - tcp 53"" Compiled';
   mlsx:hasContext :source-27.
 
@@ -715,7 +715,7 @@
   olx:wasLoggedBy :source-28.
 
 :test-28 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-28;
+  mlsx:hasLabel :event-28;
   mlsx:eventMessage '[Mon Jan 24 06:25:16.644970 2022] [mpm_prefork:notice] [pid 29640] AH00171: Graceful restart requested, doing restart';
   mlsx:hasContext :source-28.
 
@@ -735,7 +735,7 @@
   olx:wasLoggedBy :source-29.
 
 :test-29 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-29;
+  mlsx:hasLabel :event-29;
   mlsx:eventMessage "Jan 20 11:22:30";
   mlsx:hasContext :source-29.
 
@@ -755,7 +755,7 @@
   olx:wasLoggedBy :source-30.
 
 :test-30 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-30;
+  mlsx:hasLabel :event-30;
   mlsx:eventMessage 'Jan 20 11:22:30    Policy for dmz to lan is REJECT using chain all-all';
   mlsx:hasContext :source-30.
 
@@ -775,7 +775,7 @@
   olx:wasLoggedBy :source-31.
 
 :test-31 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-31;
+  mlsx:hasLabel :event-31;
   mlsx:eventMessage '20/1/2022 -- 13:16:23 - <Config> - luajit states preallocated: 128';
   mlsx:hasContext :source-31.
 
@@ -803,7 +803,7 @@
   olx:wasLoggedBy :source-32.
 
 :test-32 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-32;
+  mlsx:hasLabel :event-32;
   mlsx:eventMessage "rm: cannot remove 'john.pot': No such file or directory";
   mlsx:hasContext :source-32.
 
@@ -823,7 +823,7 @@
   olx:wasLoggedBy :source-33.
 
 :test-33 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-33;
+  mlsx:hasLabel :event-33;
   mlsx:eventMessage '20/1/2022 -- 13:12:47 - <Perf> - Builtin MPM ""toclient UDP packet"": 0';
   mlsx:hasContext :source-33.
 
@@ -846,7 +846,7 @@
   olx:wasLoggedBy :source-34.
 
 :test-34 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-34;
+  mlsx:hasLabel :event-34;
   mlsx:eventMessage '5030:M 20 Jan 12:30:58.908 * Ready to accept connections';
   mlsx:hasContext :source-34.
 
@@ -869,7 +869,7 @@
   olx:wasLoggedBy :source-35.
 
 :test-35 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-35;
+  mlsx:hasLabel :event-35;
   mlsx:eventMessage '5030:M 20 Jan 12:38:12.421 * Saving the final RDB snapshot before exiting.';
   mlsx:hasContext :source-35.
 
@@ -892,7 +892,7 @@
   olx:wasLoggedBy :source-36.
 
 :test-36 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-36;
+  mlsx:hasLabel :event-36;
   mlsx:eventMessage 'Jan 21 06:21:01 internal-share sshd[1018]: Received signal 15; terminating.';
   mlsx:hasContext :source-36.
 
@@ -918,7 +918,7 @@
   olx:wasLoggedBy :source-37.
 
 :test-37 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-37;
+  mlsx:hasLabel :event-37;
   mlsx:eventMessage 'Connecting to github.com (github.com)|140.82.131.3|:443... connected.';
   mlsx:hasContext :source-37.
 
@@ -938,7 +938,7 @@
   olx:wasLoggedBy :source-38.
 
 :test-38 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-38;
+  mlsx:hasLabel :event-38;
   mlsx:eventMessage 'Jan 20 11:22:30    Table filter Optimized -- Passes =';
   mlsx:hasContext :source-38.
 
@@ -968,7 +968,7 @@
   olx:wasLoggedBy :source-39.
 
 :test-39 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-39;
+  mlsx:hasLabel :event-39;
   mlsx:eventMessage '2022-01-23 22:43:34 twhite/192.168.230.95:36864 Validating certificate extended key usage';
   mlsx:hasContext :source-39.
 
@@ -991,7 +991,7 @@
   olx:wasLoggedBy :source-40.
 
 :test-40 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-40;
+  mlsx:hasLabel :event-40;
   mlsx:eventMessage "20/1/2022 -- 13:16:23 - <Config> - enabling ''eve-log'' module ''ssh''";
   mlsx:hasContext :source-40.
 
@@ -1004,7 +1004,7 @@
   olx:wasLoggedBy :source-41.
 
 :test-41 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-41;
+  mlsx:hasLabel :event-41;
   mlsx:eventMessage '_._';
   mlsx:hasContext :source-41.
 
@@ -1023,7 +1023,7 @@
   olx:wasLoggedBy :source-42.
 
 :test-42 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-42;
+  mlsx:hasLabel :event-42;
   mlsx:eventMessage 'bash: 196: Bad file descriptor';
   mlsx:hasContext :source-42.
 
@@ -1050,7 +1050,7 @@
   olx:wasLoggedBy :source-43.
 
 :test-43 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-43;
+  mlsx:hasLabel :event-43;
   mlsx:eventMessage 'Jan 20 12:19:28 morris-mail php7.0-cli: php_invoke ftp: already enabled for PHP 7.0 cli sapi';
   mlsx:hasContext :source-43.
 
@@ -1076,7 +1076,7 @@
   olx:wasLoggedBy :source-44.
 
 :test-44 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-44;
+  mlsx:hasLabel :event-44;
   mlsx:eventMessage '20/1/2022 -- 13:16:42 - <Perf> - AppLayer MPM ""toserver http_user_agent (http)"": 6';
   mlsx:hasContext :source-44.
 
@@ -1097,7 +1097,7 @@
   olx:wasLoggedBy :source-45.
 
 :test-45 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-45;
+  mlsx:hasLabel :event-45;
   mlsx:eventMessage '20/1/2022 -- 13:16:23 - <Info> - CPUs/cores online: 1';
   mlsx:hasContext :source-45.
 
@@ -1127,7 +1127,7 @@
   olx:wasLoggedBy :source-46.
 
 :test-46 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-46;
+  mlsx:hasLabel :event-46;
   mlsx:eventMessage '2022-01-22 12:44:02 jhall/192.168.230.165:59814 VERIFY EKU OK';
   mlsx:hasContext :source-46.
 
@@ -1157,7 +1157,7 @@
   olx:wasLoggedBy :source-47.
 
 :test-47 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-47;
+  mlsx:hasLabel :event-47;
   mlsx:eventMessage '2022-01-22 11:56:06 ahayes/192.168.231.127:37135 peer info: IV_LZO=1';
   mlsx:hasContext :source-47.
 
@@ -1183,7 +1183,7 @@
   olx:wasLoggedBy :source-48.
 
 :test-48 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-48;
+  mlsx:hasLabel :event-48;
   mlsx:eventMessage 'Jan 20 11:13:29 morris-mail kernel: [    2.185874] ACPI: PCI Interrupt Link [LNKB] enabled at IRQ 11';
   mlsx:hasContext :source-48.
 
@@ -1203,7 +1203,7 @@
   olx:wasLoggedBy :source-49.
 
 :test-49 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-49;
+  mlsx:hasLabel :event-49;
   mlsx:eventMessage '20/1/2022 -- 13:16:23 - <Config> - Adding interface ens3 from config file';
   mlsx:hasContext :source-49.
 
@@ -1216,7 +1216,7 @@
   olx:wasLoggedBy :source-50.
 
 :test-50 rdf:type mlsx:DatasetRow;
-  mlsx:hasEvent :event-50;
+  mlsx:hasLabel :event-50;
   mlsx:eventMessage '(    \'      ,       .-`  | `,    )     Running in standalone mode';
   mlsx:hasContext :source-50.
 

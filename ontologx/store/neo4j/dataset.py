@@ -38,7 +38,7 @@ class Dataset:
             username=self.__config.neo4j_username,
             password=self.__config.neo4j_password,
             url=self.__config.neo4j_url,
-            index_name="eventsIndex",
+            index_name="eventsVectorIndex",
             node_label="mlsx__DatasetRow",  # The embedding is not stored on the Event itself to keep it clean
             embedding_node_property="n4sch__embedding",
             retrieval_query="""
@@ -85,16 +85,13 @@ class Dataset:
         # Populate the embeddings for the examples
         to_populate = self.__graph_store.query(
             """
-            MATCH (d:mlsx__ExampleDataset)-[:mlsx__hasPart]->(r:mlsx__DatasetRow)-[:mlsx__hasLabel]->(e:olx__Event)
+            MATCH (d:mlsx__ExampleDataset)-[:mlsx__hasPart]->(r:mlsx__DatasetRow)
             WHERE r.n4sch__embedding IS NULL
-            OPTIONAL MATCH (e)-[:olx__wasLoggedBy]->(s:olx__Source)
+            OPTIONAL MATCH (r)-[:mlsx__hasContext]->(s:olx__Source)
             SET r.n4sch__runName = ''
             RETURN elementId(r) AS id, r.mlsx__eventMessage AS eventMessage, s.olx__sourceName AS sourceName,
             s.olx__sourceDevice AS sourceDevice
             """,
-            params={
-                "run_name": self.__config.run_name,
-            },
         )
 
         texts = []
@@ -111,7 +108,7 @@ class Dataset:
         self.__graph_store.query(
             """
             UNWIND $data AS row
-            MATCH (r:olx__DatasetRow)
+            MATCH (r:mlsx__DatasetRow)
             WHERE elementId(r) = row.id
             CALL db.create.setNodeVectorProperty(r, 'n4sch__embedding', row.embedding)
             """,
@@ -132,7 +129,6 @@ class Dataset:
         self.__graph_store.query(
             """
             MATCH (d:mlsx__TestDataset), (r:mlsx__Run {n4sch__runName: $run_name})
-            WHERE d.n4sch__runName IS NULL
             MERGE (r)-[:mlsx__hasInput]->(d)
             """,
             params={
@@ -328,7 +324,7 @@ class Dataset:
             ValueError: If no subgraph is found for the given node URI.
 
         """
-        # Ugly but quite efficient. Also filters out the embedding property and the Resource label.
+        # Ugly but quite efficient.
         nodes_subgraphs = self.__graph_store.query(
             """
             MATCH (n {uri: $node_uri})
@@ -356,8 +352,15 @@ class Dataset:
 
         nodes_subgraph = nodes_subgraphs[0]
 
+        # Remove the DatasetRow node, as it is not needed in the output graph.
+        # However it contains the event message, so it is used as the source of the graph.
         dataset_row_node = next(node for node in nodes_subgraph["nodes"] if node["type"] == "mlsx__DatasetRow")
         nodes_subgraph["nodes"].remove(dataset_row_node)
+        nodes_subgraph["relationships"] = [
+            relationship
+            for relationship in nodes_subgraph["relationships"]
+            if relationship["source"] != dataset_row_node["uri"] and relationship["target"] != dataset_row_node["uri"]
+        ]
 
         # The neo4j date and time objects are quite problematic, as they are not JSON serializable.
         # This is a workaround to convert them to strings.
@@ -388,7 +391,6 @@ class Dataset:
                     type=relationship["type"],
                 )
                 for relationship in nodes_subgraph["relationships"]
-                if relationship["source"].type != "mlsx__DatasetRow"
             ]
             if "relationships" in nodes_subgraph
             else []  # The node may not have any relationships
@@ -401,5 +403,5 @@ class Dataset:
         return GraphDocument(
             nodes=list(nodes_dict.values()),
             relationships=relationships,
-            source=Document(page_content=dataset_row_node.properties["mlsx__eventMessage"], metadata=context),
+            source=Document(page_content=dataset_row_node["properties"]["mlsx__eventMessage"], metadata=context),
         )

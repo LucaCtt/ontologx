@@ -6,8 +6,6 @@ from langchain_neo4j import Neo4jGraph
 
 from ontologx.config import Config
 
-MLSCHEMA_URI = "https://raw.githubusercontent.com/ML-Schema/core/master/MLSchema.ttl"
-
 
 class Schema:
     """Graph store and vector index for the events knowledge graph."""
