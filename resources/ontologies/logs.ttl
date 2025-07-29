@@ -141,12 +141,15 @@
 
 :wasLoggedBy rdf:type owl:ObjectProperty;
   rdfs:subPropertyOf prov:wasAttributedTo;
-  rdfs:comment "Relation between an Event and the Source that logged it.".
+  rdfs:domain :Event;
+  rdfs:range :Source;
+  rdfs:comment "Relation between an Event and the Source that logged it.";
+  rdfs:label "Was Logged By".
 
 #################################################################
 #    Data properties
 #################################################################
-:eventSeverity rdf:type owl:DatatypeProperty;
+:eventLogLevel rdf:type owl:DatatypeProperty;
   rdfs:domain :Event;
   rdfs:range xsd:string;
   rdfs:comment "Severity of the event, such as INFO, WARNING, ERROR, etc.";

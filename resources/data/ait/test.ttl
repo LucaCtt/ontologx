@@ -77,7 +77,7 @@
   olx:networkAddressPort 40288.
 
 :username-4 rdf:type olx:UserName;
-  olx:credentialValue "twhite".
+  olx:userCredentialValue "twhite".
 
 :user-4 rdf:type olx:User;
   olx:hasCredential :username-4.
@@ -98,10 +98,10 @@
   olx:sourceDevice "mail".
 
 :username-5 rdf:type olx:UserName;
-  olx:credentialValue "rebecca.blake".
+  olx:userCredentialValue "rebecca.blake".
 
 :email-5 rdf:type olx:UserEmail;
-  olx:credentialValue "rebecca.blake@smith.russellmitchell.com".
+  olx:userCredentialValue "rebecca.blake@smith.russellmitchell.com".
 
 :user-5 rdf:type olx:User;
   olx:hasCredential :username-5, :email-5.
@@ -120,7 +120,7 @@
 
 :source-6 rdf:type olx:Source;
   olx:sourceName "syslog";
-  olx:sourceDevice "morris_mail".
+  olx:sourceDevice ":morris-mail".
 
 :system-process-6 rdf:type olx:SystemProcess;
   olx:applicationName "freshclam";
@@ -213,7 +213,7 @@
 
 :event-10 rdf:type olx:Event;
   mls:implements "Jan 21 06:54:05 vpn os-prober: debug: running /usr/lib/os-probes/mounted/10freedos on mounted /dev/vda15";
-  olx:eventSeverity "debug";
+  olx:eventLogLevel "debug";
   olx:hasParameter :timestamp-10, :shell-command-10, :file-10-1, :file-10-2;
   olx:wasLoggedBy :source-10.
 
@@ -336,7 +336,7 @@
 
 :event-16 rdf:type olx:Event;
   mls:implements '20/1/2022 -- 13:16:29 - <Error> - [ERRCODE: SC_ERR_UNDEFINED_VAR(101)] - Variable ""SQL_SERVERS"" is not defined in configuration file';
-  olx:eventSeverity "error";
+  olx:eventLogLevel "error";
   olx:hasParameter :timestamp-16, :source-16;
   olx:wasLoggedBy :source-16.
 
@@ -348,19 +348,19 @@
   time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
 
 :source-17 rdf:type olx:Source;
-  olx:sourceDevice "morris_mail".
+  olx:sourceDevice ":morris-mail".
 
 :shell-command-17 rdf:type olx:ShellCommand;
   olx:applicationName "sudo".
 
 :username-17-1 rdf:type olx:UserName;
-  olx:credentialValue "root".
+  olx:userCredentialValue "root".
 
 :user-17-1 rdf:type olx:User;
   olx:hasCredential :username-27-1.
 
 :username-17-2 rdf:type olx:UserName;
-  olx:credentialValue "ait".
+  olx:userCredentialValue "ait".
 
 :user-17-2 rdf:type olx:User;
   olx:hasCredential :username-27-2;
@@ -393,7 +393,7 @@
   olx:networkAddressIPV4 "172.19.130.68".
 
 :username-18 rdf:type olx:UserName;
-  olx:credentialValue "dorothy.ellis".
+  olx:userCredentialValue "dorothy.ellis".
 
 :user-18 rdf:type olx:User;
   olx:hasCredential :username-28.
@@ -428,7 +428,7 @@
 
 :event-19 rdf:type olx:Event;
   mls:implements 'Jan 24 14:15:03 cloud-share CRON[12638]: (CRON) info (No MTA installed, discarding output)';
-  olx:eventSeverity "info";
+  olx:eventLogLevel "info";
   olx:hasParameter :timestamp-19, :system-process-19;
   olx:wasLoggedBy :source-19.
 
@@ -465,7 +465,7 @@
 
 :event-21 rdf:type olx:Event;
   mls:implements '20/1/2022 -- 13:16:23 - <Notice> - This is Suricata version 6.0.4 RELEASE running in SYSTEM mode';
-  olx:eventSeverity "notice";
+  olx:eventLogLevel "notice";
   olx:hasParameter :timestamp-21, :application-31;
   olx:wasLoggedBy :source-21.
 
@@ -554,7 +554,7 @@
 
 :event-25 rdf:type olx:Event;
   mls:implements "25/1/2022 -- 06:57:01 - <Notice> - Stats for ''eth0'':  pkts: 780375, drop: 0 (0.00%), invalid chksum: 0";
-  olx:eventSeverity "notice";
+  olx:eventLogLevel "notice";
   olx:hasParameter :timestamp-25;
   olx:wasLoggedBy :source-25.
 
@@ -609,7 +609,7 @@
 
 :event-28 rdf:type olx:Event;
   mls:implements '[Mon Jan 24 06:25:16.644970 2022] [mpm_prefork:notice] [pid 29640] AH00171: Graceful restart requested, doing restart';
-  olx:eventSeverity "notice";
+  olx:eventLogLevel "notice";
   olx:hasParameter :timestamp-28, :system-process-28;
   olx:wasLoggedBy :source-28.
 
@@ -813,7 +813,7 @@
   olx:networkAddressPort 36864.
 
 :username-39 rdf:type olx:UserName;
-  olx:credentialValue "twhite".
+  olx:userCredentialValue "twhite".
 
 :user-39 rdf:type olx:User;
   olx:hasCredential :username-39.
@@ -878,7 +878,7 @@
 
 :source-43 rdf:type olx:Source;
   olx:sourceName "syslog";
-  olx:sourceDevice "morris_mail".
+  olx:sourceDevice ":morris-mail".
 
 :application-43 rdf:type olx:Application;
   olx:applicationName "php7.0-cli";
@@ -927,7 +927,7 @@
 
 :event-45 rdf:type olx:Event;
   mls:implements '20/1/2022 -- 13:16:23 - <Info> - CPUs/cores online: 1';
-  olx:eventSeverity "info";
+  olx:eventLogLevel "info";
   olx:hasParameter :timestamp-45;
   olx:wasLoggedBy :source-45.
 
@@ -947,7 +947,7 @@
   olx:networkAddressPort 59814.
 
 :username-46 rdf:type olx:UserName;
-  olx:credentialValue "jhall".
+  olx:userCredentialValue "jhall".
 
 :user-46 rdf:type olx:User;
   olx:hasCredential :username-46.
@@ -976,7 +976,7 @@
   olx:networkAddressPort 37135.
 
 :username-47 rdf:type olx:UserName;
-  olx:credentialValue "ahayes".
+  olx:userCredentialValue "ahayes".
 
 :user-47 rdf:type olx:User;
   olx:hasCredential :username-47.
@@ -998,7 +998,7 @@
 
 :source-48 rdf:type olx:Source;
   olx:sourceName "syslog";
-  olx:sourceDevice "morris_mail".
+  olx:sourceDevice ":morris-mail".
 
 :application-48-1 rdf:type olx:Application;
   olx:applicationName "acpi".
