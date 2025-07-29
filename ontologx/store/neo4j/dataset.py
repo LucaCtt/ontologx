@@ -193,6 +193,13 @@ class Dataset:
             graph (GraphDocument): The event graph to add.
 
         """
+        # Ensure all nodes have a unique ID and a URI property.
+        # Do this before normalizing the graph, so the un-normalized graph
+        # has consistent IDs and URIs if it is used somewhere else.
+        for node in graph.nodes:
+            node.id = f"{self.__config.out_uri}/{uuid.uuid4()}"
+            node.properties["uri"] = node.id
+
         norm_graph = normalize_input_graph(graph)
 
         # Check if result dataset exists, otherwise create it
@@ -213,14 +220,12 @@ class Dataset:
             )
 
         for node in norm_graph.nodes:
-            node.id = f"{self.__config.out_uri}/{uuid.uuid4()}"
-            node.properties["uri"] = node.id
             node.properties["n4sch__runName"] = self.__config.run_name
 
             if node.type == "olx__Event":
                 # This will raise an exception if the LLM produces an Event node without a message property.
                 text = _compose_embeddings_text(
-                    node.properties["mls__implements"],
+                    norm_graph.source.page_content,
                     norm_graph.source.metadata,
                 )
                 node.properties["n4sch__embedding"] = self.__embeddings.embed_query(text)
@@ -293,7 +298,7 @@ class Dataset:
             # Tests will have neither. Generated events will have both.
         )
 
-        return [self.__get_subgraph_from_node(doc.metadata["uri"]) for doc in relevant_docs]
+        return [normalize_output_graph(self.__get_subgraph_from_node(doc.metadata["uri"])) for doc in relevant_docs]
 
     def __get_subgraph_from_node(self, node_uri: str, props_to_remove: list[str] | None = None) -> GraphDocument:
         """Get the subgraph of a node in the store.
