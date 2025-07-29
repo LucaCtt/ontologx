@@ -11,12 +11,24 @@ from ontologx.store import GraphDocument
 
 def _stringify_graph(graph: GraphDocument) -> str:
     """Convert a GraphDocument to a string representation."""
-    return f"""{"nodes": {[f"id: {node.id}, type: {node.type}, properties: {node.properties}" for node in graph.nodes]},
-        "relationships": {[f"source_id: {rel.source.id}, \
-                target_id: {rel.target.id}, \
-                type: {rel.type}" for rel in graph.relationships]},
-    }
-    """
+    nodes = [
+        {
+            "id": node.id,
+            "type": node.type,
+            "properties": [{"type": key, "value": value} for key, value in node.properties.items() if key != "uri"],
+        }
+        for node in graph.nodes
+    ]
+
+    relationships = [
+        {
+            "source_id": rel.source.id,
+            "target_id": rel.target.id,
+            "type": rel.type,
+        }
+        for rel in graph.relationships
+    ]
+    return str({"nodes": nodes, "relationships": relationships})
 
 
 class GEvalGraphAlignmentMetrics:
