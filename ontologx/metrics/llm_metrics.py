@@ -15,7 +15,7 @@ def _stringify_graph(graph: GraphDocument) -> str:
         {
             "id": node.id,
             "type": node.type,
-            "properties": [{"type": key, "value": value} for key, value in node.properties.items() if key != "uri"],
+            "properties": [{"type": key, "value": value} for key, value in node.properties.items()],
         }
         for node in graph.nodes
     ]

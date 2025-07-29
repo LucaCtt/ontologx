@@ -40,11 +40,11 @@ class Dataset:
             url=self.__config.neo4j_url,
             index_name="eventsVectorIndex",
             node_label="mlsx__DatasetRow",  # The embedding is not stored on the Event itself to keep it clean
-            embedding_node_property="n4sch__embedding",
+            embedding_node_property="embedding",
             retrieval_query="""
             RETURN node.mlsx__eventMessage AS text,
             score,
-            {uri: node.uri, n4sch__runName: node.n4sch__runName, _embedding_: node.n4sch__embedding} AS metadata
+            {uri: node.uri, n4sch__runName: node.n4sch__runName, _embedding_: node.embedding} AS metadata
             """,
         )
 
@@ -86,7 +86,7 @@ class Dataset:
         to_populate = self.__graph_store.query(
             """
             MATCH (d:mlsx__ExampleDataset)-[:mlsx__hasPart]->(r:mlsx__DatasetRow)
-            WHERE r.n4sch__embedding IS NULL
+            WHERE r.embedding IS NULL
             OPTIONAL MATCH (r)-[:mlsx__hasContext]->(s:olx__Source)
             SET r.n4sch__runName = ''
             RETURN elementId(r) AS id, r.mlsx__eventMessage AS eventMessage, s.olx__sourceName AS sourceName,
@@ -110,7 +110,7 @@ class Dataset:
             UNWIND $data AS row
             MATCH (r:mlsx__DatasetRow)
             WHERE elementId(r) = row.id
-            CALL db.create.setNodeVectorProperty(r, 'n4sch__embedding', row.embedding)
+            CALL db.create.setNodeVectorProperty(r, 'embedding', row.embedding)
             """,
             params={
                 "data": [
@@ -138,9 +138,9 @@ class Dataset:
         self.__graph_store.query(
             """
             MATCH (d:mlsx__TestDataset)-[:mlsx__hasPart]->(r:mlsx__DatasetRow)-[:mlsx__hasLabel]->(e:olx__Event)
-            WHERE r.n4sch__embedding IS NULL
+            WHERE r.embedding IS NULL
             SET r.n4sch__runName = ''
-            SET r.n4sch__embedding = ''
+            SET r.embedding = ''
             """,
             params={
                 "run_name": self.__config.run_name,
@@ -189,7 +189,6 @@ class Dataset:
         # has consistent IDs and URIs if it is used somewhere else.
         for node in graph.nodes:
             node.id = f"{self.__config.out_uri}/{uuid.uuid4()}"
-            node.properties["uri"] = node.id
 
         norm_graph = normalize_input_graph(graph)
 
@@ -222,7 +221,7 @@ class Dataset:
         dataset_row_properties = {
             "eventMessage": graph.source.page_content,
             "n4sch__runName": self.__config.run_name,
-            "n4sch__embedding": self.__embeddings.embed_query(text),
+            "embedding": self.__embeddings.embed_query(text),
             "uri": f"{self.__config.out_uri}/{uuid.uuid4()}",
         }
         self.__graph_store.query(
@@ -301,7 +300,7 @@ class Dataset:
             lambda_mult=lambda_mult,
             filter={
                 "$or": run_name_filter,
-                "n4sch__embedding": {"$ne": ""},
+                "embedding": {"$ne": ""},
             },
             # Examples will have no run name but an embedding.
             # Tests will have neither. Generated events will have both.

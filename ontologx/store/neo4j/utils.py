@@ -21,18 +21,23 @@ def normalize_output_graph(graph: GraphDocument) -> GraphDocument:
         # Convert namespace separator for node
         node.type = node.type.replace("__", ":")
 
-        # Convert namespace separator for properties, rename "n4sch" to "schema",
+        # Convert namespace separator for properties, rename "n4sch" to "rdfs",
         for key in list(node.properties.keys()):
-            new_key = key.replace("n4sch", "schema").replace("__", ":")
+            # Remove internal-only properties
+            if key in ["uri", "embedding", "n4sch__runName"]:
+                node.properties.pop(key)
+                continue
+
+            new_key = key.replace("n4sch", "rdfs").replace("__", ":")
             node.properties[new_key] = node.properties.pop(key)
 
     for relationship in norm.relationships:
         # Convert namespace separator for relationship type
         relationship.type = relationship.type.replace("__", ":")
 
-        # Convert namespace separator for properties, rename "n4sch" to "schema"
+        # Convert namespace separator for properties, rename "n4sch" to "rdfs"
         for key in list(relationship.properties.keys()):
-            new_key = key.replace("n4sch", "schema").replace("__", ":")
+            new_key = key.replace("n4sch", "rdfs").replace("__", ":")
             relationship.properties[new_key] = relationship.properties.pop(key)
 
     return norm
@@ -55,18 +60,21 @@ def normalize_input_graph(graph: GraphDocument) -> GraphDocument:
         # Copy node without properties for normalization
         node.type = node.type.replace(":", "__")
 
-        # Convert namespace separator for properties, rename "schema" to "n4sch"
+        # Insert uri property
+        node.properties["uri"] = node.id
+
+        # Convert namespace separator for properties, rename "rdfs" to "n4sch"
         for key in list(node.properties.keys()):
-            new_key = key.replace("schema", "n4sch").replace(":", "__")
+            new_key = key.replace("rdfs", "n4sch").replace(":", "__")
             node.properties[new_key] = node.properties.pop(key)
 
     for relationship in norm.relationships:
         # Convert namespace separator for relationship type
         relationship.type = relationship.type.replace(":", "__")
 
-        # Convert namespace separator for properties, rename "schema" to "n4sch"
+        # Convert namespace separator for properties, rename "rdfs" to "n4sch"
         for key in list(relationship.properties.keys()):
-            new_key = key.replace("schema", "n4sch").replace(":", "__")
+            new_key = key.replace("rdfs", "n4sch").replace(":", "__")
             relationship.properties[new_key] = relationship.properties.pop(key)
 
     return norm

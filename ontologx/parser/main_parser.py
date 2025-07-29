@@ -25,9 +25,7 @@ def _example_message_group(event_graph: GraphDocument) -> list[BaseMessage]:
         {
             "id": node.id,
             "type": node.type,
-            "properties": [
-                {"type": key, "value": value} for key, value in node.properties.items() if key != "uri"
-            ],  # Exclude 'uri' from properties as it is manually assigned later, no need for the LLM to know about it
+            "properties": [{"type": key, "value": value} for key, value in node.properties.items()],
         }
         for node in event_graph.nodes
     ]

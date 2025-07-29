@@ -33,9 +33,6 @@ def _convert_to_rdflib(data_graph: GraphDocument, ontology_graph: rdflib.Graph) 
         res.add((node_uri, rdflib.RDF.type, _expand_namespace_prefix(node.type, namespaces)))
 
         for prop, value in node.properties.items():
-            if prop == "uri":
-                continue
-
             res.add((node_uri, _expand_namespace_prefix(prop, namespaces), rdflib.Literal(value)))
 
     for rel in data_graph.relationships:
