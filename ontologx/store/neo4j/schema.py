@@ -41,7 +41,7 @@ class Schema:
         # Check if measure already exists
         measure_node = self.__graph_store.query(
             """
-            MATCH (m:mls__EvaluationMeasure {n4sch__name: $name})
+            MATCH (m:mlsx__EvaluationMeasure {n4sch__name: $name})
             RETURN m
             LIMIT 1
             """,
@@ -51,7 +51,7 @@ class Schema:
             # Create the measure node if it does not exist
             self.__graph_store.query(
                 """
-                CREATE (m:mls__EvaluationMeasure {n4sch__name: $name, uri: $uri})
+                CREATE (m:mlsx__EvaluationMeasure {n4sch__name: $name, uri: $uri})
                 """,
                 params={"name": measure_camel, "uri": self.__gen_uri()},
             )
@@ -59,8 +59,8 @@ class Schema:
         # Create the evaluation node
         self.__graph_store.query(
             """
-            MATCH (r:mls__Run {n4sch__runName: $run_name}), (m:mls__EvaluationMeasure {n4sch__name: $name})
-            CREATE (r)-[:mls__hasOutput]->(e:mls__ModelEvaluation {mls__hasValue: $value})-[:mls__specifiedBy]->(m)
+            MATCH (r:mlsx__Run {n4sch__runName: $run_name}), (m:mlsx__EvaluationMeasure {n4sch__name: $name})
+            CREATE (r)-[:mlsx__hasOutput]->(e:mlsx__ModelEvaluation {mlsx__hasValue: $value})-[:mlsx__specifiedBy]->(m)
             """,
             params={
                 "name": measure_camel,
@@ -80,14 +80,14 @@ class Schema:
 
         """
         study = self.__graph_store.query(
-            "MATCH (s:mls__Study) RETURN s.uri as uri LIMIT 1",
+            "MATCH (s:mlsx__Study) RETURN s.uri as uri LIMIT 1",
         )
         if study:
             return study[0]["uri"]
 
         # Create the study node if it does not exist
         uri = self.__gen_uri()
-        self.__graph_store.query("CREATE (s:mls__Study {uri: $uri, n4sch__name: 'OntoLogX'})", params={"uri": uri})
+        self.__graph_store.query("CREATE (s:mlsx__Study {uri: $uri, n4sch__name: 'OntoLogX'})", params={"uri": uri})
 
         return uri
 
@@ -106,7 +106,7 @@ class Schema:
         # Check if there is an experiment node with the same name under the given study
         exp = self.__graph_store.query(
             """
-            MATCH (e:mls__Experiment)<-[:mls__hasPart]-(s:mls__Study {uri: $study_uri})
+            MATCH (e:mlsx__Experiment)<-[:mlsx__hasPart]-(s:mlsx__Study {uri: $study_uri})
             WHERE e.n4sch__name = $name
             RETURN e.uri as uri
             LIMIT 1
@@ -123,8 +123,8 @@ class Schema:
         uri = self.__gen_uri()
         self.__graph_store.query(
             """
-            MATCH (s:mls__Study {uri: $study_uri})
-            CREATE (e:mls__Experiment $details)<-[:mls__hasPart]-(s)
+            MATCH (s:mlsx__Study {uri: $study_uri})
+            CREATE (e:mlsx__Experiment $details)<-[:mlsx__hasPart]-(s)
             """,
             params={
                 "details": {
@@ -152,8 +152,8 @@ class Schema:
         # Create run
         self.__graph_store.query(
             """
-            MATCH (e:mls__Experiment {uri: $experiment_uri})
-            CREATE (r:mls__Run $details)<-[:mls__hasPart]-(e)
+            MATCH (e:mlsx__Experiment {uri: $experiment_uri})
+            CREATE (r:mlsx__Run $details)<-[:mlsx__hasPart]-(e)
             """,
             params={
                 "details": {"uri": run_uri, "n4sch__runName": self.__config.run_name},
@@ -167,7 +167,7 @@ class Schema:
 
             param = self.__graph_store.query(
                 """
-                MATCH (h:mls__HyperParameter {n4sch__name: $name})
+                MATCH (h:mlsx__HyperParameter {n4sch__name: $name})
                 RETURN h
                 LIMIT 1
                 """,
@@ -176,15 +176,15 @@ class Schema:
 
             if not param:
                 self.__graph_store.query(
-                    "CREATE (h:mls__HyperParameter {n4sch__name: $name, uri: $uri})",
+                    "CREATE (h:mlsx__HyperParameter {n4sch__name: $name, uri: $uri})",
                     params={"name": name_camel, "uri": self.__gen_uri()},
                 )
 
             self.__graph_store.query(
                 """
-                MATCH (r:mls__Run {uri: $run_uri}), (h:mls__HyperParameter {n4sch__name: $name})
-                CREATE (r)-[:mls__hasInput]->(s:mls__HyperParameterSetting {mls__hasValue: $value})
-                -[:mls__specifiedBy]->(h)
+                MATCH (r:mlsx__Run {uri: $run_uri}), (h:mlsx__HyperParameter {n4sch__name: $name})
+                CREATE (r)-[:mlsx__hasInput]->(s:mlsx__HyperParameterSetting {mlsx__hasValue: $value})
+                -[:mlsx__specifiedBy]->(h)
                 """,
                 params={"name": name_camel, "value": value, "run_uri": run_uri},
             )

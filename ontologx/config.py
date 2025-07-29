@@ -164,12 +164,6 @@ class Config:
     ontology_uri = _get_uri_from_ttl(ontology_path)
     """The URI of the log ontology."""
 
-    tests_uri = _get_uri_from_ttl(tests_path)
-    """The URI of the tests."""
-
-    examples_uri = _get_uri_from_ttl(examples_path)
-    """The URI of the examples."""
-
     run_name = str(uuid.uuid4())
     """ The name of the run. A run is a single execution of the ontologx pipeline."""
 

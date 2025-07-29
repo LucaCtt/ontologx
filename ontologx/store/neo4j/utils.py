@@ -21,11 +21,6 @@ def normalize_output_graph(graph: GraphDocument) -> GraphDocument:
         # Convert namespace separator for node
         node.type = node.type.replace("__", ":")
 
-        # Remove internal-onlt property
-        node.properties.pop("n4sch__embedding", None)
-        node.properties.pop("n4sch__runName", None)
-        node.properties.pop("mls__implements", None)
-
         # Convert namespace separator for properties, rename "n4sch" to "schema",
         for key in list(node.properties.keys()):
             new_key = key.replace("n4sch", "schema").replace("__", ":")
