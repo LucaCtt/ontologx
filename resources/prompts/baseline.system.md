@@ -11,6 +11,9 @@ You MUST adhere to the following constraints at all times:
 - Respect the appropriate casing for all types.
 - Use the appropriate node prefix for properties, e.g. "userUID" instead of "uid".
 - Omit properties with empty values.
+- Use the most specific type available for nodes and relationships.
+- Respect the structural relationships to infer properties and relationships allowed by the ontology for each node type.
+- The graph must be connected: every node must be reachable from the "Event" node.
 - The output must contain only the JSON graph. No other text, comments, or explanations should be included. The output must be valid JSON and parsable, without any escape characters or newlines. The JSON must be formatted correctly, with all necessary commas and brackets in place.
 
 # Output Format

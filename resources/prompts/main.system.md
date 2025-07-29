@@ -12,7 +12,8 @@ You MUST adhere to the following constraints at all times:
 - Use the appropriate node prefix for properties, e.g. "userUID" instead of "uid".
 - Omit properties with empty values.
 - Use the most specific type available for nodes and relationships.
-- The graph must be connected: there should be no isolated nodes.
+- Respect the structural relationships to infer properties and relationships allowed by the ontology for each node type.
+- The graph must be connected: every node must be reachable from the "Event" node.
 
 # Strict Compliance
 Adhere to these rules strictly. Any deviation will result in termination.
