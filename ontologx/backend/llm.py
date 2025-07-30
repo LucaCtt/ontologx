@@ -2,10 +2,10 @@
 
 import os
 
-from langchain_core.language_models import BaseChatModel
+from langchain_core.language_models import BaseChatModel as ParserModel
 
 
-def hf_llm(model: str, temperature: float) -> BaseChatModel:
+def hf_llm(model: str, temperature: float) -> ParserModel:
     """Create a Hugging Face LLM instance using the specified model and temperature."""
     from langchain_huggingface import ChatHuggingFace, HuggingFacePipeline  # type: ignore[import]
 
@@ -20,14 +20,14 @@ def hf_llm(model: str, temperature: float) -> BaseChatModel:
     return ChatHuggingFace(llm=parser_pipeline)
 
 
-def ollama_llm(model: str, temperature: float, url: str) -> BaseChatModel:
+def ollama_llm(model: str, temperature: float, url: str) -> ParserModel:
     """Create an Ollama LLM instance using the specified model and URL."""
     from langchain_ollama.chat_models import ChatOllama  # type: ignore[import]
 
     return ChatOllama(model=model, base_url=url, temperature=temperature)
 
 
-def vllm_llm(model: str, temperature: float, url: str) -> BaseChatModel:
+def vllm_llm(model: str, temperature: float, url: str) -> ParserModel:
     """Create a VLLM instance using the specified model and URL."""
     from langchain_openai import ChatOpenAI  # type: ignore[import]
 
@@ -38,7 +38,7 @@ def vllm_llm(model: str, temperature: float, url: str) -> BaseChatModel:
     )
 
 
-def bedrock_llm(model: str, temperature: float) -> BaseChatModel:
+def bedrock_llm(model: str, temperature: float) -> ParserModel:
     """Create a Bedrock LLM instance using temporary credentials from AWS STS."""
     import boto3  # type: ignore[import]
     from botocore.config import Config  # type: ignore[import]
@@ -81,7 +81,7 @@ class LLMFactory:
         model: str,
         temperature: float,
         url: str = "",
-    ) -> BaseChatModel:
+    ) -> ParserModel:
         """Create an LLM instance based on the specified backend type.
 
         Args:
@@ -91,7 +91,7 @@ class LLMFactory:
             url (str): The URL for the backend.
 
         Returns:
-            BaseChatModel: An instance of the specified backend type.
+            ParserModel: An instance of the specified backend type.
 
         Raises:
             ValueError: If the specified backend type is not supported.

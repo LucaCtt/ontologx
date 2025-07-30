@@ -1,5 +1,6 @@
 """Module for managing event graphs in a Neo4j store."""
 
+import functools
 import uuid
 from pathlib import Path
 
@@ -8,9 +9,9 @@ from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_neo4j import Neo4jGraph, Neo4jVector
 
-from ontologx.config import Config
 from ontologx.store import GraphDocument, Node, Relationship
-from ontologx.store.neo4j.utils import normalize_input_graph, normalize_output_graph
+from ontologx.store.config import StoreConfig
+from ontologx.store.neo4j.utils import get_uri_from_ttl, normalize_input_graph, normalize_output_graph
 
 
 def _compose_embeddings_text(event: str, context: dict[str, str]) -> str:
@@ -28,16 +29,16 @@ class Dataset:
     Includes the loading of the examples and tests, and the search for similar events.
     """
 
-    def __init__(self, config: Config, graph_store: Neo4jGraph, embeddings: Embeddings) -> None:
-        self.__config = config
+    def __init__(self, graph_store: Neo4jGraph, embeddings: Embeddings, config: StoreConfig) -> None:
         self.__graph_store = graph_store
         self.__embeddings = embeddings
+        self.__config = config
 
         self.__vector_index = Neo4jVector(
             embedding=self.__embeddings,
-            username=self.__config.neo4j_username,
-            password=self.__config.neo4j_password,
-            url=self.__config.neo4j_url,
+            username=config.auth.username,
+            password=config.auth.password,
+            url=config.auth.url,
             index_name="eventsVectorIndex",
             node_label="mlsx__DatasetRow",  # The embedding is not stored on the Event itself to keep it clean
             embedding_node_property="embedding",
@@ -182,7 +183,7 @@ class Dataset:
         # Do this before normalizing the graph, so the un-normalized graph
         # has consistent IDs and URIs if it is used somewhere else.
         for node in graph.nodes:
-            node.id = f"{self.__config.out_uri}/{uuid.uuid4()}"
+            node.id = f"{self.__config.run_uri}/{uuid.uuid4()}"
 
         norm_graph = normalize_input_graph(graph)
 
@@ -200,14 +201,14 @@ class Dataset:
                 MATCH (r:mlsx__Run {uri: $run_uri})
                 CREATE (d:mlsx__OutputDataset {uri: $out_dataset_uri})<-[:mlsx__hasOutput]-(r)
                 """,
-                params={"run_uri": self.__config.run_uri, "out_dataset_uri": self.__config.out_uri + "/out-dataset"},
+                params={"run_uri": self.__config.run_uri, "out_dataset_uri": self.__config.run_uri + "/out-dataset"},
             )
 
         event_node = next(node for node in norm_graph.nodes if node.type == "olx__Event")
-        event_node.id = f"{self.__config.out_uri}/{uuid.uuid4()}"
+        event_node.id = f"{self.__config.run_uri}/{uuid.uuid4()}"
         event_node.properties["uri"] = event_node.id
         for node in norm_graph.nodes:
-            node.id = f"{self.__config.out_uri}/{uuid.uuid4()}"
+            node.id = f"{self.__config.run_uri}/{uuid.uuid4()}"
             node.properties["uri"] = node.id
 
         text = _compose_embeddings_text(
@@ -218,7 +219,7 @@ class Dataset:
         dataset_row_properties = {
             "eventMessage": graph.source.page_content,
             "embedding": self.__embeddings.embed_query(text),
-            "uri": f"{self.__config.out_uri}/{uuid.uuid4()}",
+            "uri": f"{self.__config.run_uri}/{uuid.uuid4()}",
         }
         self.__graph_store.query(
             """
@@ -230,7 +231,7 @@ class Dataset:
             params={
                 "event_props": event_node.properties,
                 "row_props": dataset_row_properties,
-                "out_dataset_uri": self.__config.out_uri + "/out-dataset",
+                "out_dataset_uri": self.__config.run_uri + "/out-dataset",
             },
         )
 
@@ -283,9 +284,9 @@ class Dataset:
         # Examples will have no run name but an embedding,
         # Tests will have neither. Generated events will have both.
         uri_filter = (
-            [{"uri": {"$like": self.__config.examples_uri}}]
+            [{"uri": {"$like": self.__examples_uri}}]
             if not self.__config.generated_graphs_retrieval
-            else [{"uri": {"$like": self.__config.examples_uri}}, {"uri": {"$like": self.__config.out_uri}}]
+            else [{"uri": {"$like": self.__examples_uri}}, {"uri": {"$like": self.__config.run_uri}}]
         )
 
         query = _compose_embeddings_text(event, context or {})
@@ -400,3 +401,8 @@ class Dataset:
             relationships=relationships,
             source=Document(page_content=dataset_row_node["properties"]["mlsx__eventMessage"], metadata=context),
         )
+
+    @functools.cached_property
+    def __examples_uri(self) -> str:
+        """Return the examples URI from the configuration."""
+        return get_uri_from_ttl(self.__config.examples_path)

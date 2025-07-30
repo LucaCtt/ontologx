@@ -3,8 +3,7 @@
 from langchain_core.embeddings import Embeddings
 from langchain_neo4j import Neo4jGraph
 
-from ontologx.config import Config
-from ontologx.store import GraphDocument, Store
+from ontologx.store import GraphDocument, Store, StoreConfig
 from ontologx.store.neo4j.dataset import Dataset
 from ontologx.store.neo4j.ontology import Ontology
 from ontologx.store.neo4j.schema import Schema
@@ -13,17 +12,21 @@ from ontologx.store.neo4j.schema import Schema
 class Neo4jStore(Store):
     """A store implementation for Neo4j graph database."""
 
-    def __init__(self, config: Config, embeddings: Embeddings) -> None:
-        self.__embeddings = embeddings
+    def __init__(
+        self,
+        embeddings: Embeddings,
+        config: StoreConfig,
+    ) -> None:
+        super().__init__(embeddings, config)
         self.__graph_store = Neo4jGraph(
-            url=config.neo4j_url,
-            username=config.neo4j_username,
-            password=config.neo4j_password,
+            url=config.auth.url,
+            username=config.auth.username,
+            password=config.auth.password,
         )
 
-        self.__onto = Ontology(config, self.__graph_store)
-        self.__schema = Schema(config, self.__graph_store)
-        self.__dataset = Dataset(config, self.__graph_store, self.__embeddings)
+        self.__onto = Ontology(self.__graph_store, config.ontology_path)
+        self.__schema = Schema(self.__graph_store, config.study_uri, config.experiment_uri, config.run_uri)
+        self.__dataset = Dataset(self.__graph_store, self._embeddings, config)
 
     def initialize(self) -> None:
         """Initialize the Neo4j graph database by creating necessary nodes, relationships, constraints, and indexes."""
@@ -88,3 +91,7 @@ class Neo4jStore(Store):
     def add_evaluation_result(self, measure: str, evaluation: str | float) -> None:
         """Add an evaluation result to the schema."""
         self.__schema.add_evaluation_result(measure, evaluation)
+
+    def add_hyperparameter(self, name: str, value: str | float | bool) -> None:
+        """Add a hyperparameter to the schema."""
+        self.__schema.add_hyperparameter(name, value)

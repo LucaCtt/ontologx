@@ -1,13 +1,13 @@
 """Ontology store for managing and querying ontologies in a Neo4j database."""
 
+import functools
 from pathlib import Path
 
 from langchain_core.documents import Document
 from langchain_neo4j import Neo4jGraph
 
-from ontologx.config import Config
 from ontologx.store import GraphDocument, Node, Relationship
-from ontologx.store.neo4j.utils import normalize_output_graph
+from ontologx.store.neo4j.utils import get_uri_from_ttl, normalize_output_graph
 
 _TIME_ONTOLOGY_URI = "http://www.w3.org/2006/time#"
 _MLSX_ONTOLOGY_URI = "https://cyberseclab.unibs.it/mlsx/dict#"
@@ -22,15 +22,15 @@ _ONTOLOGY_PARAMS = {
 class Ontology:
     """Ontology store.
 
-    Initializes the ontology on the store and provides access to the ontology.
+    Initializes the olx ontology on the store and provides access to the ontology.
     """
 
-    def __init__(self, config: Config, graph_store: Neo4jGraph) -> None:
-        self.__config = config
+    def __init__(self, graph_store: Neo4jGraph, ontology_path: str) -> None:
         self.__graph_store = graph_store
+        self.__ontology_path = ontology_path
 
     def initialize(self) -> None:
-        """Import the log ontology (and dependencies) into the store."""
+        """Import the olx ontology (and dependencies) into the store."""
         # Check if the neosemantics configuration is present,
         # if it is, assume the ontology is already loaded.
         result = self.__graph_store.query("MATCH (n:_GraphConfig) RETURN COUNT(n) AS count")
@@ -44,14 +44,14 @@ class Ontology:
         )
 
         # Set the namespaces
-        self.__graph_store.query("CALL n10s.nsprefixes.add('olx', $uri)", params={"uri": self.__config.ontology_uri})
+        self.__graph_store.query("CALL n10s.nsprefixes.add('olx', $uri)", params={"uri": self.__ontology_uri})
         self.__graph_store.query("CALL n10s.nsprefixes.add('time', $uri )", params={"uri": _TIME_ONTOLOGY_URI})
         self.__graph_store.query("CALL n10s.nsprefixes.add('mlsx', $uri)", params={"uri": _MLSX_ONTOLOGY_URI})
 
         # Load the ontologies
         self.__graph_store.query(
             "CALL n10s.onto.import.inline($ontology, 'Turtle')",
-            params={"ontology": Path(self.__config.ontology_path).read_text()},
+            params={"ontology": Path(self.__ontology_path).read_text()},
         )
         self.__graph_store.query("CALL n10s.onto.import.fetch($url, 'Turtle')", params={"url": _TIME_ONTOLOGY_URI})
 
@@ -91,7 +91,7 @@ class Ontology:
                     ) WHERE pair IS NOT NULL]
                ) AS properties
             """,
-            params={"log_ontology_uri": self.__config.ontology_uri},
+            params={"log_ontology_uri": self.__ontology_uri},
         )
         nodes_dict = {
             row["uri"]: Node(id=row["uri"], type=row["class"], properties=row["properties"]) for row in nodes_with_props
@@ -129,7 +129,12 @@ class Ontology:
             relationships=relationships,
             source=Document(
                 page_content="Ontology graph",
-                metadata={"ontology_uri": self.__config.ontology_uri},
+                metadata={"ontology_uri": self.__ontology_uri},
             ),
         )
         return normalize_output_graph(result)
+
+    @functools.cached_property
+    def __ontology_uri(self) -> str:
+        """Return the ontology URI from the ontology file."""
+        return get_uri_from_ttl(self.__ontology_path)

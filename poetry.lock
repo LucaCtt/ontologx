@@ -564,14 +564,14 @@ typing-inspect = ">=0.4.0,<1"
 
 [[package]]
 name = "deepeval"
-version = "3.3.0"
+version = "3.3.3"
 description = "The LLM Evaluation Framework"
 optional = false
 python-versions = "<4.0,>=3.9"
 groups = ["main"]
 files = [
-    {file = "deepeval-3.3.0-py3-none-any.whl", hash = "sha256:fd3ad7608c58f3ca1f54876bd4ee128ebb53c254bbee24ffe6974c8486894dc2"},
-    {file = "deepeval-3.3.0.tar.gz", hash = "sha256:ec7ef2cdef2d160f839e9fc04c2f30bc99f9411c76f8990d75402d818251a9a3"},
+    {file = "deepeval-3.3.3-py3-none-any.whl", hash = "sha256:75060f679a7dd2f50daf4a3e7795ae429403414bac266671caef527c6efb336e"},
+    {file = "deepeval-3.3.3.tar.gz", hash = "sha256:baffeedac7365271853073742f9e54f7a01f3262cb1b486fcdfbdaf7547fe81e"},
 ]
 
 [package.dependencies]
@@ -595,7 +595,7 @@ pytest-repeat = "*"
 pytest-rerunfailures = ">=12.0,<13.0"
 pytest-xdist = "*"
 requests = ">=2.31.0,<3.0.0"
-rich = ">=13.6.0,<14.0.0"
+rich = ">=13.6.0,<15.0.0"
 sentry-sdk = "*"
 setuptools = "*"
 tabulate = ">=0.9.0,<0.10.0"
@@ -3623,14 +3623,14 @@ requests = ">=2.0.1,<3.0.0"
 
 [[package]]
 name = "rich"
-version = "13.9.4"
+version = "14.1.0"
 description = "Render rich text, tables, progress bars, syntax highlighting, markdown and more to the terminal"
 optional = false
 python-versions = ">=3.8.0"
 groups = ["main"]
 files = [
-    {file = "rich-13.9.4-py3-none-any.whl", hash = "sha256:6049d5e6ec054bf2779ab3358186963bac2ea89175919d699e378b99738c2a90"},
-    {file = "rich-13.9.4.tar.gz", hash = "sha256:439594978a49a09530cff7ebc4b5c7103ef57baf48d5ea3184f21d9a2befa098"},
+    {file = "rich-14.1.0-py3-none-any.whl", hash = "sha256:536f5f1785986d6dbdea3c75205c473f970777b4a0d6c6dd1b696aa05a3fa04f"},
+    {file = "rich-14.1.0.tar.gz", hash = "sha256:e497a48b844b0320d45007cdebfeaeed8db2a4f4bcf49f15e455cfc4af11eaa8"},
 ]
 
 [package.dependencies]
@@ -4881,4 +4881,4 @@ cffi = ["cffi (>=1.11)"]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.13,<4.0"
-content-hash = "ed8a54cb0d87d722b405005372fdf492f8a514bc29658ec12a4b8471fb7455b4"
+content-hash = "6a56c03d322520851ecabffda46001f05c6adb2c4e7cbb901da652e42d0abdf0"

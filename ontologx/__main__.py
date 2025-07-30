@@ -5,20 +5,11 @@ the reading of the logs, and the construction of the knowledge graph.
 """
 
 import logging
-import time
 
-import typer
 from rich.logging import RichHandler
-from rich.progress import track
 
-from ontologx.backend import EmbeddingsFactory, LLMFactory, TestsFactory
 from ontologx.config import Config
-from ontologx.metrics import MetricsEvaluator
-from ontologx.parser import ParserFactory
-from ontologx.store import GraphDocument
-from ontologx.store.neo4j import Neo4jStore
-
-config = Config()
+from ontologx.run_handler import RunHandler
 
 # Setup logging
 logging.basicConfig(
@@ -35,132 +26,25 @@ logging.basicConfig(
 )
 logger = logging.getLogger("rich")
 logger.setLevel(logging.DEBUG)
-
 # Silence useless logs from Neo4j
 logging.getLogger("neo4j").setLevel(logging.ERROR)
 
-# Load the embeddings model
-embeddings = EmbeddingsFactory.create(
-    backend=config.embeddings_backend,
-    model=config.embeddings_model,
-    url=config.embeddings_backend_url,
-)
-
-# Load the llm
-llm = LLMFactory.create(
-    backend=config.llm_backend,
-    model=config.llm_model,
-    temperature=config.parser_temperature,
-    url=config.llm_backend_url,
-)
-
-# Load the tests evaluator
-tests_evaluator = TestsFactory.create(
-    backend=config.tests_backend,
-    model=config.tests_model,
-    url=config.tests_backend_url,
-)
-
-# Create the vector store
-store = Neo4jStore(config=config, embeddings=embeddings)
-
-app = typer.Typer(pretty_exceptions_show_locals=False)
-
-
-@app.command()
-def clear() -> None:
-    """Clear the store."""
-    store.clear()
-    logger.info("Store cleared.")
-
-
-@app.command()
-def run() -> None:
-    """Run the log knowledge graph builder."""
-    logger.info("Experiment: '%s'", config.experiment_name)
-    logger.info("Embeddings model: '%s'", config.embeddings_model)
-    logger.info("Language model: '%s'", config.llm_model)
-    logger.info("Parser type: '%s'", config.parser_type)
-
-    for run_index in range(config.n_runs):
-        config.new_run()
-        logger.info("----------------------")
-        logger.info("Run: '%s'", run_index + 1)
-
-        store.initialize()
-        logger.info("Store at '%s' initialized.", config.neo4j_url)
-
-        # Read the events at every run just in case,
-        # to avoid leaking data between runs
-        test_events = store.tests()
-        logger.info("Read %d tests from '%s'", len(test_events), config.tests_path)
-
-        parser = ParserFactory.create(
-            config.parser_type,
-            llm,
-            store,
-            config.prompt_build_graph,
-            examples_retrieval=config.examples_retrieval,
-            correction_steps=config.correction_steps,
-        )
-        logger.info("Parser '%s' created.", config.parser_type)
-
-        total_time = 0
-        total_success = 0
-        graphs_pred = []
-        graphs_true = []
-
-        for graph_true in track(test_events, description="Parsing events"):
-            event = graph_true.source.page_content
-            context = graph_true.source.metadata
-
-            logger.info("Parsing event: '%s'", event)
-
-            start_time = time.time()
-            graph_pred = parser.parse(event, context)
-            total_time += time.time() - start_time
-
-            if graph_pred is None:
-                logger.warning("Event '%s' could not be parsed.", event)
-                # Add an empty graph to the list of predicted graphs
-                # so the metrics will be calculated correctly
-                graphs_pred.append(GraphDocument(nodes=[], relationships=[], source=graph_true.source))
-            else:
-                logger.info("Event parsed successfully.")
-                graphs_pred.append(graph_pred)
-                total_success += 1
-
-                store.add_event_graph(graph_pred)
-
-            graphs_true.append(graph_true)
-
-        logger.info("-------------------------")
-        logger.info("Log parsing done.")
-
-        metrics = MetricsEvaluator(graphs_pred, graphs_true, tests_evaluator, config.ontology_path, config.shacl_path)
-
-        results = [
-            ("run_total_time", total_time),
-            ("mean_generation_time", total_time / len(test_events)),
-            ("generation_success_ratio", total_success / len(test_events)),
-            ("SHACL_violations_ratio", metrics.shacl_violations_ratio),
-            ("precision", metrics.precision),
-            ("recall", metrics.recall),
-            ("f1_score", metrics.f1),
-            ("entity_linking_accuracy", metrics.entity_linking_accuracy),
-            ("relationship_linking_accuracy", metrics.relationship_linking_accuracy),
-            ("g-eval_mean_all", metrics.geval_mean),
-            ("g-eval_mean_with_compliance", metrics.geval_mean_with_compliance),
-        ]
-
-        for name, value in results:
-            logger.info("%s: %f", name.replace("_", " ").capitalize(), value)
-            store.add_evaluation_result(name, value)
+config = Config()
 
 
 def main() -> None:
-    """Run the main entry point for OntoLogX."""
-    app()
+    """Run the log knowledge graph builder."""
+    logger.info("Experiment: '%s'", config.experiment_name)
+    logger.info("Embeddings model: '%s'", config.embeddings_model)
+    logger.info("Language model: '%s'", config.parser_model)
+    logger.info("Parser type: '%s'", config.parser_type)
+
+    run_handler = RunHandler(config)
+
+    for run_index in range(config.n_runs):
+        logger.info("----------------------")
+        logger.info("Run: '%s'", run_index + 1)
+        run_handler.start_new_run()
 
 
 if __name__ == "__main__":

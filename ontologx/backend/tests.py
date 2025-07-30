@@ -1,6 +1,6 @@
 """Factory for creating test instances based on backend type."""
 
-from deepeval.models.base_model import DeepEvalBaseLLM
+from deepeval.models.base_model import DeepEvalBaseLLM as TestsModel
 from langchain_core.language_models import BaseChatModel
 
 from ontologx.backend.llm import LLMFactory
@@ -15,7 +15,7 @@ class TestsFactory:
         backend: str,
         model: str,
         url: str = "",
-    ) -> DeepEvalBaseLLM:
+    ) -> TestsModel:
         """Create an instance of DeepEvalBaseLLM for testing purposes.
 
         Args:
@@ -28,7 +28,7 @@ class TestsFactory:
 
         """
 
-        class LangchainTestsBackend(DeepEvalBaseLLM):
+        class LangchainTestsBackend(TestsModel):
             def __init__(self) -> None:
                 self.model = self.load_model()
 

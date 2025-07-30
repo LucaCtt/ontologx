@@ -2,6 +2,8 @@
 
 from copy import deepcopy
 
+import rdflib
+
 from ontologx.store import GraphDocument
 
 
@@ -78,3 +80,22 @@ def normalize_input_graph(graph: GraphDocument) -> GraphDocument:
             relationship.properties[new_key] = relationship.properties.pop(key)
 
     return norm
+
+
+def get_uri_from_ttl(ttl_path: str) -> str:
+    """Get the URI from the TTL file.
+
+    Args:
+        ttl_path (str): The path to the TTL file.
+
+    Returns:
+        str: The URI of the TTL file.
+
+    """
+    graph = rdflib.Graph()
+    graph.parse(ttl_path)
+    uri = dict(graph.namespace_manager.namespaces()).get("")
+    if uri is None:
+        msg = f"Could not find URI in TTL file {ttl_path}"
+        raise ValueError(msg)
+    return uri.toPython()

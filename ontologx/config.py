@@ -6,56 +6,33 @@ in the root directory of the project.
 """
 
 import os
-import uuid
-from pathlib import Path
+from dataclasses import dataclass
 
 from dotenv import load_dotenv
-from rdflib import Graph
 
 load_dotenv()
 
-DEFAULT_LLM_MODELS = {
+_DEFAULT_LLM_MODELS = {
     "ollama": "llama3.2:3b",
     "huggingface": "meta-llama/Llama-3.2-3B-Instruct",
     "vllm": "meta-llama/Llama-3.2-3B-Instruct",
     "bedrock": "meta.llama3-2-3b-instruct-v1:0",
 }
 
-DEFAULT_EMBEDDINGS_MODELS = {
+_DEFAULT_EMBEDDINGS_MODELS = {
     "ollama": "milkey/gte",
     "huggingface": "Alibaba-NLP/gte-multilingual-base",
     "infinity": "Alibaba-NLP/gte-multilingual-base",
 }
 
-DEFAULT_TESTS_MODELS = {
-    "ollama": "llama3.2:3b",
-    "huggingface": "meta-llama/Llama-3.2-3B-Instruct",
-    "vllm": "meta-llama/Llama-3.2-3B-Instruct",
-    "bedrock": "meta.llama3-2-3b-instruct-v1:0",
-}
 
-
-def _get_uri_from_ttl(ttl_path: str) -> str:
-    """Get the URI from the TTL file.
-
-    Args:
-        ttl_path (str): The path to the TTL file.
-
-    Returns:
-        str: The URI of the TTL file.
-
-    """
-    graph = Graph()
-    graph.parse(ttl_path)
-    uri = dict(graph.namespace_manager.namespaces()).get("")
-    if uri is None:
-        msg = f"Could not find URI in TTL file {ttl_path}"
-        raise ValueError(msg)
-    return uri.toPython()
-
-
+@dataclass(frozen=True)
 class Config:
-    """Configuration class for setting up variables used in the log graph building."""
+    """Configuration class for setting up variables used in the log graph building.
+
+    This class is immutable and uses environment variables to set its attributes on instantiation.
+    Reassigning attributes after instantiation will raise an error.
+    """
 
     parser_type = os.getenv("PARSER_TYPE", "main")
     """The type of parser to use. Supported values are 'main' and 'baseline'"""
@@ -69,7 +46,7 @@ class Config:
     correction_steps = int(os.getenv("CORRECTION_STEPS", "3"))
     """The number of correction steps to take. Must be greater or equal to 0."""
 
-    experiment_name: str = os.getenv("EXPERIMENT_NAME", str(uuid.uuid4()))
+    experiment_name: str = os.getenv("EXPERIMENT_NAME", "default")
     """
     The name of the current experiment. Experiments are used to group runs together,
     the criterion for grouping is up to the user.
@@ -114,14 +91,35 @@ class Config:
     embeddings_backend_url = os.getenv("EMBEDDINGS_BACKEND_URL", "http://localhost:11434")
     """The URL of the embeddings backend. Used only if the backend is "ollama" or "infinity"."""
 
-    llm_backend = os.getenv("LLM_BACKEND", "ollama")
+    embeddings_model = os.getenv(
+        "EMBEDDINGS_MODEL",
+        _DEFAULT_EMBEDDINGS_MODELS[embeddings_backend],
+    )
     """
-    The backend to use for the llm.
+    The model used to embed logs. Must be a valid model for the backend used,
+    e.g. a model from the HuggingFace model hub if using the HuggingFace backend.
+    """
+
+    parser_backend = os.getenv("PARSER_BACKEND", "ollama")
+    """
+    The backend to use for the parser llm.
     Must be one of "ollama", "huggingface", "vllm", or "bedrock".
     """
 
-    llm_backend_url = os.getenv("LLM_BACKEND_URL", "http://localhost:11434")
-    """The URL of the llm backend. Used only if the backend is "ollama" or "vllm"."""
+    parser_backend_url = os.getenv("PARSER_BACKEND_URL", "http://localhost:11434")
+    """The URL of the parser llm backend. Used only if the backend is "ollama" or "vllm"."""
+
+    parser_model = os.getenv(
+        "LLM_MODEL",
+        _DEFAULT_LLM_MODELS[parser_backend],
+    )
+    """
+    The model used to parse logs. Must be a valid model for the backend used,
+    e.g. a model from the HuggingFace model hub if using the HuggingFace backend.
+    """
+
+    parser_temperature = float(os.getenv("PARSER_TEMPERATURE", "0.7"))
+    """The temperature of the LLM used to parse logs. Must be between 0 and 1."""
 
     tests_backend = os.getenv("TESTS_BACKEND", "bedrock")
     """The LLM backend to use for the tests. Must be one of the supported LLM backends."""
@@ -129,52 +127,17 @@ class Config:
     tests_backend_url = os.getenv("TESTS_BACKEND_URL", "http://localhost:11434")
     """The URL of the tests backend. Used only if the backend is "ollama" or "vllm"."""
 
-    embeddings_model = os.getenv(
-        "EMBEDDINGS_MODEL",
-        DEFAULT_EMBEDDINGS_MODELS[embeddings_backend],
-    )
-    """
-    The model used to embed logs. Must be a valid model for the backend used,
-    e.g. a model from the HuggingFace model hub if using the HuggingFace backend.
-    """
-
-    llm_model = os.getenv(
-        "LLM_MODEL",
-        DEFAULT_LLM_MODELS[llm_backend],
-    )
-    """
-    The model used to parse logs. Must be a valid model for the backend used,
-    e.g. a model from the HuggingFace model hub if using the HuggingFace backend.
-    """
     tests_model = os.getenv(
         "TESTS_MODEL",
-        DEFAULT_LLM_MODELS[tests_backend],
+        _DEFAULT_LLM_MODELS[tests_backend],
     )
     """
     The model used to evaluate the tests. Must be a valid model for the backend used,
     e.g. a model from the HuggingFace model hub if using the HuggingFace backend.
     """
 
-    parser_temperature = float(os.getenv("PARSER_TEMPERATURE", "0.7"))
-    """The temperature of the LLM used to parse logs. Must be between 0 and 1."""
-
-    prompt_build_graph = Path(prompt_path).read_text()
-    """The prompt used to build the graph."""
-
-    ontology_uri = _get_uri_from_ttl(ontology_path)
-    """The URI of the log ontology."""
-
-    examples_uri = _get_uri_from_ttl(examples_path)
-    """The URI of the examples log graphs."""
-
-    tests_uri = _get_uri_from_ttl(tests_path)
-    """The URI of the tests log graphs."""
-
-    run_uri = "https://cyberseclab.unibs.it/olx/run/" + str(uuid.uuid4())
-    """The URI of the run node."""
-
-    out_uri = run_uri + "/out"
-    """The URI of the output nodes."""
+    tests_temperature = float(os.getenv("TESTS_TEMPERATURE", "0.4"))
+    """The temperature of the LLM used to evaluate the tests. Must be between 0 and 1."""
 
     def __init__(self):
         if self.parser_temperature < 0 or self.parser_temperature > 1:
@@ -185,31 +148,11 @@ class Config:
             msg = "Self reflection steps must be greater than 0"
             raise ValueError(msg)
 
-        if self.llm_backend not in DEFAULT_LLM_MODELS:
-            msg = f"LLM backend must be one of {DEFAULT_LLM_MODELS.keys()}, but got '{self.llm_backend}'"
+        if self.parser_backend not in _DEFAULT_LLM_MODELS:
+            msg = f"LLM backend must be one of {_DEFAULT_LLM_MODELS.keys()}, but got '{self.parser_backend}'"
             raise ValueError(msg)
 
-        if self.embeddings_backend not in DEFAULT_EMBEDDINGS_MODELS:
-            msg = f"Embeddings backend must be one of {DEFAULT_EMBEDDINGS_MODELS.keys()}, \
+        if self.embeddings_backend not in _DEFAULT_EMBEDDINGS_MODELS:
+            msg = f"Embeddings backend must be one of {_DEFAULT_EMBEDDINGS_MODELS.keys()}, \
                 but got '{self.embeddings_backend}'"
             raise ValueError(msg)
-
-    def new_run(self) -> None:
-        """Create a new run by generating a new UUID and updating the run name."""
-        self.run_uri = "https://cyberseclab.unibs.it/olx/run/" + str(uuid.uuid4())
-        self.out_uri = self.run_uri + "/out"
-
-    def hyperparameters(self) -> dict[str, str | int | float]:
-        """Return the hyperparameters used in the experiment.
-
-        Returns:
-            dict[str, str]: The hyperparameters used in the experiment.
-
-        """
-        return {
-            "parser_type": self.parser_type,
-            "embeddings_model": self.embeddings_model,
-            "parser_model": self.llm_model,
-            "parser_temperature": self.parser_temperature,
-            "correction_steps": self.correction_steps,
-        }

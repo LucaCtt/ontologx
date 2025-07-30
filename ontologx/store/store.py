@@ -2,11 +2,26 @@
 
 from abc import ABC, abstractmethod
 
-from ontologx.store import GraphDocument
+from ontologx.backend.embeddings import Embeddings
+from ontologx.store import GraphDocument, StoreConfig
 
 
 class Store(ABC):
     """Abstract base class for a store module that manages the storage and retrieval of event graphs."""
+
+    def __init__(self, embeddings: Embeddings, config: StoreConfig) -> None:
+        """Initialize the store with the given configuration.
+
+        This method should not do any initialization of the store itself, but rather set up the configuration.
+        Expensive init operations should be done in the `initialize` method.
+
+        Args:
+            embeddings (Embeddings): Embeddings backend to use for the store.
+            config (StoreConfig): Configuration for the store module.
+
+        """
+        self._embeddings = embeddings
+        self._config = config
 
     @abstractmethod
     def initialize(self) -> None:
