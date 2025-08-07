@@ -1532,24 +1532,6 @@ tokenizers = ">=0.19.1"
 transformers = ">=4.39.0"
 
 [[package]]
-name = "langchain-neo4j"
-version = "0.5.0"
-description = "An integration package connecting Neo4j and LangChain"
-optional = false
-python-versions = "<3.14,>=3.9"
-groups = ["main"]
-files = [
-    {file = "langchain_neo4j-0.5.0-py3-none-any.whl", hash = "sha256:b202623222904ef38f3309fd62e51546290efcc34fc49ff5a5b34ace65979330"},
-    {file = "langchain_neo4j-0.5.0.tar.gz", hash = "sha256:9a2e153cdb79dfccf6208d520cfe00b59dbe21bff21fbabae0108a6b6fad948c"},
-]
-
-[package.dependencies]
-langchain = ">=0.3.7,<0.4.0"
-langchain-core = ">=0.3.39,<0.4.0"
-neo4j = ">=5.25.0,<6.0.0"
-neo4j-graphrag = ">=1.9.0,<2.0.0"
-
-[[package]]
 name = "langchain-ollama"
 version = "0.2.3"
 description = "An integration package connecting Ollama and LangChain"
