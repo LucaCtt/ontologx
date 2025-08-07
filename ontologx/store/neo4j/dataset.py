@@ -5,9 +5,15 @@ import uuid
 from pathlib import Path
 
 import neo4j
+import numpy as np
+from langchain_community.vectorstores.utils import maximal_marginal_relevance
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
-from langchain_neo4j import Neo4jGraph, Neo4jVector
+from neo4j import Driver
+from neo4j_graphrag.embeddings import Embedder
+from neo4j_graphrag.indexes import create_fulltext_index, create_vector_index, upsert_vectors
+from neo4j_graphrag.retrievers import HybridRetriever
+from neo4j_graphrag.types import RetrieverResultItem
 
 from ontologx.store import GraphDocument, Node, Relationship
 from ontologx.store.config import StoreConfig
@@ -23,68 +29,75 @@ def _compose_embeddings_text(event: str, context: dict[str, str]) -> str:
     return text
 
 
+class _LangchainEmbedder(Embedder):
+    """Custom embedder to use the LangChain Embeddings interface."""
+
+    def __init__(self, embeddings: Embeddings) -> None:
+        self._embeddings = embeddings
+
+    def embed_query(self, text: str) -> list[float]:
+        """Embed a single text string."""
+        return self._embeddings.embed_query(text)
+
+
 class Dataset:
     """The Dataset module is responsible for managing the event graphs in the store.
 
     Includes the loading of the examples and tests, and the search for similar events.
     """
 
-    def __init__(self, graph_store: Neo4jGraph, embeddings: Embeddings, config: StoreConfig) -> None:
-        self.__graph_store = graph_store
+    def __init__(self, driver: Driver, embeddings: Embeddings, config: StoreConfig) -> None:
+        self.__driver = driver
         self.__embeddings = embeddings
         self.__config = config
 
-        self.__vector_index = Neo4jVector(
-            embedding=self.__embeddings,
-            username=config.auth.username,
-            password=config.auth.password,
-            url=config.auth.url,
-            index_name="eventsVectorIndex",
-            node_label="mlsx__DatasetRow",  # The embedding is not stored on the Event itself to keep it clean
-            embedding_node_property="embedding",
-            retrieval_query="""
-            RETURN node.mlsx__eventMessage AS text,
-            score,
-            {uri: node.uri, _embedding_: node.embedding} AS metadata
-            """,
+        self.__retriever = HybridRetriever(
+            driver,
+            "eventsVectorIndex",
+            "eventsTextIndex",
+            _LangchainEmbedder(embeddings),
+            result_formatter=lambda x: RetrieverResultItem(
+                content=x["uri"],
+                metadata={
+                    "score": x["score"],
+                    "embedding": x["embedding"],
+                },
+            ),
         )
 
     def initialize(self) -> None:
         """Initialize the dataset by loading the examples and tests, and creating the vector index for events."""
         # Check if the examples are already loaded
-        result = self.__graph_store.query(
+        dataset, _, _ = self.__driver.execute_query(
             """
             MATCH (r:mlsx__Run {uri: $run_uri})-[:mlsx__hasInput]->(d:mlsx__ExampleDataset)
             RETURN d
             LIMIT 1
             """,
-            params={"run_uri": self.__config.run_uri},
+            run_uri=self.__config.run_uri,
         )
-        if result:
+        if dataset:
             return
 
         # Load the examples
         # Note: n10s will not load the examples if they are already present in the store.
         # This is ok, as we want to load the examples again only when they change.
-        self.__graph_store.query(
+        self.__driver.execute_query(
             "CALL n10s.rdf.import.inline($examples, 'Turtle')",
-            params={"examples": Path(self.__config.examples_path).read_text()},
+            examples=Path(self.__config.examples_path).read_text(),
         )
 
         # Attach the examples to the current run
-        self.__graph_store.query(
+        self.__driver.execute_query(
             """
             MATCH (d:mlsx__ExampleDataset), (r:mlsx__Run {uri: $run_uri})
             CREATE (r)-[:mlsx__hasInput]->(d)
             """,
-            params={"run_uri": self.__config.run_uri},
+            run_uri=self.__config.run_uri,
         )
 
-        # Create the index for the event messages
-        self.__vector_index.create_new_index()
-
-        # Populate the embeddings for the examples
-        to_populate = self.__graph_store.query(
+        # Get examples to populate embeddings
+        to_populate, _, _ = self.__driver.execute_query(
             """
             MATCH (d:mlsx__ExampleDataset)-[:mlsx__hasPart]->(r:mlsx__DatasetRow)
             WHERE r.embedding IS NULL
@@ -105,37 +118,49 @@ class Dataset:
             texts.append(_compose_embeddings_text(el["eventMessage"], context))
 
         text_embeddings = self.__embeddings.embed_documents(texts)
-        self.__graph_store.query(
-            """
-            UNWIND $data AS row
-            MATCH (r:mlsx__DatasetRow)
-            WHERE elementId(r) = row.id
-            CALL db.create.setNodeVectorProperty(r, 'embedding', row.embedding)
-            """,
-            params={
-                "data": [
-                    {"id": el["id"], "embedding": embedding}
-                    for el, embedding in zip(to_populate, text_embeddings, strict=True)
-                ],
-            },
+
+        # Get the dimensions of the embeddings
+        embeddings_dimensions = len(text_embeddings[0])
+
+        # Create the index for the event messages
+        create_vector_index(
+            driver=self.__driver,
+            name="eventsVectorIndex",
+            label="mlsx__DatasetRow",  # The embedding is not stored on the Event itself to keep it clean
+            embedding_property="embedding",
+            dimensions=embeddings_dimensions,
+            similarity_fn="cosine",
+        )
+
+        upsert_vectors(
+            driver=self.__driver,
+            ids=[el["id"] for el in to_populate],
+            embedding_property="embedding",
+            embeddings=text_embeddings,
+        )
+
+        # Create the fulltext index for the event messages
+        create_fulltext_index(
+            driver=self.__driver,
+            name="eventsTextIndex",
+            label="mlsx__DatasetRow",
+            node_properties=["mlsx__eventMessage"],
         )
 
         # Load the tests
         # Note: the test events should not have an embedding.
-        self.__graph_store.query(
+        self.__driver.execute_query(
             "CALL n10s.rdf.import.inline($tests, 'Turtle')",
-            params={"tests": Path(self.__config.tests_path).read_text()},
+            tests=Path(self.__config.tests_path).read_text(),
         )
-        self.__graph_store.query(
+        self.__driver.execute_query(
             """
             MATCH (d:mlsx__TestDataset), (r:mlsx__Run {uri: $run_uri})
             MERGE (r)-[:mlsx__hasInput]->(d)
             """,
-            params={
-                "run_uri": self.__config.run_uri,
-            },
+            run_uri=self.__config.run_uri,
         )
-        self.__graph_store.query(
+        self.__driver.execute_query(
             """
             MATCH (d:mlsx__TestDataset)-[:mlsx__hasPart]->(r:mlsx__DatasetRow)-[:mlsx__hasLabel]->(e:olx__Event)
             WHERE r.embedding IS NULL
@@ -145,7 +170,7 @@ class Dataset:
 
     def tests(self) -> list[GraphDocument]:
         """Return a list of test documents from the dataset."""
-        test_nodes = self.__graph_store.query(
+        test_nodes, _, _ = self.__driver.execute_query(
             """
             MATCH (d:mlsx__TestDataset)-[:mlsx__hasPart]->(r:mlsx__DatasetRow)-[:mlsx__hasLabel]->(e:olx__Event)
             RETURN r.mlsx__eventMessage as eventMessage, e.uri as uri
@@ -188,20 +213,21 @@ class Dataset:
         norm_graph = normalize_input_graph(graph)
 
         # Check if result dataset exists, otherwise create it
-        result_dataset = self.__graph_store.query(
+        result_dataset, _, _ = self.__driver.execute_query(
             """
             MATCH (r:mlsx__Run {uri: $run_uri})-[:mlsx__hasOutput]->(d:mlsx__OutputDataset)
             RETURN d
             """,
-            params={"run_uri": self.__config.run_uri},
+            run_uri=self.__config.run_uri,
         )
         if not result_dataset:
-            self.__graph_store.query(
+            self.__driver.execute_query(
                 """
                 MATCH (r:mlsx__Run {uri: $run_uri})
                 CREATE (d:mlsx__OutputDataset {uri: $out_dataset_uri})<-[:mlsx__hasOutput]-(r)
                 """,
-                params={"run_uri": self.__config.run_uri, "out_dataset_uri": self.__config.run_uri + "/out-dataset"},
+                run_uri=self.__config.run_uri,
+                out_dataset_uri=self.__config.run_uri + "/out-dataset",
             )
 
         event_node = next(node for node in norm_graph.nodes if node.type == "olx__Event")
@@ -221,39 +247,37 @@ class Dataset:
             "embedding": self.__embeddings.embed_query(text),
             "uri": f"{self.__config.run_uri}/{uuid.uuid4()}",
         }
-        self.__graph_store.query(
+        self.__driver.execute_query(
             """
             MATCH (d:mlsx__OutputDataset)
             WHERE d.uri STARTS WITH $out_dataset_uri
             CREATE (d)-[:mlsx__hasPart]->(r:mlsx__DatasetRow $row_props)
                 -[:mlsx__hasLabel]->(n:olx__Event $event_props)
             """,
-            params={
-                "event_props": event_node.properties,
-                "row_props": dataset_row_properties,
-                "out_dataset_uri": self.__config.run_uri + "/out-dataset",
-            },
+            event_props=event_node.properties,
+            row_props=dataset_row_properties,
+            out_dataset_uri=self.__config.run_uri + "/out-dataset",
         )
 
         for node in norm_graph.nodes:
             if node.type == "olx__Event":
                 continue
 
-            self.__graph_store.query(
-                f"CREATE (n:{node.type} $props)",
-                params={"props": node.properties},
+            self.__driver.execute_query(
+                "CALL apoc.create.node($label, $props)",
+                label=node.type,
+                props=node.properties,
             )
 
         for relationship in norm_graph.relationships:
-            self.__graph_store.query(
-                f"""
-                MATCH (a {{uri: $source_uri}}), (b {{uri: $target_uri}})
-                CREATE (a)-[:{relationship.type}]->(b)
+            self.__driver.execute_query(
+                """
+                MATCH (a {uri: $source_uri}), (b {uri: $target_uri})
+                CALL apoc.create.relationship(a, $relationship_type, {}, b)
                 """,
-                params={
-                    "source_uri": relationship.source.id,
-                    "target_uri": relationship.target.id,
-                },
+                source_uri=relationship.source.id,
+                relationship_type=relationship.type,
+                target_uri=relationship.target.id,
             )
 
     def events_mmr_search(
@@ -279,31 +303,35 @@ class Dataset:
                 with the nodes they are connected to and their relationships.
 
         """
-        # This filter is for retrieving examples only,
-        # or examples + generated events.
-        # Examples will have no run name but an embedding,
-        # Tests will have neither. Generated events will have both.
-        uri_filter = (
-            [{"uri": {"$like": self.__examples_uri}}]
-            if not self.__config.generated_graphs_retrieval
-            else [{"uri": {"$like": self.__examples_uri}}, {"uri": {"$like": self.__config.run_uri}}]
-        )
-
         query = _compose_embeddings_text(event, context or {})
-        relevant_docs = self.__vector_index.max_marginal_relevance_search(
-            query=query,
-            k=k,
-            fetch_k=fetch_k,
-            lambda_mult=lambda_mult,
-            filter={
-                "$or": uri_filter,
-                "embedding": {"$ne": ""},
-            },
-            # Examples will have no run name but an embedding.
-            # Tests will have neither. Generated events will have both.
+        query_embedding = self.__embeddings.embed_query(query)
+        search_results = self.__retriever.search(
+            query=query_embedding,
+            top_k=k * 5,  # Fetch more documents to ensure we have enough after filtering
         )
+        relevant_docs = search_results.items
+        relevant_docs.sort(key=lambda x: x.metadata["score"] if x.metadata else 0, reverse=True)
+        relevant_docs = relevant_docs[:fetch_k]  # Limit to fetch_k results
 
-        return [normalize_output_graph(self.__get_subgraph_from_node(doc.metadata["uri"])) for doc in relevant_docs]
+        # Get examples only or examples + generated events,
+        # depending on the configuration.
+        allowed_uris = [self.__examples_uri]
+        if self.__config.generated_graphs_retrieval:
+            allowed_uris.append(self.__config.run_uri)
+
+        selected_indexes = maximal_marginal_relevance(
+            np.array(query_embedding),
+            [
+                doc.metadata["embedding"]
+                for doc in relevant_docs
+                if doc.metadata is not None and "embedding" in doc.metadata
+            ],
+            k=k,
+            lambda_mult=lambda_mult,
+        )
+        selected_uris = [relevant_docs[i].content for i in selected_indexes]
+
+        return [normalize_output_graph(self.__get_subgraph_from_node(uri)) for uri in selected_uris]
 
     def __get_subgraph_from_node(self, node_uri: str) -> GraphDocument:
         """Get the subgraph of a node in the store.
@@ -321,7 +349,7 @@ class Dataset:
 
         """
         # Ugly but quite efficient.
-        nodes_subgraphs = self.__graph_store.query(
+        nodes_subgraphs, _, _ = self.__driver.execute_query(
             """
             MATCH (n {uri: $node_uri})
             CALL apoc.path.subgraphAll(n,
@@ -329,24 +357,24 @@ class Dataset:
             YIELD nodes, relationships
             RETURN
             [node IN nodes | {
-            uri: node.uri,
-            type: HEAD([label IN LABELS(node) WHERE label <> 'Resource']),
-            properties: PROPERTIES(node)
+                uri: node.uri,
+                type: HEAD([label IN LABELS(node) WHERE label <> 'Resource']),
+                properties: PROPERTIES(node)
             }] AS nodes,
             [rel IN relationships | {
-            source: STARTNODE(rel).uri,
-            target: ENDNODE(rel).uri,
-            type: TYPE(rel)
+                source: STARTNODE(rel).uri,
+                target: ENDNODE(rel).uri,
+                type: TYPE(rel)
             }] AS relationships
             """,
-            params={"node_uri": node_uri},
+            node_uri=node_uri,
         )
 
         if not nodes_subgraphs:
             msg = f"No subgraph found for node with URI: {node_uri}"
             raise ValueError(msg)
 
-        nodes_subgraph = nodes_subgraphs[0]
+        nodes_subgraph = dict(nodes_subgraphs[0])
 
         # Remove the DatasetRow node, as it is not needed in the output graph.
         # However it contains the event message, so it is used as the source of the graph.

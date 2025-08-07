@@ -2,14 +2,14 @@
 
 import uuid
 
-from langchain_neo4j import Neo4jGraph
+from neo4j import Driver
 
 
 class Schema:
     """Schema management for the Neo4j store, following the MLSX ontology."""
 
-    def __init__(self, graph_store: Neo4jGraph, study_uri: str, experiment_uri: str, run_uri: str) -> None:
-        self.__graph_store = graph_store
+    def __init__(self, driver: Driver, study_uri: str, experiment_uri: str, run_uri: str) -> None:
+        self.__driver = driver
         self.__study_uri = study_uri
         self.__experiment_uri = experiment_uri
         self.__run_uri = run_uri
@@ -25,34 +25,33 @@ class Schema:
         measure_camel = "".join(x.capitalize() for x in measure.lower().split("_"))
 
         # Check if measure already exists
-        measure_node = self.__graph_store.query(
+        measure_node, _, _ = self.__driver.execute_query(
             """
             MATCH (m:mlsx__EvaluationMeasure {n4sch__name: $name})
             RETURN m
             LIMIT 1
             """,
-            params={"name": measure_camel},
+            name=measure_camel,
         )
         if not measure_node:
             # Create the measure node if it does not exist
-            self.__graph_store.query(
+            self.__driver.execute_query(
                 """
                 CREATE (m:mlsx__EvaluationMeasure {n4sch__name: $name, uri: $uri})
                 """,
-                params={"name": measure_camel, "uri": self.__gen_uri()},
+                name=measure_camel,
+                uri=self.__gen_uri(),
             )
 
         # Create the evaluation node
-        self.__graph_store.query(
+        self.__driver.execute_query(
             """
             MATCH (r:mlsx__Run {uri: $run_uri}), (m:mlsx__EvaluationMeasure {n4sch__name: $name})
             CREATE (r)-[:mlsx__hasOutput]->(e:mlsx__ModelEvaluation {mlsx__hasValue: $value})-[:mlsx__specifiedBy]->(m)
             """,
-            params={
-                "name": measure_camel,
-                "value": evaluation,
-                "run_uri": self.__run_uri,
-            },
+            name=measure_camel,
+            value=evaluation,
+            run_uri=self.__run_uri,
         )
 
     def add_hyperparameter(self, name: str, value: str | float | bool) -> None:
@@ -67,28 +66,31 @@ class Schema:
         """
         name_camel = "".join(x.capitalize() for x in name.lower().split("_"))
 
-        param = self.__graph_store.query(
+        param, _, _ = self.__driver.execute_query(
             """
-                MATCH (h:mlsx__HyperParameter {n4sch__name: $name})
-                RETURN h
-                LIMIT 1
-                """,
-            params={"name": name_camel},
+            MATCH (h:mlsx__HyperParameter {n4sch__name: $name})
+            RETURN h
+            LIMIT 1
+            """,
+            name=name_camel,
         )
 
         if not param:
-            self.__graph_store.query(
+            self.__driver.execute_query(
                 "CREATE (h:mlsx__HyperParameter {n4sch__name: $name, uri: $uri})",
-                params={"name": name_camel, "uri": self.__gen_uri()},
+                name=name_camel,
+                uri=self.__gen_uri(),
             )
 
-        self.__graph_store.query(
+        self.__driver.execute_query(
             """
-                MATCH (r:mlsx__Run {uri: $run_uri}), (h:mlsx__HyperParameter {n4sch__name: $name})
-                CREATE (r)-[:mlsx__hasInput]->(s:mlsx__HyperParameterSetting {mlsx__hasValue: $value})
-                -[:mlsx__specifiedBy]->(h)
-                """,
-            params={"name": name_camel, "value": value, "run_uri": self.__run_uri},
+            MATCH (r:mlsx__Run {uri: $run_uri}), (h:mlsx__HyperParameter {n4sch__name: $name})
+            CREATE (r)-[:mlsx__hasInput]->(s:mlsx__HyperParameterSetting {mlsx__hasValue: $value})
+            -[:mlsx__specifiedBy]->(h)
+            """,
+            name=name_camel,
+            value=value,
+            run_uri=self.__run_uri,
         )
 
     def __initialize_study(self) -> None:
@@ -97,17 +99,17 @@ class Schema:
         Only one study node is expected to exist in the graph store.
         If it does not exist, it will be created.
         """
-        study = self.__graph_store.query(
+        study, _, _ = self.__driver.execute_query(
             "MATCH (s:mlsx__Study {uri: $study_uri}) RETURN s",
-            params={"study_uri": self.__study_uri},
+            study_uri=self.__study_uri,
         )
         if study:
             return
 
         # Create the study node if it does not exist
-        self.__graph_store.query(
+        self.__driver.execute_query(
             "CREATE (s:mlsx__Study {uri: $uri, n4sch__name: 'OntoLogX'})",
-            params={"uri": self.__study_uri},
+            uri=self.__study_uri,
         )
 
     def __initialize_experiment(self) -> None:
@@ -116,30 +118,26 @@ class Schema:
         The experiment node is created if it does not exist.
         """
         # Check if there is an experiment node with the same name under the given study
-        exp = self.__graph_store.query(
+        exp, _, _ = self.__driver.execute_query(
             """
             MATCH (e:mlsx__Experiment {uri: $experiment_uri})<-[:mlsx__hasPart]-(s:mlsx__Study {uri: $study_uri})
             RETURN e
             LIMIT 1
             """,
-            params={
-                "experiment_uri": self.__experiment_uri,
-                "study_uri": self.__study_uri,
-            },
+            experiment_uri=self.__experiment_uri,
+            study_uri=self.__study_uri,
         )
         if exp:
             return
 
         # Create the experiment node if it does not exist
-        self.__graph_store.query(
+        self.__driver.execute_query(
             """
             MATCH (s:mlsx__Study {uri: $study_uri})
             CREATE (e:mlsx__Experiment {uri: $experiment_uri})<-[:mlsx__hasPart]-(s)
             """,
-            params={
-                "experiment_uri": self.__experiment_uri,
-                "study_uri": self.__study_uri,
-            },
+            experiment_uri=self.__experiment_uri,
+            study_uri=self.__study_uri,
         )
 
     def __initialize_run(self) -> None:
@@ -149,15 +147,13 @@ class Schema:
 
         """
         # Create run
-        self.__graph_store.query(
+        self.__driver.execute_query(
             """
             MATCH (e:mlsx__Experiment {uri: $experiment_uri})
             CREATE (r:mls__Run {uri: $run_uri})<-[:mls__hasPart]-(e)
             """,
-            params={
-                "run_uri": self.__run_uri,
-                "experiment_uri": self.__experiment_uri,
-            },
+            run_uri=self.__run_uri,
+            experiment_uri=self.__experiment_uri,
         )
 
     def __gen_uri(self) -> str:

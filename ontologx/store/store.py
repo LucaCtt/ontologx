@@ -32,8 +32,8 @@ class Store(ABC):
         """
 
     @abstractmethod
-    def clear(self) -> None:
-        """Clear the store back to a clean state, removing nodes, relationships, constraints, and indexes."""
+    def close(self) -> None:
+        """Close the connection to the store, cleaning up resources."""
 
     @abstractmethod
     def ontology(self) -> GraphDocument:

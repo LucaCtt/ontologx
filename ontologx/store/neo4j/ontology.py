@@ -1,10 +1,10 @@
-"""Ontology store for managing and querying ontologies in a Neo4j database."""
+"""Ontology store for managing and execute_querying ontologies in a Neo4j database."""
 
 import functools
 from pathlib import Path
 
 from langchain_core.documents import Document
-from langchain_neo4j import Neo4jGraph
+from neo4j import Driver
 
 from ontologx.store import GraphDocument, Node, Relationship
 from ontologx.store.neo4j.utils import get_uri_from_ttl, normalize_output_graph
@@ -25,35 +25,35 @@ class Ontology:
     Initializes the olx ontology on the store and provides access to the ontology.
     """
 
-    def __init__(self, graph_store: Neo4jGraph, ontology_path: str) -> None:
-        self.__graph_store = graph_store
+    def __init__(self, driver: Driver, ontology_path: str) -> None:
+        self.__driver = driver
         self.__ontology_path = ontology_path
 
     def initialize(self) -> None:
         """Import the olx ontology (and dependencies) into the store."""
         # Check if the neosemantics configuration is present,
         # if it is, assume the ontology is already loaded.
-        result = self.__graph_store.query("MATCH (n:_GraphConfig) RETURN COUNT(n) AS count")
-        if result[0]["count"] != 0:
+        result, _, _ = self.__driver.execute_query("MATCH (n:_GraphConfig) RETURN n")
+        if not result:
             return
 
         # Init neosemantics plugin
-        self.__graph_store.query("CALL n10s.graphconfig.init($params)", params={"params": _ONTOLOGY_PARAMS})
-        self.__graph_store.query(
+        self.__driver.execute_query("CALL n10s.graphconfig.init($params)", params={"params": _ONTOLOGY_PARAMS})
+        self.__driver.execute_query(
             "CREATE CONSTRAINT n10s_unique_uri IF NOT EXISTS FOR (r:Resource) REQUIRE r.uri IS UNIQUE",
         )
 
         # Set the namespaces
-        self.__graph_store.query("CALL n10s.nsprefixes.add('olx', $uri)", params={"uri": self.__ontology_uri})
-        self.__graph_store.query("CALL n10s.nsprefixes.add('time', $uri )", params={"uri": _TIME_ONTOLOGY_URI})
-        self.__graph_store.query("CALL n10s.nsprefixes.add('mlsx', $uri)", params={"uri": _MLSX_ONTOLOGY_URI})
+        self.__driver.execute_query("CALL n10s.nsprefixes.add('olx', $uri)", params={"uri": self.__ontology_uri})
+        self.__driver.execute_query("CALL n10s.nsprefixes.add('time', $uri )", params={"uri": _TIME_ONTOLOGY_URI})
+        self.__driver.execute_query("CALL n10s.nsprefixes.add('mlsx', $uri)", params={"uri": _MLSX_ONTOLOGY_URI})
 
         # Load the ontologies
-        self.__graph_store.query(
+        self.__driver.execute_query(
             "CALL n10s.onto.import.inline($ontology, 'Turtle')",
             params={"ontology": Path(self.__ontology_path).read_text()},
         )
-        self.__graph_store.query("CALL n10s.onto.import.fetch($url, 'Turtle')", params={"url": _TIME_ONTOLOGY_URI})
+        self.__driver.execute_query("CALL n10s.onto.import.fetch($url, 'Turtle')", params={"url": _TIME_ONTOLOGY_URI})
 
     def graph(self) -> GraphDocument:
         """Return the ontology graph as a GraphDocument.
@@ -72,7 +72,7 @@ class Ontology:
         # Retrieves all classes in the log ontology,
         # along with any classes that have a first-degree subclass relationship with them.
         # It also retrieves any properties associated with each class, if they exist.
-        nodes_with_props = self.__graph_store.query(
+        nodes_with_props, _, _ = self.__driver.execute_query(
             """
             MATCH (c:n4sch__Class)
             WHERE c.uri STARTS WITH $log_ontology_uri
@@ -99,7 +99,7 @@ class Ontology:
 
         # Retrieves triples between the classes retrieved above,
         # representing ontological and structural relationships between them.
-        triples = self.__graph_store.query(
+        triples, _, _ = self.__driver.execute_query(
             """
             MATCH (n:n4sch__Class)<-[:n4sch__domain]-(r:n4sch__Relationship)-[:n4sch__range]->(m:n4sch__Class)
             WHERE n.uri IN $node_uris AND m.uri IN $node_uris

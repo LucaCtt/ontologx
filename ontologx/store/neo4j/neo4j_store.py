@@ -1,7 +1,7 @@
 """Neo4j store implementation."""
 
 from langchain_core.embeddings import Embeddings
-from langchain_neo4j import Neo4jGraph
+from neo4j import GraphDatabase
 
 from ontologx.store import GraphDocument, Store, StoreConfig
 from ontologx.store.neo4j.dataset import Dataset
@@ -18,15 +18,11 @@ class Neo4jStore(Store):
         config: StoreConfig,
     ) -> None:
         super().__init__(embeddings, config)
-        self.__graph_store = Neo4jGraph(
-            url=config.auth.url,
-            username=config.auth.username,
-            password=config.auth.password,
-        )
+        self.__driver = GraphDatabase.driver(config.auth.url, auth=(config.auth.username, config.auth.password))
 
-        self.__onto = Ontology(self.__graph_store, config.ontology_path)
-        self.__schema = Schema(self.__graph_store, config.study_uri, config.experiment_uri, config.run_uri)
-        self.__dataset = Dataset(self.__graph_store, self._embeddings, config)
+        self.__onto = Ontology(self.__driver, config.ontology_path)
+        self.__schema = Schema(self.__driver, config.study_uri, config.experiment_uri, config.run_uri)
+        self.__dataset = Dataset(self.__driver, self._embeddings, config)
 
     def initialize(self) -> None:
         """Initialize the Neo4j graph database by creating necessary nodes, relationships, constraints, and indexes."""
@@ -34,20 +30,10 @@ class Neo4jStore(Store):
         self.__schema.initialize()
         self.__dataset.initialize()
 
-    def clear(self) -> None:
-        """Clear the Neo4j graph database by deleting all nodes, relationships, constraints, and indexes."""
-        # Delete all nodes and relationships in the graph
-        self.__graph_store.query("MATCH (n) DETACH DELETE n")
-
-        # Delete all constraints
-        constraints = self.__graph_store.query("SHOW CONSTRAINTS YIELD name RETURN name")
-        for constraint in constraints:
-            self.__graph_store.query(f"DROP CONSTRAINT {constraint['name']}")
-
-        # Delete all indexes
-        indexes = self.__graph_store.query("SHOW INDEXES YIELD name RETURN name")
-        for index in indexes:
-            self.__graph_store.query(f"DROP INDEX {index['name']}")
+    def close(self) -> None:
+        """Close the Neo4j driver connection."""
+        if self.__driver:
+            self.__driver.close()
 
     def tests(self) -> list[GraphDocument]:
         """Return a list of test documents from the dataset."""

@@ -140,6 +140,8 @@ class RunHandler:
             if isinstance(value, str | int | float | bool):
                 store.add_hyperparameter(key, value)
 
+        store.close()
+
     def __get_store_config(self) -> StoreConfig:
         run_uri = f"{self.__experiment_uri}/{uuid.uuid4()!s}"
 
