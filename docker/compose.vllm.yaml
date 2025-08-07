@@ -7,8 +7,8 @@ services:
       dockerfile: docker/ontologx.dockerfile
     container_name: ${EXPERIMENT_NAME:-default}_olx
     environment:
-      - LLM_BACKEND=vllm
-      - LLM_BACKEND_URL=http://llm:8000/v1
+      - PARSER_BACKEND=vllm
+      - PARSER_BACKEND_URL=http://llm:8000/v1
       - EMBEDDINGS_BACKEND=infinity
       - EMBEDDINGS_BACKEND_URL=http://embs:9000
       - TESTS_BACKEND=bedrock

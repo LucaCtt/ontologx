@@ -64,7 +64,7 @@ def bedrock_llm(model: str, temperature: float) -> ParserModel:
     return ChatBedrockConverse(
         model=model,
         temperature=temperature,
-        region_name="us-east-1",
+        region_name=os.environ["AWS_REGION"],
         aws_access_key_id=credentials["AccessKeyId"],
         aws_secret_access_key=credentials["SecretAccessKey"],
         aws_session_token=credentials["SessionToken"],

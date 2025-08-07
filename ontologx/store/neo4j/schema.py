@@ -155,7 +155,7 @@ class Schema:
             CREATE (r:mls__Run {uri: $run_uri})<-[:mls__hasPart]-(e)
             """,
             params={
-                "uri": self.__run_uri,
+                "run_uri": self.__run_uri,
                 "experiment_uri": self.__experiment_uri,
             },
         )
