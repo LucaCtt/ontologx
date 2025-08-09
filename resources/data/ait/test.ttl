@@ -1,7 +1,6 @@
 @prefix : <https://cyberseclab.unibs.it/olx/tests#>.
 @prefix mlsx: <https://cyberseclab.unibs.it/mlsx/dict#>.
 @prefix olx: <https://cyberseclab.unibs.it/olx/dict#>.
-@prefix p-plan: <http://purl.org/net/p-plan#>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix time: <http://www.w3.org/2006/time#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
@@ -50,17 +49,15 @@
 :source-3 rdf:type olx:Source;
   olx:sourceDevice "cloud_share".
 
-:applications-chain-3 rdf:type olx:ApplicationChain.
 :file-3 rdf:type olx:File;
   olx:filePath "/var/run/samba/msg.lock".
 
 :shell-command-3 rdf:type olx:ShellCommand;
   olx:applicationName "mkdir";
-  p-plan:hasInputVar :file-3;
-  p-plan:isStepOfPlan :applications-chain-3.
+  olx:hasParameter :file-3.
 
 :event-3 rdf:type olx:Event;
-  olx:hasParameter :timestamp-3, :applications-chain-3, :shell-command-3;
+  olx:hasParameter :timestamp-3, :shell-command-3;
   olx:wasLoggedBy :source-3.
 
 :test-3 rdf:type mlsx:DatasetRow;
@@ -232,7 +229,6 @@
   olx:sourceName "syslog";
   olx:sourceDevice "vpn".
 
-:applications-chain-10 rdf:type olx:ApplicationsChain.
 :file-10-1 rdf:type olx:File;
   olx:filePath "/usr/lib/os-probes/mounted/10freedos".
 
@@ -240,9 +236,8 @@
   olx:filePath "/dev/vda15".
 
 :shell-command-10 rdf:type olx:ShellCommand;
-  p-plan:hasInputVar :file-10-1, :file-10-2;
-  p-plan:isStepOfPlan :applications-chain-10;
-  olx:applicationName "os-prober".
+  olx:applicationName "os-prober";
+  olx:hasParameter :file-10-1, :file-10-2.
 
 :event-10 rdf:type olx:Event;
   olx:eventLogLevel "debug";
@@ -789,17 +784,15 @@
 :source-32 rdf:type olx:Source;
   olx:sourceDevice "intranet_server".
 
-:applications-chain-32 rdf:type olx:ApplicationsChain.
 :file-32 rdf:type olx:File;
   olx:filePath "john.pot".
 
 :shell-command-32 rdf:type olx:ShellCommand;
-  p-plan:hasInputVar :file-32;
-  p-plan:isStepOfPlan :applications-chain-32;
-  olx:applicationName "rm".
+  olx:applicationName "rm";
+  olx:hasParameter :file-32.
 
 :event-32 rdf:type olx:Event;
-  olx:hasParameter :timestamp-32, :applications-chain-32;
+  olx:hasParameter :timestamp-32, :shell-command-32;
   olx:wasLoggedBy :source-32.
 
 :test-32 rdf:type mlsx:DatasetRow;

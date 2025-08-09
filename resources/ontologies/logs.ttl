@@ -65,11 +65,6 @@
   rdfs:comment "A logical address in a network, such as an IP address or a MAC address.";
   rdfs:label "Network Address".
 
-:ApplicationsChain rdf:type owl:Class;
-  rdfs:subClassOf :Parameter, p-plan:Plan;
-  rdfs:comment "A chain of applications, such as a sequence of commands in a shell script.";
-  rdfs:label "Applications Chain".
-
 :Application rdf:type owl:Class;
   rdfs:subClassOf :Parameter, p-plan:Step;
   rdfs:comment "An application, such as a web server, a database, etc.";
@@ -84,11 +79,6 @@
   rdfs:subClassOf :Application;
   rdfs:comment "A shell command.";
   rdfs:label "Shell Command".
-
-:ConcatenationOperator rdf:type owl:Class;
-  rdfs:subClassOf :Parameter, p-plan:Step;
-  rdfs:comment "An operator used to concatenate two commands, such as '|', '&&', '||', ';'.";
-  rdfs:label "Concatenation Operator".
 
 :File rdf:type owl:Class;
   rdfs:subClassOf :Parameter;
@@ -128,9 +118,9 @@
 #    Object Properties
 #################################################################
 :hasParameter rdf:type owl:ObjectProperty;
-  rdfs:domain :Event;
+  rdfs:domain :Event, :Application;
   rdfs:range :Parameter;
-  rdfs:comment "Relation between an Event and one of its parameter.";
+  rdfs:comment "Relation between an Event or Application and one of its parameter.";
   rdfs:label "Has Parameter".
 
 :hasCredential rdf:type owl:ObjectProperty;
@@ -250,12 +240,6 @@
   rdfs:range xsd:string;
   rdfs:comment "Signal sent to the process";
   rdfs:label "System Process Signal".
-
-:concatenationOperatorValue rdf:type owl:DatatypeProperty;
-  rdfs:domain :ConcatenationOperator;
-  rdfs:range xsd:string;
-  rdfs:comment "Value of the concatenation operator, such as '|', '&&', '||', ';'";
-  rdfs:label "Concatenation Operator Value".
 
 :filePath rdf:type owl:DatatypeProperty;
   rdfs:domain :File;

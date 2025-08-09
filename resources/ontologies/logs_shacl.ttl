@@ -124,6 +124,11 @@ olx:ApplicationShape rdf:type sh:NodeShape;
     sh:path olx:applicationVersion;
     sh:datatype xsd:string;
     sh:maxCount 1;
+  ];
+  sh:property [
+    sh:path olx:hasParameter;
+    sh:class olx:Parameter;
+    sh:nodeKind sh:IRI;
   ].
 
 olx:SystemProcessShape rdf:type sh:NodeShape;
@@ -138,16 +143,6 @@ olx:SystemProcessShape rdf:type sh:NodeShape;
   sh:property [
     sh:path olx:systemProcessSignal;
     sh:datatype xsd:string;
-    sh:maxCount 1;
-  ].
-
-olx:ConcatenationOperatorShape rdf:type sh:NodeShape;
-  sh:targetClass olx:ConcatenationOperator;
-  dash:closedByTypes true;
-  sh:property [
-    sh:path olx:concatenationOperatorValue;
-    sh:datatype xsd:string;
-    sh:minCount 1;
     sh:maxCount 1;
   ].
 

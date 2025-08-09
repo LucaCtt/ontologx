@@ -1,7 +1,6 @@
 @prefix : <https://cyberseclab.unibs.it/olx/examples/#>.
 @prefix mlsx: <https://cyberseclab.unibs.it/mlsx/dict#>.
 @prefix olx: <https://cyberseclab.unibs.it/olx/dict#>.
-@prefix p-plan: <http://purl.org/net/p-plan#>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix time: <http://www.w3.org/2006/time#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
@@ -27,34 +26,26 @@
   olx:applicationName "CRON";
   olx:systemProcessPID 16314.
 
-:applications-chain-1 rdf:type olx:ApplicationsChain.
 :file-1-1 rdf:type olx:File;
   olx:filePath "/".
 
 :shell-command-1 rdf:type olx:ShellCommand;
   olx:applicationName "cd";
-  p-plan:hasInputVar :file-1-1;
-  p-plan:isStepOfPlan :applications-chain-1.
-
-:concatenation-operator-1 rdf:type olx:ConcatenationOperator;
-  olx:concatenationOperatorValue "&&";
-  p-plan:isStepOfPlan :applications-chain-1;
-  p-plan:isPreceededBy :shell-command-1.
+  olx:hasParameter :file-1-1.
 
 :file-1-2 rdf:type olx:File;
   olx:filePath "/etc/cron.hourly".
 
 :shell-command-2 rdf:type olx:ShellCommand;
   olx:applicationName "run-parts";
-  p-plan:hasInputVar :file-1-2;
-  p-plan:isStepOfPlan :applications-chain-1;
-  p-plan:isPreceededBy :concatenation-operator-1.
+  olx:hasParameter :file-1-2.
 
 :event-1 rdf:type olx:Event;
   olx:hasParameter :timestamp-1,
     :user-1,
     :system-process-1,
-    :applications-chain-1;
+    :shell-command-1,
+    :shell-command-2;
   olx:wasLoggedBy :source-1.
 
 :example-1 rdf:type mlsx:DatasetRow;
