@@ -103,7 +103,7 @@ class MainParser(Parser):
         self.chain = gen_graph_prompt | structured_model
 
     def __get_examples(self, event: str, context: dict) -> list[BaseMessage]:
-        similar_events = self.store.search("mmr", event, context, k=2)
+        similar_events = self.store.search("mmr", event, context, k=3)
         return [msg for similar_event in similar_events for msg in _example_message_group(similar_event)]
 
     def parse(self, event: str, context: dict) -> GraphDocument | None:

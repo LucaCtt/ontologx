@@ -43,7 +43,7 @@ def main() -> None:
 
     for run_index in range(config.n_runs):
         logger.info("----------------------")
-        logger.info("Run: '%s'", run_index + 1)
+        logger.info("Run %d", run_index + 1)
         run_handler.start_new_run()
 
 

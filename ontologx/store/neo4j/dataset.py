@@ -5,9 +5,12 @@ import uuid
 from pathlib import Path
 
 import neo4j
+import numpy as np
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
+from langchain_core.vectorstores.utils import maximal_marginal_relevance
 from langchain_neo4j import Neo4jGraph, Neo4jVector
+from neo4j_graphrag.types import SearchType
 
 from ontologx.store import GraphDocument, Node, Relationship
 from ontologx.store.config import StoreConfig
@@ -15,10 +18,12 @@ from ontologx.store.neo4j.utils import get_uri_from_ttl, normalize_input_graph, 
 
 
 def _compose_embeddings_text(event: str, context: dict[str, str]) -> str:
-    text = f"event: '{event.replace("'", "\\'")}'"
+    # Note: the following characters will be stripped out by langchain-neo4j:
+    # + - = && || > < ! ( ) { } [ ] ^ " ~ * ? : \ /
+    text = f"event is '{event}'"
 
     for key, value in context.items():
-        text += f", {key}: '{value.replace("'", "\\'")}'"
+        text += f", {key} is '{value}'"
 
     return text
 
@@ -40,8 +45,10 @@ class Dataset:
             password=config.auth.password,
             url=config.auth.url,
             index_name="eventsVectorIndex",
+            keyword_index_name="eventsKeywordIndex",
             node_label="mlsx__DatasetRow",  # The embedding is not stored on the Event itself to keep it clean
             embedding_node_property="embedding",
+            search_type=SearchType.HYBRID,
             retrieval_query="""
             RETURN node.mlsx__eventMessage AS text,
             score,
@@ -82,6 +89,7 @@ class Dataset:
 
         # Create the index for the event messages
         self.__vector_index.create_new_index()
+        self.__vector_index.create_new_keyword_index(["mlsx__eventMessage"])
 
         # Populate the embeddings for the examples
         to_populate = self.__graph_store.query(
@@ -261,7 +269,7 @@ class Dataset:
         event: str,
         context: dict | None = None,
         k: int = 3,
-        fetch_k: int = 20,
+        fetch_k: int = 30,
         lambda_mult: float = 0.5,
     ) -> list[GraphDocument]:
         """Search for similar events in the store.
@@ -284,26 +292,39 @@ class Dataset:
         # Examples will have no run name but an embedding,
         # Tests will have neither. Generated events will have both.
         uri_filter = (
-            [{"uri": {"$like": self.__examples_uri}}]
+            [self.__examples_uri]
             if not self.__config.generated_graphs_retrieval
-            else [{"uri": {"$like": self.__examples_uri}}, {"uri": {"$like": self.__config.run_uri}}]
+            else [self.__examples_uri, self.__config.run_uri]
         )
 
         query = _compose_embeddings_text(event, context or {})
-        relevant_docs = self.__vector_index.max_marginal_relevance_search(
-            query=query,
-            k=k,
-            fetch_k=fetch_k,
-            lambda_mult=lambda_mult,
-            filter={
-                "$or": uri_filter,
-                "embedding": {"$ne": ""},
-            },
-            # Examples will have no run name but an embedding.
-            # Tests will have neither. Generated events will have both.
-        )
+        query_embedding = self.__embeddings.embed_query(query)
 
-        return [normalize_output_graph(self.__get_subgraph_from_node(doc.metadata["uri"])) for doc in relevant_docs]
+        got_docs = self.__vector_index.similarity_search_with_score_by_vector(
+            embedding=query_embedding,
+            query=query,
+            k=fetch_k,
+            return_embeddings=True,
+        )
+        got_docs = [(doc, score) for doc, score in got_docs if doc.metadata["uri"].startswith(tuple(uri_filter))]
+
+        # Get the embeddings for the fetched documents
+        got_embeddings = [doc.metadata["_embedding_"] for doc, _ in got_docs]
+
+        # Select documents using maximal marginal relevance
+        selected_indices = maximal_marginal_relevance(
+            np.array(query_embedding),
+            got_embeddings,
+            lambda_mult=lambda_mult,
+            k=k,
+        )
+        selected_docs = [got_docs[i][0] for i in selected_indices]
+
+        # Remove embedding values from metadata
+        for doc in selected_docs:
+            del doc.metadata["_embedding_"]
+
+        return [normalize_output_graph(self.__get_subgraph_from_node(doc.metadata["uri"])) for doc in selected_docs]
 
     def __get_subgraph_from_node(self, node_uri: str) -> GraphDocument:
         """Get the subgraph of a node in the store.
