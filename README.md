@@ -18,7 +18,7 @@ The easiest way to run OntoLogX is to use one of the Docker compose files, which
 
 Create an appropriate `.env` file with the minimum values specified in the [Backends](#backends) section for the backend you want to use. For example, to use the vLLM backend:
 ```env
-echo "LLM_MODEL=meta-llama/Meta-Llama-3.1-8B-Instruct
+echo "PARSER_MODEL=meta-llama/Meta-Llama-3.1-8B-Instruct
 EMBEDDINGS_MODEL=Alibaba-NLP/gte-multilingual-base
 TESTS_MODEL=meta-llama/Meta-Llama-3.3-70B-Instruct
 " > .env
@@ -40,7 +40,7 @@ Experiment configuration. Should almost always be set manually:
 - `EXPERIMENT_NAME`: The name of the experiment to run. This will be used to create an Experiment node in the Neo4j database. Default is a random UUID.
 - `N_RUNS`: The number of runs to perform for the experiment. Default is 10.
 - `EMBEDDINGS_MODEL`: The model to use for the embeddings. This should be a valid model name for the embeddings backend you are using. Default is `gte-multilingual-base`.
-- `LLM_MODEL`: The model to use for the LLM calls. This should be a valid model name for the LLM backend you are using. Default is `Llama 3.2 3B`.
+- `PARSER_MODEL`: The model to use for the LLM calls. This should be a valid model name for the LLM backend you are using. Default is `Llama 3.2 3B`.
 - `TESTS_MODEL`: The model to use for the tests. This should be a valid model name for the tests backend you are using. Default is `Llama 3.2 3B`. A larger model than the default is recommended.
 - `PARSER_TEMPERATURE`: The temperature to use for the parser. This is a float value between 0 and 1, where 0 means no randomness and 1 means maximum randomness. Default is 0.7.
 

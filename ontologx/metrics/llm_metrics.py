@@ -92,18 +92,19 @@ class GEvalGraphAlignmentMetrics:
                     "timestamps, or contextual details conveyed in the log."
                 ),
                 (
-                    "Translate the output knowledge graph into a coherent natural language description "
-                    "that reflects the event(s) they represent."
+                    "Write a detailed description of the actual output knowledge graph in natural language. "
+                    "Include what occurred, the involved entities, their roles, any parameters, "
+                    "timestamps, or contextual details conveyed in the graph."
                 ),
                 (
-                    "Assess whether the graph description semantically captures "
-                    "the same core information as the log event. "
+                    "Assess whether the description of the actual output knowledge graph semantically captures "
+                    "the same information as the log event's description. "
                     "Check for:\n"
                     "  - Coverage: Are all key elements from the log event present?\n"
                     "  - Correctness: Are entities, actions, and relationships represented accurately?\n"
-                    "  - Relevance: Are any additional triples relevant to the log event context?\n"
+                    "  - Relevance: Are any additional nodes or relationships relevant to the log event context?\n"
                     "It is acceptable if the graph contains more information than the log event, "
-                    "as long as it enriches the representation without introducing unrelated or incorrect content."
+                    "as long as the information isn't contradicting."
                 ),
             ],
             evaluation_params=[LLMTestCaseParams.INPUT, LLMTestCaseParams.ACTUAL_OUTPUT],

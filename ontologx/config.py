@@ -110,7 +110,7 @@ class Config:
     """The URL of the parser llm backend. Used only if the backend is "ollama" or "vllm"."""
 
     parser_model = os.getenv(
-        "LLM_MODEL",
+        "PARSER_MODEL",
         _DEFAULT_LLM_MODELS[parser_backend],
     )
     """
