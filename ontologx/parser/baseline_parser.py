@@ -58,6 +58,9 @@ class BaselineParser(Parser):
 
         output_graph = GraphDocument(nodes=[], relationships=[], source=Document(page_content=event, metadata=context))
 
+        if "nodes" not in raw_schema or not isinstance(raw_schema["nodes"], list):
+            return output_graph
+
         nodes_dict = {}
         for node in raw_schema["nodes"]:
             if not isinstance(node, dict):

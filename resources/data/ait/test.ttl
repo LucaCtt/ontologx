@@ -57,7 +57,7 @@
   olx:hasParameter :file-3.
 
 :event-3 rdf:type olx:Event;
-  olx:hasParameter :timestamp-3, :shell-command-3;
+  olx:hasParameter :shell-command-3;
   olx:wasLoggedBy :source-3.
 
 :test-3 rdf:type mlsx:DatasetRow;
@@ -167,8 +167,8 @@
 :network-address-7 rdf:type olx:NetworkAddress;
   olx:networkAddressIPV4 "192.168.230.122".
 
-:url-7 rdf:type olx:urlValue;
-  olx:urlValueValue "/".
+:url-7 rdf:type olx:URL;
+  olx:urlValue "/".
 
 :event-7 rdf:type olx:Event;
   olx:hasParameter :timestamp-7, :network-address-7, :url-7;
@@ -241,7 +241,7 @@
 
 :event-10 rdf:type olx:Event;
   olx:eventLogLevel "debug";
-  olx:hasParameter :timestamp-10, :shell-command-10, :file-10-1, :file-10-2;
+  olx:hasParameter :timestamp-10, :shell-command-10;
   olx:wasLoggedBy :source-10.
 
 :test-10 rdf:type mlsx:DatasetRow;
@@ -262,14 +262,14 @@
 :network-address-11 rdf:type olx:NetworkAddress;
   olx:networkAddressIPV4 "172.19.131.174".
 
-:url-11 rdf:type olx:urlValue;
+:url-11 rdf:type olx:URL;
   olx:urlValue "/paypal".
 
 :application-11 rdf:type olx:Application;
   olx:applicationName "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)".
 
 :event-11 rdf:type olx:Event;
-  olx:hasParameter :timestamp-11, :network-address-11, :url-11, :application-21;
+  olx:hasParameter :timestamp-11, :network-address-11, :url-11, :application-11;
   olx:wasLoggedBy :source-11.
 
 :test-11 rdf:type mlsx:DatasetRow;
@@ -289,7 +289,7 @@
   olx:sourceDevice "vpn".
 
 :event-12 rdf:type olx:Event;
-  olx:hasParameter :timestamp-22;
+  olx:hasParameter :timestamp-12;
   olx:wasLoggedBy :source-12.
 
 :test-12 rdf:type mlsx:DatasetRow;
@@ -413,13 +413,13 @@
   olx:userCredentialValue "root".
 
 :user-17-1 rdf:type olx:User;
-  olx:hasCredential :username-27-1.
+  olx:hasCredential :username-17-1.
 
 :username-17-2 rdf:type olx:UserName;
   olx:userCredentialValue "ait".
 
 :user-17-2 rdf:type olx:User;
-  olx:hasCredential :username-27-2;
+  olx:hasCredential :username-17-2;
   olx:userUID 0.
 
 :event-17 rdf:type olx:Event;
@@ -453,7 +453,7 @@
   olx:userCredentialValue "dorothy.ellis".
 
 :user-18 rdf:type olx:User;
-  olx:hasCredential :username-28.
+  olx:hasCredential :username-18.
 
 :file-18 rdf:type olx:File;
   olx:filePath "/usr/share/horde/login.php";
@@ -509,7 +509,7 @@
   olx:sourceDevice "cloud_share".
 
 :event-20 rdf:type olx:Event;
-  olx:hasParameter :timestamp-20, :application-20;
+  olx:hasParameter :timestamp-20;
   olx:wasLoggedBy :source-20.
 
 :test-20 rdf:type mlsx:DatasetRow;
@@ -534,7 +534,7 @@
 
 :event-21 rdf:type olx:Event;
   olx:eventLogLevel "notice";
-  olx:hasParameter :timestamp-21, :application-31;
+  olx:hasParameter :timestamp-21, :application-21;
   olx:wasLoggedBy :source-21.
 
 :test-21 rdf:type mlsx:DatasetRow;
@@ -899,7 +899,7 @@
 :source-37 rdf:type olx:Source;
   olx:sourceDevice "intranet_server".
 
-:url-37 rdf:type olx:urlValue;
+:url-37 rdf:type olx:URL;
   olx:urlValue "github.com".
 
 :network-address-37 rdf:type olx:NetworkAddress;
@@ -927,7 +927,7 @@
   olx:sourceDevice "inet-firewall".
 
 :event-38 rdf:type olx:Event;
-  olx:hasParameter :timestamp-38, :application-38;
+  olx:hasParameter :timestamp-38;
   olx:wasLoggedBy :source-38.
 
 :test-38 rdf:type mlsx:DatasetRow;
@@ -957,7 +957,7 @@
   olx:hasCredential :username-39.
 
 :event-39 rdf:type olx:Event;
-  olx:hasParameter :timestamp-39, :application-39, :network-address-39, :user-39;
+  olx:hasParameter :timestamp-39, :network-address-39, :user-39;
   olx:wasLoggedBy :source-39.
 
 :test-39 rdf:type mlsx:DatasetRow;
@@ -1012,7 +1012,7 @@
   olx:fileLine 196.
 
 :event-42 rdf:type olx:Event;
-  olx:hasParameter :application-42, :file-42;
+  olx:hasParameter :shell-command-42, :file-42;
   olx:wasLoggedBy :source-42.
 
 :test-42 rdf:type mlsx:DatasetRow;
@@ -1192,7 +1192,7 @@
   olx:sourceDevice "internal_share".
 
 :event-49 rdf:type olx:Event;
-  olx:hasParameter :timestamp-49, :application-49;
+  olx:hasParameter :timestamp-49;
   olx:wasLoggedBy :source-49.
 
 :test-49 rdf:type mlsx:DatasetRow;

@@ -100,7 +100,10 @@ class RunHandler:
                 graphs_pred.append(graph_pred)
                 total_success += 1
 
-                store.add_event_graph(graph_pred)
+                try:
+                    store.add_event_graph(graph_pred)
+                except Exception:
+                    logger.exception("Error storing graph for event '%s'", event)
 
             graphs_true.append(graph_true)
 

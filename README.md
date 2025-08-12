@@ -106,13 +106,13 @@ This section reports useful queries to run in the Neo4j database to inspect the 
 
 - Get run result nodes:
 ```
-MATCH (n) WHERE n:EvaluationMeasure or n:ModelEvaluation or n:Run RETURN n
+MATCH (n) WHERE n:mlsx__EvaluationMeasure or n:mlsx__ModelEvaluation or n:mlsx__Run RETURN n
 ```
 This command is particulary useful to inspect the number of completed runs, after launching an experiment.
 
 - Get mean evaluation results with standard deviation:
 ```
-MATCH (m:EvaluationMeasure)<-[:specifiedBy]-(e:ModelEvaluation) RETURN m.hasName AS measure, avg(e.hasValue) AS mean, stDev(e.hasValue) AS SD ORDER BY measure
+MATCH (m:mlsx__EvaluationMeasure)<-[:specifiedBy]-(e:mlsx__ModelEvaluation) RETURN m.hasName AS measure, avg(e.hasValue) AS mean, stDev(e.hasValue) AS SD ORDER BY measure
 ```
 
 ## License

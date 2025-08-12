@@ -152,7 +152,7 @@ class Schema:
         self.__graph_store.query(
             """
             MATCH (e:mlsx__Experiment {uri: $experiment_uri})
-            CREATE (r:mls__Run {uri: $run_uri})<-[:mls__hasPart]-(e)
+            CREATE (r:mlsx__Run {uri: $run_uri})<-[:mlsx__hasPart]-(e)
             """,
             params={
                 "run_uri": self.__run_uri,

@@ -225,7 +225,7 @@ class Dataset:
         )
 
         dataset_row_properties = {
-            "eventMessage": graph.source.page_content,
+            "mlsx__eventMessage": graph.source.page_content,
             "embedding": self.__embeddings.embed_query(text),
             "uri": f"{self.__config.run_uri}/{uuid.uuid4()}",
         }
