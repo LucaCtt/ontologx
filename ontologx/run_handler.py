@@ -140,8 +140,7 @@ class RunHandler:
             if key.startswith("neo4j"):
                 continue
 
-            if isinstance(value, str | int | float | bool):
-                store.add_hyperparameter(key, value)
+            store.add_hyperparameter(key, value)
 
     def __get_store_config(self) -> StoreConfig:
         run_uri = f"{self.__experiment_uri}/{uuid.uuid4()!s}"

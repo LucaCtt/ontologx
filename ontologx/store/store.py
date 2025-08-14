@@ -84,3 +84,7 @@ class Store(ABC):
             evaluation (Any): The value of the evaluation.
 
         """
+
+    @abstractmethod
+    def add_hyperparameter(self, name: str, value: str | float | bool) -> None:
+        """Add a hyperparameter to the schema."""
