@@ -26,6 +26,12 @@ olx = "ontologx.__main__:main"
 ruff = "^0.12.4"
 pre-commit = "^4.1.0"
 
+[tool.poetry.group.openai]
+optional = true
+
+[tool.poetry.group.openai.dependencies]
+langchain-openai = "^0.3.30"
+
 [tool.poetry.group.huggingface]
 optional = true
 

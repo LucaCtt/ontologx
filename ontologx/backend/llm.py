@@ -71,6 +71,17 @@ def bedrock_llm(model: str, temperature: float) -> ParserModel:
     )
 
 
+def openai_llm(model: str, temperature: float, url: str) -> ParserModel:
+    """Create an OpenAI LLM instance using the specified model and URL."""
+    from langchain_openai import ChatOpenAI
+
+    return ChatOpenAI(
+        model=model,
+        base_url=url,
+        temperature=temperature,
+    )
+
+
 class LLMFactory:
     """Factory class for creating LLM instances."""
 
@@ -109,6 +120,9 @@ class LLMFactory:
 
             case "bedrock":
                 return bedrock_llm(model, temperature)
+
+            case "openai":
+                return openai_llm(model, temperature, url)
 
             case _:
                 msg = f"Unsupported backend type: {backend}"
