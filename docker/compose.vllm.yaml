@@ -44,9 +44,6 @@ services:
       - ontologx
     entrypoint: python3
     command: -m vllm.entrypoints.openai.api_server --model ${PARSER_MODEL} --task generate --trust-remote-code ${VLLM_ADDITIONAL_ARGS-} # Ad-hoc vllm arguments are likely to be needed
-    environment:
-      - CUDA_DEVICE_ORDER=PCI_BUS_ID
-      - CUDA_VISIBLE_DEVICES=${VLLM_VISIBLE_DEVICES-}
     env_file:
       - ../.env
     healthcheck:
@@ -77,9 +74,6 @@ services:
       - 9000
     env_file:
       - ../.env
-    environment:
-      - CUDA_DEVICE_ORDER=PCI_BUS_ID
-      - CUDA_VISIBLE_DEVICES=${INFINITY_VISIBLE_DEVICES-}
     healthcheck:
       test: [ "CMD", "curl", "--fail", "http://localhost:9000/docs" ]
       interval: 20s
