@@ -5,12 +5,12 @@ This repository contains the code for OntoLogX, developed by researchers at the 
 ## Getting Started
 
 ### Installation
-To install OntoLogX, you can use Poetry. First, make sure you have Poetry installed. Then, run the following command:
+To install OntoLogX, you can use [uv](https://docs.astral.sh/uv/). First, make sure you have `uv` installed. Then, run the following command:
 
 ```bash
-poetry install --with dev, vllm, aws
+uv sync -group aws
 ```
-This will create a virtual environment and install all the main project dependencies, including the development dependencies and the optional dependencies for the VLLM and AWS backends. See [Backends](#backends) for more information on the supported backends.
+This will create a virtual environment and install all the main project dependencies, including the development dependencies and the optional dependencies for the AWS backend. See [Backends](#backends) for more information on the supported backends.
 
 ### Running OntoLogX
 
@@ -86,16 +86,16 @@ It is recommended to use Infinity for the embeddings, as it provides a fast and 
 If you intend to work on the codebase, first make sure to install the development dependencies by running:
 
 ```bash
-poetry install --with dev
+uv sync
 ```
 
 To ensure code quality and consistency, we use [Ruff](https://beta.ruff.rs/docs/) for linting. The `pyproject.toml` file contains the configuration for Ruff, which is recommende for linting and formatting the code. Make suure to install the appropriate extension for your editor, such as the [Ruff extension for VSCode](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff). To run the linter manually, you can use the following command:
 
 ```bash
-poetry run ruff check .
+uv run ruff check .
 ```
 
-The repo also includes pre-commit hooks for running Ruff, and to check the Poetry config. To install them, run:
+The repo also includes pre-commit hooks for running Ruff, and to check the `uv` config. To install them, run:
 ```bash
 pre-commit install
 ```

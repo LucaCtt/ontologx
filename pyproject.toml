@@ -2,17 +2,17 @@
 name = "ontologx"
 version = "0.1.0"
 description = ""
-authors = [{name="Luca Cotti", email = "luca.cotti@unibs.it"}]
-license = {text = "MIT"}
-readme = "README.md"
+authors = [{ name = "Luca Cotti", email = "luca.cotti@unibs.it" }]
 requires-python = ">=3.13,<3.14"
+readme = "README.md"
+license = { text = "MIT" }
 dependencies = [
     "langchain>=0.3.18",
     "langchain-community>=0.3.17",
     "python-dotenv>=1.0.1",
     "neo4j>=5.28.1",
     "pydantic (>=2.11.7,<3.0.0)",
-    "langchain-neo4j[mmr] (>=0.5.0,<0.6.0)",
+    "langchain-neo4j (>=0.5.0,<0.6.0)",
     "rdflib (>=7.1.4,<8.0.0)",
     "deepeval (>=3.3.0,<4.0.0)",
     "pyshacl (>=0.30.1,<0.31.0)",
@@ -22,47 +22,26 @@ dependencies = [
 [project.scripts]
 olx = "ontologx.__main__:main"
 
-[tool.poetry.group.dev.dependencies]
-ruff = "^0.12.4"
-pre-commit = "^4.1.0"
-
-[tool.poetry.group.openai]
-optional = true
-
-[tool.poetry.group.openai.dependencies]
-langchain-openai = "^0.3.30"
-
-[tool.poetry.group.huggingface]
-optional = true
-
-[tool.poetry.group.huggingface.dependencies]
-torch = "^2.6.0"
-langchain-huggingface = "^0.1.2"
-sentence-transformers = "^3.4.1"
-accelerate = "^1.4.0"
-einops = "^0.8.1"
-
-[tool.poetry.group.ollama]
-optional = true
-
-[tool.poetry.group.ollama.dependencies]
-langchain-ollama = "^0.2.3"
-
-[tool.poetry.group.aws]
-optional = true
-
-[tool.poetry.group.aws.dependencies]
-langchain-aws = "^0.2.22"
-
-[tool.poetry.group.vllm]
-optional = true
-
-[tool.poetry.group.vllm.dependencies]
-langchain-openai = "^0.3.16"
+[dependency-groups]
+dev = [
+    "ruff>=0.12.4,<0.13",
+    "pre-commit>=4.1.0,<5",
+]
+openai = ["langchain-openai>=0.3.30,<0.4"]
+huggingface = [
+    "torch>=2.6.0,<3",
+    "langchain-huggingface>=0.1.2,<0.2",
+    "sentence-transformers>=3.4.1,<4",
+    "accelerate>=1.4.0,<2",
+    "einops>=0.8.1,<0.9",
+]
+ollama = ["langchain-ollama>=0.2.3,<0.3"]
+aws = ["langchain-aws>=0.2.22,<0.3"]
+vllm = ["langchain-openai>=0.3.16,<0.4"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.8.11,<0.9.0"]
+build-backend = "uv_build"
 
 [tool.ruff]
 line-length = 120
