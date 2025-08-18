@@ -1,19 +1,23 @@
+# Pull the uv image to avoid an additional download step
 FROM ghcr.io/astral-sh/uv:0.8.11-python3.13-trixie-slim
-
-ENV UV_LINK_MODE=copy
 
 WORKDIR /app
 
+# Copy the lock files first to leverage Docker cache
+COPY pyproject.toml uv.lock ./
+
+# Install required dependencies.
+# The `--no-install-project` flag is used to avoid installing the project itself,
+# which is handled in a later step to avoid re-downloading dependencies
+# when the source code changes.
 RUN --mount=type=cache,target=/root/.cache/uv \
-    --mount=type=bind,source=uv.lock,target=uv.lock \
-    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --locked --no-install-project --group vllm --group aws --no-dev
+    uv sync --locked --no-install-project --group aws --group openai --group vllm --no-dev
 
-COPY ontologx ./ontologx
-COPY resources ./resources
+COPY src src
+COPY resources resources
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-dev
+    uv sync --locked --group aws --group openai --group vllm --no-dev
 
-ENTRYPOINT ["uv", "run", "--no-dev", "olx", "run"]
+ENTRYPOINT ["uv", "run", "--no-dev", "olx"]
 

@@ -4,7 +4,6 @@ version = "0.1.0"
 description = ""
 authors = [{ name = "Luca Cotti", email = "luca.cotti@unibs.it" }]
 requires-python = ">=3.13,<3.14"
-readme = "README.md"
 license = { text = "MIT" }
 dependencies = [
     "langchain>=0.3.18",
