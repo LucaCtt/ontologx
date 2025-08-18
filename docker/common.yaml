@@ -1,0 +1,60 @@
+services:
+  embs:
+    image: michaelf34/infinity:0.0.76
+    container_name: ${EXPERIMENT_NAME:-default}_embs
+    volumes:
+      - ../exps/${EXPERIMENT_NAME:-default}/embs:/app/.cache
+    restart: on-failure:3
+    runtime: nvidia
+    command: v2 --model-id ${EMBEDDINGS_MODEL} --dtype float16 --port 9000
+    networks:
+      - ontologx
+    expose:
+      - 9000
+    env_file:
+      - ../.env
+    healthcheck:
+      test: [ "CMD", "curl", "--fail", "http://localhost:9000/docs" ]
+      interval: 20s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+      start_interval: 10s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [ gpu ]
+
+  neo4j:
+    image: neo4j:5.20.0
+    container_name: ${EXPERIMENT_NAME:-default}_neo4j
+    environment:
+      - NEO4J_PLUGINS=["apoc", "n10s"]
+      - NEO4J_dbms_usage__report_enabled=false
+      - NEO4J_AUTH=neo4j/password
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
+    volumes:
+      - ../exps/${EXPERIMENT_NAME:-default}/neo4j/data:/data
+      - ../exps/${EXPERIMENT_NAME:-default}/neo4j/logs:/logs
+      - ../exps/${EXPERIMENT_NAME:-default}/neo4j/plugins:/plugins
+    networks:
+      - ontologx
+    expose:
+      - 7474
+      - 7687
+    restart: on-failure:3
+    healthcheck:
+      test: [ "CMD", "wget", "-q", "--spider", "http://localhost:7474" ] # The neo4j image has wget only, not curl
+      interval: 20s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
+      start_interval: 10s
+
+networks:
+  ontologx:
+    driver: bridge

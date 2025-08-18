@@ -73,7 +73,7 @@ def bedrock_llm(model: str, temperature: float) -> ParserModel:
 
 def openai_llm(model: str, temperature: float, url: str) -> ParserModel:
     """Create an OpenAI LLM instance using the specified model and URL."""
-    from langchain_openai import ChatOpenAI
+    from langchain_openai import ChatOpenAI  # type: ignore[import]
 
     return ChatOpenAI(
         model=model,

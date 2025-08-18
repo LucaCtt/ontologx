@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 _DEFAULT_LLM_MODELS = {
+    "openai": "gpt-oss-20b",
     "ollama": "llama3.2:3b",
     "huggingface": "meta-llama/Llama-3.2-3B-Instruct",
     "vllm": "meta-llama/Llama-3.2-3B-Instruct",
