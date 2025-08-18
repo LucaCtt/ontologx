@@ -13,8 +13,8 @@ COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-install-project --group aws --group openai --group vllm --no-dev
 
-COPY src src
 COPY resources resources
+COPY src src
 
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --group aws --group openai --group vllm --no-dev

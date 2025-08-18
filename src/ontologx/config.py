@@ -65,7 +65,7 @@ class Config:
     tests_path = os.getenv("TESTS_PATH", "resources/data/ait/test.ttl")
     """The input path to the logs to parse."""
 
-    shacl_path = os.getenv("CONSTRAINTS_PATH", ".resources/ontologies/logs_shacl.ttl")
+    shacl_path = os.getenv("CONSTRAINTS_PATH", "resources/ontologies/logs_shacl.ttl")
     """The path to the SHACL constraints file for the ontology."""
 
     prompt_path = os.getenv(
