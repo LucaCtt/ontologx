@@ -1,6 +1,7 @@
 """Baseline parser for constructing a knowledge graph using a language model with plain prompting."""
 
 import json
+import re
 
 from langchain_core.documents import Document
 from langchain_core.language_models import BaseChatModel
@@ -21,7 +22,28 @@ def _parse_json(llm_output: BaseMessage) -> dict:
             else json.dumps(llm_output.content),
         )
     except json.JSONDecodeError:
-        # If the output is not in json format, return an empty dict
+        # If the output is not in pure JSON format, check if any output is present
+        # between <output> tags (for reasoning models).
+        if isinstance(llm_output.content, str):
+            # Candidate output JSON
+            candidates = re.findall(r'\{.*?\}', llm_output.content, re.DOTALL)
+
+            # Get the longest candidates first, as they are more likely to be complete JSON objects
+            candidates.sort(key=len, reverse=True)
+
+            for candidate in candidates:
+                try:
+                    # Attempt to parse the candidate as JSON
+                    out = json.loads(candidate.replace("\n", ""))
+
+                    # Check if the output contains both nodes and relationships
+                    if out.get("nodes") and out.get("relationships"):
+                        return out
+                except json.JSONDecodeError:
+                    # If the candidate is not valid JSON, continue to the next one
+                    continue
+
+        # If nothing else works, return an empty dictionary
         return {}
 
 
