@@ -1,63 +1,63 @@
 name: ${EXPERIMENT_NAME:-default}
 include:
-    - docker/common.yaml
+  - common.yaml
 
 services:
-    ontologx:
-        build:
-            context: ..
-            dockerfile: docker/ontologx.dockerfile
-        container_name: ${EXPERIMENT_NAME:-default}_olx
-        environment:
-            - PARSER_BACKEND=vllm
-            - PARSER_BACKEND_URL=http://llm:8000/v1
-            - EMBEDDINGS_BACKEND=infinity
-            - EMBEDDINGS_BACKEND_URL=http://embs:9000
-            - TESTS_BACKEND=bedrock
-            - NEO4J_URL=bolt://neo4j:7687
-            - OPENAI_API_KEY=Empty # Required by OpenAI client API
-            - TRANSFORMERS_VERBOSITY=critical
-        env_file:
-            - ../.env
-        depends_on:
-            llm:
-                condition: service_healthy
-                restart: true
-            embs:
-                condition: service_healthy
-                restart: true
-            neo4j:
-                condition: service_healthy
-                restart: true
-        networks:
-            - ontologx
+  ontologx:
+    build:
+      context: ..
+      dockerfile: docker/ontologx.dockerfile
+    container_name: ${EXPERIMENT_NAME:-default}_olx
+    environment:
+      - PARSER_BACKEND=vllm
+      - PARSER_BACKEND_URL=http://llm:8000/v1
+      - EMBEDDINGS_BACKEND=infinity
+      - EMBEDDINGS_BACKEND_URL=http://embs:9000
+      - TESTS_BACKEND=bedrock
+      - NEO4J_URL=bolt://neo4j:7687
+      - OPENAI_API_KEY=Empty # Required by OpenAI client API
+      - TRANSFORMERS_VERBOSITY=critical
+    env_file:
+      - ${PWD}/.env
+    depends_on:
+      llm:
+        condition: service_healthy
+        restart: true
+      embs:
+        condition: service_healthy
+        restart: true
+      neo4j:
+        condition: service_healthy
+        restart: true
+    networks:
+      - ontologx
 
-    llm:
-        image: vllm/vllm-openai:v0.10.1
-        container_name: ${EXPERIMENT_NAME:-default}_llm
-        volumes:
-            - ${EXPERIMENTS_DIR:-./exps}/${EXPERIMENT_NAME:-default}/vllm/llms:/root/.cache/huggingface # Save models so they are not downloaded every time
-        runtime: nvidia
-        ipc: host # Allow the container access to the host's shared memory
-        restart: on-failure:3
-        expose:
-            - 8000
-        networks:
-            - ontologx
-        entrypoint: python3
-        command: -m vllm.entrypoints.openai.api_server --model ${PARSER_MODEL} --task generate --trust-remote-code ${VLLM_ADDITIONAL_ARGS-} # Ad-hoc vllm arguments are likely to be needed
-        env_file:
-            - ../.env
-        healthcheck:
-            test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-            interval: 20s
-            timeout: 10s
-            retries: 300 # A lot of retries because big models may take a while to load
-            start_period: 30s
-            start_interval: 10s
-        deploy:
-            resources:
-                reservations:
-                    devices:
-                        - driver: nvidia
-                          capabilities: [gpu]
+  llm:
+    image: vllm/vllm-openai:v0.10.1
+    container_name: ${EXPERIMENT_NAME:-default}_llm
+    volumes:
+      - ${PWD}/exps/${EXPERIMENT_NAME:-default}/vllm/llms:/root/.cache/huggingface # Save models so they are not downloaded every time
+    runtime: nvidia
+    ipc: host # Allow the container access to the host's shared memory
+    restart: on-failure:3
+    expose:
+      - 8000
+    networks:
+      - ontologx
+    entrypoint: python3
+    command: -m vllm.entrypoints.openai.api_server --model ${PARSER_MODEL} --task generate --trust-remote-code ${VLLM_ADDITIONAL_ARGS-} # Ad-hoc vllm arguments are likely to be needed
+    env_file:
+      - ${PWD}/.env
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 20s
+      timeout: 10s
+      retries: 300 # A lot of retries because big models may take a while to load
+      start_period: 30s
+      start_interval: 10s
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]

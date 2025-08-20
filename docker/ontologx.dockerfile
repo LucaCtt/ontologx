@@ -20,4 +20,3 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --group aws --group openai --group vllm --no-dev
 
 ENTRYPOINT ["uv", "run", "--no-dev", "olx"]
-
