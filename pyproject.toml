@@ -22,10 +22,7 @@ dependencies = [
 olx = "ontologx.__main__:main"
 
 [dependency-groups]
-dev = [
-    "ruff>=0.12.4,<0.13",
-    "pre-commit>=4.1.0,<5",
-]
+dev = ["ruff>=0.12.4,<0.13", "pre-commit>=4.1.0,<5"]
 openai = ["langchain-openai>=0.3.30,<0.4"]
 huggingface = [
     "torch>=2.6.0,<3",
@@ -36,7 +33,6 @@ huggingface = [
 ]
 ollama = ["langchain-ollama>=0.2.3,<0.3"]
 aws = ["langchain-aws>=0.2.22,<0.3"]
-vllm = ["langchain-openai>=0.3.16,<0.4"]
 
 [build-system]
 requires = ["uv_build>=0.8.11,<0.9.0"]
@@ -51,12 +47,12 @@ select = [
     "ALL", # include all the rules, including new ones
 ]
 ignore = [
-    "D107", # Missing docstring in __init__
-    "FBT001", # Boolean-typed positional argument in function definition
+    "D107",    # Missing docstring in __init__
+    "FBT001",  # Boolean-typed positional argument in function definition
     "PLR0913", # Too many arguments in function definition
-    "ANN204", # Missing return type for special method `__init__`
-    "TC002", # Move into type-checking block
-    "D203", # Incorrect blank line before class
-    "D213", # Multi line summary second line
-    "PLC0415" # Imports at top level
+    "ANN204",  # Missing return type for special method `__init__`
+    "TC002",   # Move into type-checking block
+    "D203",    # Incorrect blank line before class
+    "D213",    # Multi line summary second line
+    "PLC0415", # Imports at top level
 ]
