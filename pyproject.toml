@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = [{ name = "Luca Cotti", email = "luca.cotti@unibs.it" }]
 requires-python = ">=3.13,<3.14"
-license = { text = "MIT" }
+license = { file = "LICENSE" }
 dependencies = [
     "langchain>=0.3.18",
     "langchain-community>=0.3.17",
@@ -23,7 +23,6 @@ olx = "ontologx.__main__:main"
 
 [dependency-groups]
 dev = ["ruff>=0.12.4,<0.13", "pre-commit>=4.1.0,<5"]
-openai = ["langchain-openai>=0.3.30,<0.4"]
 huggingface = [
     "torch>=2.6.0,<3",
     "langchain-huggingface>=0.1.2,<0.2",
@@ -32,7 +31,9 @@ huggingface = [
     "einops>=0.8.1,<0.9",
 ]
 ollama = ["langchain-ollama>=0.2.3,<0.3"]
+vllm = ["langchain-openai>=0.3.16,<0.4"]
 aws = ["langchain-aws>=0.2.22,<0.3"]
+openai = ["langchain-openai>=0.3.30,<0.4"]
 
 [build-system]
 requires = ["uv_build>=0.8.11,<0.9.0"]

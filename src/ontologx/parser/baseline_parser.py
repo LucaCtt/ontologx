@@ -26,7 +26,7 @@ def _parse_json(llm_output: BaseMessage) -> dict:
         # between <output> tags (for reasoning models).
         if isinstance(llm_output.content, str):
             # Candidate output JSON
-            candidates = re.findall(r'\{.*?\}', llm_output.content, re.DOTALL)
+            candidates = re.findall(r"\{.*?\}", llm_output.content, re.DOTALL)
 
             # Get the longest candidates first, as they are more likely to be complete JSON objects
             candidates.sort(key=len, reverse=True)
