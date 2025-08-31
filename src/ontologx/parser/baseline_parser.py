@@ -78,7 +78,11 @@ class BaselineParser(Parser):
         out = self.chain.invoke({"event": event, "context": context})
         raw_schema = _parse_json(out)
 
-        output_graph = GraphDocument(nodes=[], relationships=[], source=Document(page_content=event, metadata=context))
+        output_graph = GraphDocument(
+            nodes=[],
+            relationships=[],
+            source=Document(page_content=event, metadata={"context": context}),
+        )
 
         if "nodes" not in raw_schema or not isinstance(raw_schema["nodes"], list):
             return output_graph

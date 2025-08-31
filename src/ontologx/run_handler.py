@@ -9,9 +9,9 @@ from rich.progress import track
 
 from ontologx.backend import EmbeddingsFactory, LLMFactory, TestsFactory
 from ontologx.config import Config
-from ontologx.metrics.metrics import MetricsEvaluator
+from ontologx.metrics import GEvalGraphAlignmentMetrics, OntologyMetrics, SHACLMetrics, TacticsMetrics
 from ontologx.parser import ParserFactory
-from ontologx.store import GraphDocument
+from ontologx.store import GraphDocument, Store
 from ontologx.store.config import StoreAuth, StoreConfig
 from ontologx.store.neo4j.neo4j_store import Neo4jStore
 
@@ -42,6 +42,12 @@ class RunHandler:
             model=config.tests_model,
             url=config.tests_backend_url,
         )
+        self.__tactics_model = LLMFactory.create(
+            backend=config.tactics_backend,
+            model=config.tactics_model,
+            temperature=config.tactics_temperature,
+            url=config.tactics_backend_url,
+        )
 
         self.__study_uri = f"{_BASE_URI}/study"
         self.__experiment_uri = f"{self.__study_uri}/{config.experiment_name}"
@@ -55,9 +61,7 @@ class RunHandler:
             - True graphs (GraphDocument)
 
         """
-        store = Neo4jStore(self.__embeddings, self.__get_store_config())
-        store.initialize()
-
+        store = self.__initialize_new_store()
         logger.info("Store at '%s' initialized.", self.__config.neo4j_url)
 
         # Read the events at every run just in case,
@@ -82,7 +86,7 @@ class RunHandler:
 
         for graph_true in track(test_events, description="Parsing events"):
             event = graph_true.source.page_content
-            context = graph_true.source.metadata
+            context = graph_true.source.metadata["context"]
 
             logger.info("Parsing event: '%s'", event)
 
@@ -110,29 +114,16 @@ class RunHandler:
         logger.info("-------------------------")
         logger.info("Log parsing done.")
 
-        metrics = MetricsEvaluator(
-            graphs_pred,
-            graphs_true,
-            self.__tests_model,
-            self.__config.ontology_path,
-            self.__config.shacl_path,
+        results = self.__compute_metrics(graphs_pred, graphs_true)
+        results.update(
+            {
+                "run_total_time": total_time,
+                "mean_generation_time": total_time / len(test_events),
+                "generation_success_ratio": total_success / len(test_events),
+            },
         )
 
-        results = [
-            ("run_total_time", total_time),
-            ("mean_generation_time", total_time / len(test_events)),
-            ("generation_success_ratio", total_success / len(test_events)),
-            ("SHACL_violations_ratio", metrics.shacl_violations_ratio),
-            ("precision", metrics.precision),
-            ("recall", metrics.recall),
-            ("f1_score", metrics.f1),
-            ("entity_linking_accuracy", metrics.entity_linking_accuracy),
-            ("relationship_linking_accuracy", metrics.relationship_linking_accuracy),
-            ("g-eval_mean_all", metrics.geval_mean),
-            ("g-eval_mean_with_compliance", metrics.geval_mean_with_compliance),
-        ]
-
-        for name, value in results:
+        for name, value in results.items():
             logger.info("%s: %f", name.replace("_", " ").capitalize(), value)
             store.add_evaluation_result(name, value)
 
@@ -142,10 +133,10 @@ class RunHandler:
 
             store.add_hyperparameter(key, value)
 
-    def __get_store_config(self) -> StoreConfig:
+    def __initialize_new_store(self) -> Store:
         run_uri = f"{self.__experiment_uri}/{uuid.uuid4()!s}"
 
-        return StoreConfig(
+        config = StoreConfig(
             study_uri=self.__study_uri,
             experiment_uri=self.__experiment_uri,
             run_uri=run_uri,
@@ -159,3 +150,76 @@ class RunHandler:
                 password=self.__config.neo4j_password,
             ),
         )
+        store = Neo4jStore(self.__embeddings, config)
+        store.initialize()
+
+        return store
+
+    def __compute_metrics(
+        self,
+        y_pred: list[GraphDocument],
+        y_true: list[GraphDocument],
+    ) -> dict[str, float]:
+        """Compute the metrics for the given predicted and true graphs.
+
+        Args:
+            y_pred (list[GraphDocument]): The list of predicted graphs.
+            y_true (list[GraphDocument]): The list of true graphs.
+
+        Returns:
+            dict: A dictionary containing the computed metrics.
+
+        """
+        results = {}
+
+        if "ontology" in self.__config.metrics:
+            ontology_metrics = OntologyMetrics(
+                y_pred,
+                y_true,
+            )
+            results.update(
+                {
+                    "precision": ontology_metrics.precision,
+                    "recall": ontology_metrics.recall,
+                    "f1_score": ontology_metrics.f1,
+                    "entity_linking_accuracy": ontology_metrics.entity_linking_accuracy,
+                    "relationship_linking_accuracy": ontology_metrics.relationship_linking_accuracy,
+                },
+            )
+
+        if "shacl" in self.__config.metrics or "g-eval" in self.__config.metrics:
+            shacl_metrics = SHACLMetrics(
+                y_pred,
+                self.__config.ontology_path,
+                self.__config.shacl_path,
+            )
+            results.update(
+                {
+                    "SHACL_violations_ratio": shacl_metrics.violations_ratio,
+                },
+            )
+
+            if "g-eval" in self.__config.metrics:
+                geval_metrics = GEvalGraphAlignmentMetrics(
+                    y_pred,
+                    shacl_metrics.compliance_list,
+                    self.__tests_model,
+                )
+                results.update(
+                    {
+                        "g-eval_mean_all": geval_metrics.mean,
+                        "g-eval_mean_with_compliance": geval_metrics.mean_with_compliance,
+                    },
+                )
+
+        if "tactics" in self.__config.metrics:
+            ttps_metrics = TacticsMetrics(y_pred, y_true, self.__tactics_model, self.__config.tactics_prompt_path)
+            results.update(
+                {
+                    "tactics_precision": ttps_metrics.precision,
+                    "tactics_recall": ttps_metrics.recall,
+                    "tactics_f1_score": ttps_metrics.f1_score,
+                },
+            )
+
+        return results

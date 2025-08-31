@@ -46,16 +46,44 @@ def _convert_to_rdflib(data_graph: GraphDocument, ontology_graph: rdflib.Graph) 
 
 
 class SHACLMetrics:
+    """Class to calculate SHACL metrics for a list of graphs."""
+
+    def __init__(self, y_pred: list[GraphDocument], ontology_path: str, shacl_path: str) -> None:
+        ontology_graph = rdflib.Graph()
+        ontology_graph.parse(ontology_path, format="turtle")
+
+        shacl_graph = rdflib.Graph()
+        shacl_graph.parse(shacl_path, format="turtle")
+
+        self.__metrics = [_GraphSHACLMetrics(graph, ontology_graph, shacl_graph) for graph in y_pred]
+
+    @functools.cached_property
+    def violations_ratio(self) -> float:
+        """Calculate the average SHACL violations ratio across all graphs."""
+        if not self.__metrics:
+            return 0.0
+
+        total_ratio = sum(metric.violations_ratio for metric in self.__metrics)
+        return total_ratio / len(self.__metrics)
+
+    @functools.cached_property
+    def compliance_ratio(self) -> float:
+        """Calculate the average SHACL compliance ratio across all graphs."""
+        return 1 - self.violations_ratio
+
+    @functools.cached_property
+    def compliance_list(self) -> list[float]:
+        """Get a list of SHACL compliance ratios for each graph."""
+        return [1 - metric.violations_ratio for metric in self.__metrics]
+
+
+class _GraphSHACLMetrics:
     """Class to calculate SHACL metrics for a given graph."""
 
-    def __init__(self, graph: GraphDocument, ontology_path: str, shacl_path: str) -> None:
-        self.__ontology_graph = rdflib.Graph()
-        self.__ontology_graph.parse(ontology_path, format="turtle")
-
-        self.__shacl_graph = rdflib.Graph()
-        self.__shacl_graph.parse(shacl_path, format="turtle")
-
-        self.__data_graph = _convert_to_rdflib(graph, self.__ontology_graph)
+    def __init__(self, graph: GraphDocument, ontology_graph: rdflib.Graph, shacl_graph: rdflib.Graph) -> None:
+        self.__data_graph = _convert_to_rdflib(graph, ontology_graph)
+        self.__shacl_graph = shacl_graph
+        self.__ontology_graph = ontology_graph
 
     @functools.cached_property
     def violations_ratio(self) -> float:
@@ -64,11 +92,6 @@ class SHACLMetrics:
             return 0.0
 
         return self.__total_violations / self.__total_constraints
-
-    @functools.cached_property
-    def compliance_ratio(self) -> float:
-        """Calculate the compliance ratio based on SHACL violations."""
-        return 1.0 - self.violations_ratio
 
     @functools.cached_property
     def __total_violations(self) -> int:

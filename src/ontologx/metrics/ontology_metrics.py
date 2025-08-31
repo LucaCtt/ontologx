@@ -65,8 +65,42 @@ def _relationship_match(rel1: Relationship, rel2: Relationship) -> bool:
     )
 
 
-class OntologyGraphMetrics:
-    """Metrics for evaluating ontology graphs.
+class OntologyMetrics:
+    """Metrics for evaluating ontology graphs."""
+
+    def __init__(self, y_pred: list[GraphDocument], y_true: list[GraphDocument]):
+        self.__metrics = [_GraphOntologyMetrics(pred, true) for pred, true in zip(y_pred, y_true, strict=False)]
+
+    @functools.cached_property
+    def precision(self) -> float:
+        """Calculate precision across all pred graphs."""
+        return sum(metric.precision for metric in self.__metrics) / len(self.__metrics)
+
+    @functools.cached_property
+    def recall(self) -> float:
+        """Calculate recall across all pred graphs."""
+        return sum(metric.recall for metric in self.__metrics) / len(self.__metrics)
+
+    @functools.cached_property
+    def f1(self) -> float:
+        """Calculate F1 score across all pred graphs."""
+        return sum(metric.f1 for metric in self.__metrics) / len(self.__metrics)
+
+    @functools.cached_property
+    def entity_linking_accuracy(self) -> float:
+        """Calculate entity linking accuracy across all pred graphs."""
+        return sum(metric.entity_linking_accuracy for metric in self.__metrics) / len(self.__metrics)
+
+    @functools.cached_property
+    def relationship_linking_accuracy(self) -> float:
+        """Calculate relationship linking accuracy across all pred graphs."""
+        return sum(metric.relationship_linking_accuracy for metric in self.__metrics) / len(
+            self.__metrics,
+        )
+
+
+class _GraphOntologyMetrics:
+    """Metrics for evaluating an ontology graph.
 
     This class computes precision, recall, F1 score, entity linking accuracy,
     relationship linking accuracy, using a given predicted and true GraphDocument.

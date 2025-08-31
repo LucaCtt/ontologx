@@ -6,7 +6,7 @@ in the root directory of the project.
 """
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from dotenv import load_dotenv
 
@@ -53,6 +53,9 @@ class Config:
     the criterion for grouping is up to the user.
     """
 
+    metrics: list[str] = field(default_factory=lambda: os.getenv("METRICS", "ontology,shacl,g-eval,tactics").split(","))
+    """The metrics to compute at the end of the experiment."""
+
     n_runs = int(os.getenv("N_RUNS", "10"))
     """The number of runs to execute in the experiment."""
 
@@ -73,6 +76,11 @@ class Config:
         "resources/prompts/main.system.md" if parser_type == "main" else "resources/prompts/baseline.system.md",
     )
     """The prompt used to build the graph."""
+
+    tactics_prompt_path = os.getenv(
+        "TACTICS_PROMPT_PATH",
+        "resources/prompts/tactics.system.md",
+    )
 
     neo4j_url = os.getenv("NEO4J_URL", "bolt://localhost:7687")
     """The URL of the Neo4j database. Use bolt+ssc for self-signed certificates."""
@@ -139,6 +147,26 @@ class Config:
 
     tests_temperature = float(os.getenv("TESTS_TEMPERATURE", "0.4"))
     """The temperature of the LLM used to evaluate the tests. Must be between 0 and 1."""
+
+    tactics_backend = os.getenv("TACTICS_BACKEND", "ollama")
+    """The backend to use for the tactics llm.
+    Must be one of "ollama", "huggingface", "vllm", or "bedrock".
+    """
+
+    tactics_backend_url = os.getenv("TACTICS_BACKEND_URL", "http://localhost:11434")
+    """The URL of the tactics llm backend. Used only if the backend is "ollama" or "vllm"."""
+
+    tactics_model = os.getenv(
+        "TACTICS_MODEL",
+        _DEFAULT_LLM_MODELS[tactics_backend],
+    )
+    """
+    The model used to suggest tactics. Must be a valid model for the backend used,
+    e.g. a model from the HuggingFace model hub if using the HuggingFace backend.
+    """
+
+    tactics_temperature = float(os.getenv("TACTICS_TEMPERATURE", "0.4"))
+    """The temperature of the LLM used to suggest tactics. Must be between 0 and 1."""
 
     def __init__(self):
         if self.parser_temperature < 0 or self.parser_temperature > 1:

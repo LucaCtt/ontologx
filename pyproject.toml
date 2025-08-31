@@ -31,7 +31,6 @@ huggingface = [
     "einops>=0.8.1,<0.9",
 ]
 ollama = ["langchain-ollama>=0.2.3,<0.3"]
-vllm = ["langchain-openai>=0.3.16,<0.4"]
 aws = ["langchain-aws>=0.2.22,<0.3"]
 openai = ["langchain-openai>=0.3.30,<0.4"]
 

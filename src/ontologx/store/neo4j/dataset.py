@@ -156,7 +156,7 @@ class Dataset:
         test_nodes = self.__graph_store.query(
             """
             MATCH (d:mlsx__TestDataset)-[:mlsx__hasPart]->(r:mlsx__DatasetRow)-[:mlsx__hasLabel]->(e:olx__Event)
-            RETURN r.mlsx__eventMessage as eventMessage, e.uri as uri
+            RETURN r.mlsx__eventMessage as eventMessage, e.uri as uri, r.mlsx__tactics as tactics
             ORDER BY e.uri
             """,
         )
@@ -172,7 +172,10 @@ class Dataset:
                 if source_node.properties.get("olx__sourceDevice"):
                     context["sourceDevice"] = source_node.properties["olx__sourceDevice"]
 
-            graph.source = Document(page_content=test["eventMessage"], metadata=context)
+            graph.source = Document(
+                page_content=test["eventMessage"],
+                metadata={"context": context, "tactics": test["tactics"]},
+            )
             tests.append(normalize_output_graph(graph))
 
         return tests
@@ -221,7 +224,7 @@ class Dataset:
 
         text = _compose_embeddings_text(
             norm_graph.source.page_content,
-            norm_graph.source.metadata,
+            norm_graph.source.metadata["context"],
         )
 
         dataset_row_properties = {
@@ -420,7 +423,10 @@ class Dataset:
         return GraphDocument(
             nodes=list(nodes_dict.values()),
             relationships=relationships,
-            source=Document(page_content=dataset_row_node["properties"]["mlsx__eventMessage"], metadata=context),
+            source=Document(
+                page_content=dataset_row_node["properties"]["mlsx__eventMessage"],
+                metadata={"context": context},
+            ),
         )
 
     @functools.cached_property

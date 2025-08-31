@@ -52,7 +52,7 @@ class BaseEventGraph(BaseModel):
         return GraphDocument(
             nodes=list(nodes_dict.values()),
             relationships=relationships,
-            source=Document(page_content=source_event, metadata=context),
+            source=Document(page_content=source_event, metadata={"context": context}),
         )
 
 

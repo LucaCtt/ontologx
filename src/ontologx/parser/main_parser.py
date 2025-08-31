@@ -19,7 +19,7 @@ logger = logging.getLogger("rich")
 def _example_message_group(event_graph: GraphDocument) -> list[BaseMessage]:
     """Create an example message group for the given event and graph."""
     event = event_graph.source.page_content
-    context = event_graph.source.metadata
+    context = event_graph.source.metadata["context"]
 
     nodes = [
         {
