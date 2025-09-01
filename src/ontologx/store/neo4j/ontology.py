@@ -16,6 +16,8 @@ _ONTOLOGY_PARAMS = {
     "subPropertyOfRel": "subPropertyOf",
     "domainRel": "domain",
     "rangeRel": "range",
+    "handleMultival": "ARRAY",
+    "multivalPropList": ["https://cyberseclab.unibs.it/mlsx/dict#hasTactic"],
 }
 
 

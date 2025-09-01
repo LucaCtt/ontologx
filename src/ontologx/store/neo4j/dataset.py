@@ -156,7 +156,7 @@ class Dataset:
         test_nodes = self.__graph_store.query(
             """
             MATCH (d:mlsx__TestDataset)-[:mlsx__hasPart]->(r:mlsx__DatasetRow)-[:mlsx__hasLabel]->(e:olx__Event)
-            RETURN r.mlsx__eventMessage as eventMessage, e.uri as uri, r.mlsx__tactics as tactics
+            RETURN r.mlsx__eventMessage as eventMessage, e.uri as uri, r.mlsx__hasTactic as tactics
             ORDER BY e.uri
             """,
         )

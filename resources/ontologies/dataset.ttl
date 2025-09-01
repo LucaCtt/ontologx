@@ -99,6 +99,12 @@
   rdfs:label "hasLabel";
   rdfs:comment "The label of the log event in a dataset row.".
 
+:hasTactic rdf:type owl:ObjectProperty;
+  rdfs:domain :DatasetRow;
+  rdfs:range xsd:string;
+  rdfs:label "hasTactics";
+  rdfs:comment "The tactics associated with a log event in a dataset row.".
+
 :hasContext rdf:type owl:ObjectProperty;
   rdfs:domain :DatasetRow;
   rdfs:range olx:Source;
@@ -133,5 +139,3 @@
   rdfs:range xsd:string;
   rdfs:label "Event Message";
   rdfs:comment "The message of the log event in a dataset row.".
-
-
