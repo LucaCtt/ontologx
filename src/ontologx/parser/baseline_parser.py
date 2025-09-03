@@ -5,7 +5,7 @@ import re
 
 from langchain_core.documents import Document
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import BaseMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 
 from ontologx.parser.models import build_baseline_prompt
@@ -46,23 +46,58 @@ def _parse_json(llm_output: BaseMessage) -> dict:
         # If nothing else works, return an empty dictionary
         return {}
 
+def _example_message_group(event_graph: GraphDocument) -> list[BaseMessage]:
+    """Create an example message group for the given event and graph."""
+    event = event_graph.source.page_content
+    context = event_graph.source.metadata
+
+    nodes = [
+        {
+            "id": node.id,
+            "type": node.type,
+            "properties": [{"type": key, "value": value} for key, value in node.properties.items()],
+        }
+        for node in event_graph.nodes
+    ]
+
+    relationships = [
+        {
+            "source_id": rel.source.id,
+            "target_id": rel.target.id,
+            "type": rel.type,
+        }
+        for rel in event_graph.relationships
+    ]
+
+    return [
+        HumanMessage(f"Event: '{event}'\nContext: {context}", name="example_user"),
+        AIMessage(
+            json.dumps({"nodes": nodes, "relationships": relationships}),
+        ),
+    ]
 
 class BaselineParser(Parser):
     """Baseline class asking a LLM to create a KG, without any improvement."""
 
-    def __init__(self, llm: BaseChatModel, store: Store, prompt_build_graph: str) -> None:
+    def __init__(self, llm: BaseChatModel, store: Store, prompt_build_graph: str, examples_retrieval: bool) -> None:
         super().__init__(llm, store, prompt_build_graph)
+        self.examples_retrieval = examples_retrieval
 
         prompt = build_baseline_prompt(self.store.ontology(), prompt_build_graph)
 
         gen_graph_prompt = ChatPromptTemplate.from_messages(
             [
                 ("system", prompt),
+                ("placeholder", "{examples}"),
                 ("human", "Event: '{event}'\nContext: '{context}'"),
             ],
         )
 
         self.chain = gen_graph_prompt | llm
+
+    def __get_examples(self, event: str, context: dict) -> list[BaseMessage]:
+        similar_events = self.store.search("mmr", event, context, k=3)
+        return [msg for similar_event in similar_events for msg in _example_message_group(similar_event)]
 
     def parse(self, event: str, context: dict) -> GraphDocument | None:
         """Parse the given event and construct a knowledge graph, without using tools.
@@ -75,7 +110,9 @@ class BaselineParser(Parser):
             A report containing the stats of the parsing process.
 
         """
-        out = self.chain.invoke({"event": event, "context": context})
+        examples = self.__get_examples(event, context) if self.examples_retrieval else []
+
+        out = self.chain.invoke({"event": event, "context": context, "examples": examples})
         raw_schema = _parse_json(out)
 
         output_graph = GraphDocument(

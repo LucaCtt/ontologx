@@ -23,7 +23,7 @@ class ParserFactory:
         """Create a Parser instance.
 
         Args:
-            parser_type: The type of parser to create. Can be "baseline", "tools", or "main".
+            parser_type: The type of parser to create. Can be "baseline" or "main".
             llm: The language model to use for parsing.
             store: The store to use for storing the parsed graphs.
             prompt_build_graph: The prompt to use for building the graph.
@@ -37,7 +37,7 @@ class ParserFactory:
         """
         match parser_type:
             case "baseline":
-                return BaselineParser(llm, store, prompt_build_graph)
+                return BaselineParser(llm, store, prompt_build_graph, examples_retrieval)
             case "main":
                 return MainParser(llm, store, prompt_build_graph, correction_steps, examples_retrieval)
             case _:

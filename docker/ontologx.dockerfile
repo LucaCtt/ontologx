@@ -14,6 +14,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-install-project --group aws --group openai --no-dev
 
 COPY resources resources
+COPY LICENSE LICENSE
 COPY src src
 
 RUN --mount=type=cache,target=/root/.cache/uv \

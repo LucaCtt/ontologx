@@ -1222,6 +1222,9 @@ ollama = [
 openai = [
     { name = "langchain-openai" },
 ]
+vllm = [
+    { name = "langchain-openai" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -1252,6 +1255,7 @@ huggingface = [
 ]
 ollama = [{ name = "langchain-ollama", specifier = ">=0.2.3,<0.3" }]
 openai = [{ name = "langchain-openai", specifier = ">=0.3.30,<0.4" }]
+vllm = [{ name = "langchain-openai", specifier = ">=0.3.16,<0.4" }]
 
 [[package]]
 name = "openai"
