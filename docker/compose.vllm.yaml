@@ -33,7 +33,7 @@ services:
       - ontologx
 
   llm:
-    image: vllm/vllm-openai:v0.10.1
+    image: vllm/vllm-openai:v0.9.2
     container_name: ${EXPERIMENT_NAME:-default}_llm
     volumes:
       - ${PWD}/exps/${EXPERIMENT_NAME:-default}/vllm/llms:/root/.cache/huggingface # Save models so they are not downloaded every time
