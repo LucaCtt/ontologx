@@ -74,9 +74,6 @@ class _TacticsPredictor:
 
 class _SessionTacticMetrics:
     def __init__(self, y_labels_pred: list[_MITRETactic], y_labels_true: list[_MITRETactic]):
-        self.__y_labels_pred = y_labels_pred
-        self.__y_labels_true = y_labels_true
-
         predicted_set = set(y_labels_pred)
         ground_truth_set = set(y_labels_true)
 

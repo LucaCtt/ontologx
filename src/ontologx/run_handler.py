@@ -7,7 +7,7 @@ from pathlib import Path
 
 from rich.progress import track
 
-from ontologx.backend import EmbeddingsFactory, LLMFactory, TestsFactory
+from ontologx.backend import EmbeddingsFactory, LLMFactory
 from ontologx.config import Config
 from ontologx.metrics import GEvalGraphAlignmentMetrics, OntologyMetrics, SHACLMetrics, TacticsMetrics
 from ontologx.parser import ParserFactory
@@ -37,15 +37,16 @@ class RunHandler:
             temperature=config.parser_temperature,
             url=config.parser_backend_url,
         )
-        self.__tests_model = TestsFactory.create(
-            backend=config.tests_backend,
-            model=config.tests_model,
-            url=config.tests_backend_url,
+        self.__tests_model = LLMFactory.create(
+            backend=config.geval_backend,
+            model=config.geval_model,
+            temperature=0.4,
+            url=config.geval_backend_url,
         )
         self.__tactics_model = LLMFactory.create(
             backend=config.tactics_backend,
             model=config.tactics_model,
-            temperature=config.tactics_temperature,
+            temperature=0.4,
             url=config.tactics_backend_url,
         )
 
@@ -73,7 +74,7 @@ class RunHandler:
             self.__config.parser_type,
             self.__parser_model,
             store,
-            Path(self.__config.prompt_path).read_text(),
+            Path(self.__config.parser_prompt_path).read_text(),
             examples_retrieval=self.__config.examples_retrieval,
             correction_steps=self.__config.correction_steps,
         )

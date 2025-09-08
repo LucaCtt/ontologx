@@ -11,10 +11,11 @@ services:
     environment:
       - PARSER_BACKEND=bedrock
       - EMBEDDINGS_BACKEND=infinity
-      - TESTS_BACKEND=bedrock
       - EMBEDDINGS_BACKEND_URL=http://embs:9000
+      - TACTICS_BACKEND=openai
+      - TACTICS_BACKEND_URL=http://tactics:8000/v1
+      - GEVAL_BACKEND=bedrock
       - NEO4J_URL=bolt://neo4j:7687
-      - TRANSFORMERS_VERBOSITY=critical
     env_file:
       - ${PWD}/.env
     depends_on:

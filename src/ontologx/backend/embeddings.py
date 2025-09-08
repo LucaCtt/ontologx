@@ -3,13 +3,6 @@
 from langchain_core.embeddings import Embeddings
 
 
-def hf_embeddings(model: str) -> Embeddings:
-    """Create a Hugging Face embeddings instance."""
-    from langchain_huggingface.embeddings import HuggingFaceEmbeddings  # type: ignore[attr-defined]
-
-    return HuggingFaceEmbeddings(model_name=model, model_kwargs={"trust_remote_code": True})
-
-
 def infinity_embeddings(model: str, url: str) -> Embeddings:
     """Create an Infinity embeddings instance."""
     from langchain_community.embeddings import InfinityEmbeddings  # type: ignore[attr-defined]
@@ -49,9 +42,6 @@ class EmbeddingsFactory:
 
         """
         match backend:
-            case "huggingface":
-                return hf_embeddings(model)
-
             case "infinity":
                 return infinity_embeddings(model, url)
 

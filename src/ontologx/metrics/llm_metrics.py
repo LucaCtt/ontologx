@@ -5,9 +5,28 @@ import functools
 from deepeval.metrics.g_eval.g_eval import GEval
 from deepeval.models.base_model import DeepEvalBaseLLM
 from deepeval.test_case.llm_test_case import LLMTestCase, LLMTestCaseParams
+from langchain_core.language_models import BaseChatModel
 
 from ontologx.store import GraphDocument
 
+
+class _DeepEvalWrapper(DeepEvalBaseLLM):
+        def __init__(self, model: BaseChatModel) -> None:
+            self.model = model
+
+        def load_model(self) -> BaseChatModel: # type: ignore[override]
+            return self.model
+
+        def generate(self, prompt: str) -> str:
+            out = self.model.invoke(prompt)
+            return str(out.content)
+
+        async def a_generate(self, prompt: str) -> str:
+            out = await self.model.ainvoke(prompt)
+            return str(out.content)
+
+        def get_model_name(self) -> str:
+            return f"{self.model.name} (Langchain)"
 
 def _stringify_graph(graph: GraphDocument) -> str:
     """Convert a GraphDocument to a string representation."""
@@ -49,7 +68,7 @@ class GEvalGraphAlignmentMetrics:
                 try:
                     res = self.__metric.measure(test_case, _show_indicator=False)
                     break
-                except ValueError as _:
+                except ValueError:
                     continue
 
             result.append(res)
@@ -71,7 +90,7 @@ class GEvalGraphAlignmentMetrics:
             else 0
         )
 
-    def __init__(self, y_pred: list[GraphDocument], y_compliance: list[float], llm_model: DeepEvalBaseLLM):
+    def __init__(self, y_pred: list[GraphDocument], y_compliance: list[float], llm_model: BaseChatModel):
         """Initialize the G-Eval metrics with predictions and the LLM model.
 
         Args:
@@ -84,7 +103,7 @@ class GEvalGraphAlignmentMetrics:
         self.__y_compliance = y_compliance
         self.__metric = GEval(
             name="Graph Alignment",
-            model=llm_model,
+            model=_DeepEvalWrapper(llm_model),
             evaluation_steps=[
                 (
                     "Write a detailed description of the input log event in natural language. "

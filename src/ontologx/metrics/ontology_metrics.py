@@ -4,7 +4,7 @@ import functools
 
 from ontologx.store import GraphDocument, Node, Relationship
 
-type _Triple = tuple[str, str, str]  # Triple in the form (subject, predicate, object)
+_Triple = tuple[str, str, str]  # Triple in the form (subject, predicate, object)
 
 
 def _triples(graph: GraphDocument) -> list[_Triple]:

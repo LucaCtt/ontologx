@@ -18,6 +18,6 @@ COPY LICENSE LICENSE
 COPY src src
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --group aws --group openai --no-dev
+    uv sync --locked --group bedrock --group openai --no-dev
 
 ENTRYPOINT ["uv", "run", "--no-dev", "olx"]

@@ -23,15 +23,8 @@ olx = "ontologx.__main__:main"
 
 [dependency-groups]
 dev = ["ruff>=0.12.4,<0.13", "pre-commit>=4.1.0,<5"]
-huggingface = [
-    "torch>=2.6.0,<3",
-    "langchain-huggingface>=0.1.2,<0.2",
-    "sentence-transformers>=3.4.1,<4",
-    "accelerate>=1.4.0,<2",
-    "einops>=0.8.1,<0.9",
-]
 ollama = ["langchain-ollama>=0.2.3,<0.3"]
-aws = ["langchain-aws>=0.2.22,<0.3"]
+bedrock = ["langchain-aws>=0.2.22,<0.3"]
 openai = ["langchain-openai>=0.3.30,<0.4"]
 
 [build-system]

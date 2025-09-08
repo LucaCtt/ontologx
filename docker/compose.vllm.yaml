@@ -9,14 +9,15 @@ services:
       dockerfile: docker/ontologx.dockerfile
     container_name: ${EXPERIMENT_NAME:-default}_olx
     environment:
-      - PARSER_BACKEND=vllm
+      - PARSER_BACKEND=openai
       - PARSER_BACKEND_URL=http://llm:8000/v1
       - EMBEDDINGS_BACKEND=infinity
       - EMBEDDINGS_BACKEND_URL=http://embs:9000
-      - TESTS_BACKEND=bedrock
+      - TACTICS_BACKEND=openai
+      - TACTICS_BACKEND_URL=http://tactics:8000/v1
+      - GEVAL_BACKEND=bedrock
       - NEO4J_URL=bolt://neo4j:7687
       - OPENAI_API_KEY=Empty # Required by OpenAI client API
-      - TRANSFORMERS_VERBOSITY=critical
     env_file:
       - ${PWD}/.env
     depends_on:

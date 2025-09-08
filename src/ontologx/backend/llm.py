@@ -2,43 +2,17 @@
 
 import os
 
-from langchain_core.language_models import BaseChatModel as ParserModel
+from langchain_core.language_models import BaseChatModel
 
 
-def hf_llm(model: str, temperature: float) -> ParserModel:
-    """Create a Hugging Face LLM instance using the specified model and temperature."""
-    from langchain_huggingface import ChatHuggingFace, HuggingFacePipeline  # type: ignore[import]
-
-    parser_pipeline = HuggingFacePipeline.from_model_id(
-        model_id=model,
-        task="text-generation",
-        device_map="auto",
-        pipeline_kwargs={
-            "temperature": temperature,
-        },
-    )
-    return ChatHuggingFace(llm=parser_pipeline)
-
-
-def ollama_llm(model: str, temperature: float, url: str) -> ParserModel:
+def ollama_llm(model: str, temperature: float, url: str) -> BaseChatModel:
     """Create an Ollama LLM instance using the specified model and URL."""
     from langchain_ollama.chat_models import ChatOllama  # type: ignore[import]
 
     return ChatOllama(model=model, base_url=url, temperature=temperature)
 
 
-def vllm_llm(model: str, temperature: float, url: str) -> ParserModel:
-    """Create a VLLM instance using the specified model and URL."""
-    from langchain_openai import ChatOpenAI  # type: ignore[import]
-
-    return ChatOpenAI(
-        model=model,
-        base_url=url,
-        temperature=temperature,
-    )
-
-
-def bedrock_llm(model: str, temperature: float) -> ParserModel:
+def bedrock_llm(model: str, temperature: float) -> BaseChatModel:
     """Create a Bedrock LLM instance using temporary credentials from AWS STS."""
     import boto3  # type: ignore[import]
     from botocore.config import Config  # type: ignore[import]
@@ -71,7 +45,7 @@ def bedrock_llm(model: str, temperature: float) -> ParserModel:
     )
 
 
-def openai_llm(model: str, temperature: float, url: str) -> ParserModel:
+def openai_llm(model: str, temperature: float, url: str) -> BaseChatModel:
     """Create an OpenAI LLM instance using the specified model and URL."""
     from langchain_openai import ChatOpenAI  # type: ignore[import]
 
@@ -92,7 +66,7 @@ class LLMFactory:
         model: str,
         temperature: float,
         url: str = "",
-    ) -> ParserModel:
+    ) -> BaseChatModel:
         """Create an LLM instance based on the specified backend type.
 
         Args:
@@ -102,21 +76,15 @@ class LLMFactory:
             url (str): The URL for the backend.
 
         Returns:
-            ParserModel: An instance of the specified backend type.
+            BaseChatModel: An instance of the specified backend type.
 
         Raises:
             ValueError: If the specified backend type is not supported.
 
         """
         match backend:
-            case "huggingface":
-                return hf_llm(model, temperature)
-
             case "ollama":
                 return ollama_llm(model, temperature, url)
-
-            case "vllm":
-                return vllm_llm(model, temperature, url)
 
             case "bedrock":
                 return bedrock_llm(model, temperature)
