@@ -157,21 +157,3 @@ class Config:
 
     neo4j_password = os.getenv("NEO4J_PASSWORD", "password")
     """The password to use for the Neo4j database."""
-
-    def __init__(self):
-        if self.parser_temperature < 0 or self.parser_temperature > 1:
-            msg = "Parser temperature must be between 0 and 1"
-            raise ValueError(msg)
-
-        if self.correction_steps < 0:
-            msg = "Self reflection steps must be greater than 0"
-            raise ValueError(msg)
-
-        if self.parser_backend not in _DEFAULT_LLM_MODELS:
-            msg = f"LLM backend must be one of {_DEFAULT_LLM_MODELS.keys()}, but got '{self.parser_backend}'"
-            raise ValueError(msg)
-
-        if self.embeddings_backend not in _DEFAULT_EMBEDDINGS_MODELS:
-            msg = f"Embeddings backend must be one of {_DEFAULT_EMBEDDINGS_MODELS.keys()}, \
-                but got '{self.embeddings_backend}'"
-            raise ValueError(msg)

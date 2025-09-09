@@ -11,7 +11,7 @@ COPY pyproject.toml uv.lock ./
 # which is handled in a later step to avoid re-downloading dependencies
 # when the source code changes.
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --locked --no-install-project --group aws --group openai --no-dev
+    uv sync --locked --no-install-project --group bedrock --group openai --no-dev
 
 COPY resources resources
 COPY LICENSE LICENSE
