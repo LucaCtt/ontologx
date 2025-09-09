@@ -7,63 +7,468 @@
 
 # {"dst_ip": "10.42.4.33", "dst_port": 2222.0, "eventid": "cowrie.session.connect", "message": "New connection: 10.42.4.1:46516 (10.42.4.33:2222) [session: fcfef7904937]", "protocol": "ssh", "sensor": "cowrie-azure-worker-00-8ff84698d-4226n", "src_ip": "10.42.4.1", "src_port": 46516.0, "timestamp": "2025-08-10T22:21:57.893589Z"}
 
-:example-0 rdf:type mlsx:DatasetRow;
-    mlsx:eventMessage "{\"dst_ip\": \"10.42.4.33\", \"dst_port\": 2222.0, \"eventid\": \"cowrie.session.connect\", \"message\": \"New connection: 10.42.4.1:46516 (10.42.4.33:2222) [session: fcfef7904937]\", \"protocol\": \"ssh\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"src_port\": 46516.0, \"timestamp\": \"2025-08-10T22:21:57.893589Z\"}";
-    mlsx:hasTactic "Execution", "Initial Access".
+:timestamp-1 rdf:type time:Instant;
+  time:inXSDDateTimeStamp "2025-08-10T22:21:57.893589Z"^^xsd:dateTimeStamp.
+
+:network-address-1-1 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "10.42.4.33";
+  olx:networkAddressPort 2222.
+
+:network-address-1-2 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "10.42.4.1";
+  olx:networkAddressPort 46516.
+
+:network-protocol-1 rdf:type olx:NetworkProtocol;
+  olx:networkProtocolName "ssh".
+
+:source-1 rdf:type olx:Source;
+  olx:sourceName "cowrie";
+  olx:sourceDevice "cowrie-azure-worker-00-8ff84698d-4226n".
+
+:event-1 rdf:type olx:Event;
+  olx:eventID "cowrie.session.connect";
+  olx:eventSessionID "fcfef7904937";
+  olx:hasParameter :timestamp-1, :network-address-1-1, :network-address-1-2, :network-protocol-1;
+  olx:wasLoggedBy :source-1.
+
+:example-1 rdf:type mlsx:DatasetRow;
+  mlsx:eventMessage "{\"dst_ip\": \"10.42.4.33\", \"dst_port\": 2222.0, \"eventid\": \"cowrie.session.connect\", \"message\": \"New connection: 10.42.4.1:46516 (10.42.4.33:2222) [session: fcfef7904937]\", \"protocol\": \"ssh\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"src_port\": 46516.0, \"timestamp\": \"2025-08-10T22:21:57.893589Z\"}";
+  mlsx:hasLabel :event-1;
+  mlsx:hasTactic "Execution", "Initial Access".
 
 # {"eventid": "cowrie.client.version", "message": "Remote SSH version: SSH-2.0-Go", "sensor": "cowrie-azure-worker-00-8ff84698d-4226n", "src_ip": "10.42.4.1", "timestamp": "2025-08-10T22:21:57.894158Z", "version": "SSH-2.0-Go"}
 
-:example-1 rdf:type mlsx:DatasetRow;
-    mlsx:eventMessage "{\"eventid\": \"cowrie.client.version\", \"message\": \"Remote SSH version: SSH-2.0-Go\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:21:57.894158Z\", \"version\": \"SSH-2.0-Go\"}";
-    mlsx:hasTactic "Execution", "Initial Access".
+:timestamp-2 rdf:type time:Instant;
+  time:inXSDDateTimeStamp "2025-08-10T22:21:57.894158Z"^^xsd:dateTimeStamp.
+
+:network-address-2 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "10.42.4.1".
+
+:network-protocol-2 rdf:type olx:NetworkProtocol;
+  olx:networkProtocolName "ssh".
+
+:application-2 rdf:type olx:Application;
+  olx:applicationName "ssh";
+  olx:applicationVersion "SSH-2.0-Go".
+
+:source-2 rdf:type olx:Source;
+  olx:sourceName "cowrie";
+  olx:sourceDevice "cowrie-azure-worker-00-8ff84698d-4226n".
+
+:event-2 rdf:type olx:Event;
+  olx:eventID "cowrie.client.version";
+  olx:eventSessionID "fcfef7904937";
+  olx:hasParameter :timestamp-2, :network-address-2, :network-protocol-2, :application-2;
+  olx:wasLoggedBy :source-2.
+
+:example-2 rdf:type mlsx:DatasetRow;
+  mlsx:eventMessage "{\"eventid\": \"cowrie.client.version\", \"message\": \"Remote SSH version: SSH-2.0-Go\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:21:57.894158Z\", \"version\": \"SSH-2.0-Go\"}";
+  mlsx:hasLabel :event-2;
+  mlsx:hasTactic "Execution", "Initial Access".
 
 # {"compCS": ["none"], "encCS": ["aes128-gcm@openssh.com", "chacha20-poly1305@openssh.com", "aes128-ctr", "aes192-ctr", "aes256-ctr"], "eventid": "cowrie.client.kex", "hash": "98ddc5604ef6a1006a2b49a58759fbe6", "hashAlgorithms": "curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha1;aes128-gcm@openssh.com,chacha20-poly1305@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr;hmac-sha2-256-etm@openssh.com,hmac-sha2-256,hmac-sha1,hmac-sha1-96;none", "kexAlgs": ["curve25519-sha256@libssh.org", "ecdh-sha2-nistp256", "ecdh-sha2-nistp384", "ecdh-sha2-nistp521", "diffie-hellman-group14-sha1"], "keyAlgs": ["rsa-sha2-512-cert-v01@openssh.com", "rsa-sha2-256-cert-v01@openssh.com", "ssh-rsa-cert-v01@openssh.com", "ssh-dss-cert-v01@openssh.com", "ecdsa-sha2-nistp256-cert-v01@openssh.com", "ecdsa-sha2-nistp384-cert-v01@openssh.com", "ecdsa-sha2-nistp521-cert-v01@openssh.com", "ssh-ed25519-cert-v01@openssh.com", "ecdsa-sha2-nistp256", "ecdsa-sha2-nistp384", "ecdsa-sha2-nistp521", "rsa-sha2-512", "rsa-sha2-256", "ssh-rsa", "ssh-dss", "ssh-ed25519"], "langCS": [""], "macCS": ["hmac-sha2-256-etm@openssh.com", "hmac-sha2-256", "hmac-sha1", "hmac-sha1-96"], "message": "SSH client hassh fingerprint: 98ddc5604ef6a1006a2b49a58759fbe6", "sensor": "cowrie-azure-worker-00-8ff84698d-4226n", "src_ip": "10.42.4.1", "timestamp": "2025-08-10T22:21:57.979625Z"}
 
-:example-2 rdf:type mlsx:DatasetRow;
-    mlsx:eventMessage "{\"compCS\": [\"none\"], \"encCS\": [\"aes128-gcm@openssh.com\", \"chacha20-poly1305@openssh.com\", \"aes128-ctr\", \"aes192-ctr\", \"aes256-ctr\"], \"eventid\": \"cowrie.client.kex\", \"hash\": \"98ddc5604ef6a1006a2b49a58759fbe6\", \"hashAlgorithms\": \"curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha1;aes128-gcm@openssh.com,chacha20-poly1305@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr;hmac-sha2-256-etm@openssh.com,hmac-sha2-256,hmac-sha1,hmac-sha1-96;none\", \"kexAlgs\": [\"curve25519-sha256@libssh.org\", \"ecdh-sha2-nistp256\", \"ecdh-sha2-nistp384\", \"ecdh-sha2-nistp521\", \"diffie-hellman-group14-sha1\"], \"keyAlgs\": [\"rsa-sha2-512-cert-v01@openssh.com\", \"rsa-sha2-256-cert-v01@openssh.com\", \"ssh-rsa-cert-v01@openssh.com\", \"ssh-dss-cert-v01@openssh.com\", \"ecdsa-sha2-nistp256-cert-v01@openssh.com\", \"ecdsa-sha2-nistp384-cert-v01@openssh.com\", \"ecdsa-sha2-nistp521-cert-v01@openssh.com\", \"ssh-ed25519-cert-v01@openssh.com\", \"ecdsa-sha2-nistp256\", \"ecdsa-sha2-nistp384\", \"ecdsa-sha2-nistp521\", \"rsa-sha2-512\", \"rsa-sha2-256\", \"ssh-rsa\", \"ssh-dss\", \"ssh-ed25519\"], \"langCS\": [\"\"], \"macCS\": [\"hmac-sha2-256-etm@openssh.com\", \"hmac-sha2-256\", \"hmac-sha1\", \"hmac-sha1-96\"], \"message\": \"SSH client hassh fingerprint: 98ddc5604ef6a1006a2b49a58759fbe6\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:21:57.979625Z\"}";
-    mlsx:hasTactic "Execution", "Initial Access".
+:timestamp-3 rdf:type time:Instant;
+  time:inXSDDateTimeStamp "2025-08-10T22:21:57.979625Z"^^xsd:dateTimeStamp.
 
-# {"eventid": "cowrie.login.success", "message": "login attempt [root/ubuntu] succeeded", "password": "ubuntu", "sensor": "cowrie-azure-worker-00-8ff84698d-4226n", "src_ip": "10.42.4.1", "timestamp": "2025-08-10T22:21:58.244271Z", "username": "root"}
+:hash-string-3 rdf:type olx:HashString;
+  olx:hashStringAlgorithm "SHA-256";
+  olx:hashStringValue "98ddc5604ef6a1006a2b49a58759fbe6".
+
+:network-address-3 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "10.42.4.1".
+
+:network-protocol-3 rdf:type olx:NetworkProtocol;
+  olx:networkProtocolName "ssh".
+
+:source-3 rdf:type olx:Source;
+  olx:sourceName "cowrie";
+  olx:sourceDevice "cowrie-azure-worker-00-8ff84698d-4226n".
+
+:event-3 rdf:type olx:Event;
+  olx:eventID "cowrie.client.kex";
+  olx:eventSessionID "fcfef7904937";
+  olx:hasParameter :timestamp-3, :hash-string-3, :network-address-3, :network-protocol-3;
+  olx:wasLoggedBy :source-3.
 
 :example-3 rdf:type mlsx:DatasetRow;
-    mlsx:eventMessage "{\"eventid\": \"cowrie.login.success\", \"message\": \"login attempt [root/ubuntu] succeeded\", \"password\": \"ubuntu\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:21:58.244271Z\", \"username\": \"root\"}";
-    mlsx:hasTactic "Execution", "Initial Access".
+  mlsx:eventMessage "{\"compCS\": [\"none\"], \"encCS\": [\"aes128-gcm@openssh.com\", \"chacha20-poly1305@openssh.com\", \"aes128-ctr\", \"aes192-ctr\", \"aes256-ctr\"], \"eventid\": \"cowrie.client.kex\", \"hash\": \"98ddc5604ef6a1006a2b49a58759fbe6\", \"hashAlgorithms\": \"curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha1;aes128-gcm@openssh.com,chacha20-poly1305@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr;hmac-sha2-256-etm@openssh.com,hmac-sha2-256,hmac-sha1,hmac-sha1-96;none\", \"kexAlgs\": [\"curve25519-sha256@libssh.org\", \"ecdh-sha2-nistp256\", \"ecdh-sha2-nistp384\", \"ecdh-sha2-nistp521\", \"diffie-hellman-group14-sha1\"], \"keyAlgs\": [\"rsa-sha2-512-cert-v01@openssh.com\", \"rsa-sha2-256-cert-v01@openssh.com\", \"ssh-rsa-cert-v01@openssh.com\", \"ssh-dss-cert-v01@openssh.com\", \"ecdsa-sha2-nistp256-cert-v01@openssh.com\", \"ecdsa-sha2-nistp384-cert-v01@openssh.com\", \"ecdsa-sha2-nistp521-cert-v01@openssh.com\", \"ssh-ed25519-cert-v01@openssh.com\", \"ecdsa-sha2-nistp256\", \"ecdsa-sha2-nistp384\", \"ecdsa-sha2-nistp521\", \"rsa-sha2-512\", \"rsa-sha2-256\", \"ssh-rsa\", \"ssh-dss\", \"ssh-ed25519\"], \"langCS\": [\"\"], \"macCS\": [\"hmac-sha2-256-etm@openssh.com\", \"hmac-sha2-256\", \"hmac-sha1\", \"hmac-sha1-96\"], \"message\": \"SSH client hassh fingerprint: 98ddc5604ef6a1006a2b49a58759fbe6\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:21:57.979625Z\"}";
+  mlsx:hasLabel :event-3;
+  mlsx:hasTactic "Execution", "Initial Access".
+
+# {"eventid": "cowrie.login.success", "message": "login attempt [root/ubuntu] succeeded", "password": "ubuntu", "sensor": "cowrie-azure-worker-00-8ff84698d-4226n", "src_ip": "10.42.4.1", "timestamp": "2025-08-10T22:21:58.244271Z", "username": "root"}
+:timestamp-4 rdf:type time:Instant;
+  time:inXSDDateTimeStamp "2025-08-10T22:21:58.244271Z"^^xsd:dateTimeStamp.
+
+:network-address-4 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "10.42.4.1".
+
+:network-protocol-4 rdf:type olx:NetworkProtocol;
+  olx:networkProtocolName "ssh".
+
+:username-4 rdf:type olx:UserName;
+  olx:userCredentialValue "root".
+
+:password-4 rdf:type olx:Password;
+  olx:userCredentialValue "ubuntu".
+
+:user-4 rdf:type olx:User;
+  olx:hasCredential :username-4, :password-4.
+
+:source-4 rdf:type olx:Source;
+  olx:sourceName "cowrie";
+  olx:sourceDevice "cowrie-azure-worker-00-8ff84698d-4226n".
+
+:event-4 rdf:type olx:Event;
+  olx:eventID "cowrie.login.success";
+  olx:eventSessionID "fcfef7904937";
+  olx:hasParameter :timestamp-4, :network-address-4, :network-protocol-4, :user-4;
+  olx:wasLoggedBy :source-4.
+
+:example-4 rdf:type mlsx:DatasetRow;
+  mlsx:eventMessage "{\"eventid\": \"cowrie.login.success\", \"message\": \"login attempt [root/ubuntu] succeeded\", \"password\": \"ubuntu\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:21:58.244271Z\", \"username\": \"root\"}";
+  mlsx:hasLabel :event-4;
+  mlsx:hasTactic "Execution", "Initial Access".
 
 # {"eventid": "cowrie.session.file_upload", "filename": "sshd", "message": "SFTP Uploaded file \"sshd\" to var/lib/cowrie/downloads/94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00", "outfile": "var/lib/cowrie/downloads/94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00", "sensor": "cowrie-azure-worker-00-8ff84698d-4226n", "shasum": "94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00", "src_ip": "10.42.4.1", "timestamp": "2025-08-10T22:23:26.278996Z"}
 
-:example-4 rdf:type mlsx:DatasetRow;
-    mlsx:eventMessage "{\"eventid\": \"cowrie.session.file_upload\", \"filename\": \"sshd\", \"message\": \"SFTP Uploaded file \\\"sshd\\\" to var/lib/cowrie/downloads/94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00\", \"outfile\": \"var/lib/cowrie/downloads/94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"shasum\": \"94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:23:26.278996Z\"}";
-    mlsx:hasTactic "Execution", "Initial Access".
+:timestamp-5 rdf:type time:Instant;
+  time:inXSDDateTimeStamp "2025-08-10T22:23:26.278996Z"^^xsd:dateTimeStamp.
+
+:hash-string-5 rdf:type olx:HashString;
+  olx:hashStringAlgorithm "SHA-256";
+  olx:hashStringValue "94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00".
+
+:network-address-5 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "10.42.4.1".
+
+:network-protocol-5-1 rdf:type olx:NetworkProtocol;
+  olx:networkProtocolName "ssh".
+
+:network-protocol-5-2 rdf:type olx:NetworkProtocol;
+  olx:networkProtocolName "sftp".
+
+:file-5-1 rdf:type olx:File;
+  olx:filePath "sshd".
+
+:file-5-2 rdf:type olx:File;
+  olx:filePath "var/lib/cowrie/downloads/94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00".
+
+:source-5 rdf:type olx:Source;
+  olx:sourceName "cowrie";
+  olx:sourceDevice "cowrie-azure-worker-00-8ff84698d-4226n".
+
+:event-5 rdf:type olx:Event;
+  olx:eventID "cowrie.session.file_upload";
+  olx:eventSessionID "fcfef7904937";
+  olx:hasParameter :timestamp-5, :hash-string-5, :network-address-5, :network-protocol-5-1, :network-protocol-5-2, :file-5-1, :file-5-2;
+  olx:wasLoggedBy :source-5.
+
+:example-5 rdf:type mlsx:DatasetRow;
+  mlsx:eventMessage "{\"eventid\": \"cowrie.session.file_upload\", \"filename\": \"sshd\", \"message\": \"SFTP Uploaded file \\\"sshd\\\" to var/lib/cowrie/downloads/94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00\", \"outfile\": \"var/lib/cowrie/downloads/94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"shasum\": \"94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:23:26.278996Z\"}";
+  mlsx:hasLabel :event-5;
+  mlsx:hasTactic "Execution", "Initial Access".
 
 # {"arch": "linux-x64-lsb", "eventid": "cowrie.session.params", "message": "[]", "sensor": "cowrie-azure-worker-00-8ff84698d-4226n", "src_ip": "10.42.4.1", "timestamp": "2025-08-10T22:23:26.626913Z"}
 
-:example-5 rdf:type mlsx:DatasetRow;
-    mlsx:eventMessage "{\"arch\": \"linux-x64-lsb\", \"eventid\": \"cowrie.session.params\", \"message\": \"[]\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:23:26.626913Z\"}";
-    mlsx:hasTactic "Execution", "Initial Access".
+:timestamp-6 rdf:type time:Instant;
+  time:inXSDDateTimeStamp "2025-08-10T22:23:26.626913Z"^^xsd:dateTimeStamp.
+
+:network-address-6 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "10.42.4.1".
+
+:source-6 rdf:type olx:Source;
+  olx:sourceName "cowrie";
+  olx:sourceDevice "cowrie-azure-worker-00-8ff84698d-4226n".
+
+:event-6 rdf:type olx:Event;
+  olx:eventID "cowrie.session.params";
+  olx:eventSessionID "fcfef7904937";
+  olx:hasParameter :timestamp-6, :network-address-6;
+  olx:wasLoggedBy :source-6.
+
+:example-6 rdf:type mlsx:DatasetRow;
+  mlsx:eventMessage "{\"arch\": \"linux-x64-lsb\", \"eventid\": \"cowrie.session.params\", \"message\": \"[]\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:23:26.626913Z\"}";
+  mlsx:hasLabel :event-6;
+  mlsx:hasTactic "Execution", "Initial Access".
 
 # {"eventid": "cowrie.command.input", "input": "chmod +x ./.5577515578064049276/sshd;nohup ./.5577515578064049276/sshd 124.225.67.32 39.106.57.208 8.245.24.52 180.163.61.238 62.171.162.142 5.178.111.210 82.180.154.188 85.174.227.19 188.235.158.122 116.128.243.59 47.109.28.100 192.241.228.126 176.126.84.72 222.187.215.194 15.204.224.32 36.163.199.18 36.151.192.243 45.131.111.106 147.93.62.20 185.103.103.83 211.101.244.162 120.48.32.185 212.115.54.22 46.235.84.183 125.124.106.113 120.233.147.34 158.51.96.38 111.170.168.6 139.214.222.149 43.167.236.203 221.14.147.153 152.110.82.109 34.122.156.88 139.59.253.66 96.78.175.36 62.171.184.111 157.255.155.179 145.223.117.124 43.139.160.130 103.232.21.226 117.173.76.160 39.164.232.214 103.145.145.78 106.75.68.22 117.149.247.143 178.128.253.94 114.231.77.98 163.172.34.113 45.15.168.245 111.12.131.236 154.124.241.135 &", "message": "CMD: chmod +x ./.5577515578064049276/sshd;nohup ./.5577515578064049276/sshd 124.225.67.32 39.106.57.208 8.245.24.52 180.163.61.238 62.171.162.142 5.178.111.210 82.180.154.188 85.174.227.19 188.235.158.122 116.128.243.59 47.109.28.100 192.241.228.126 176.126.84.72 222.187.215.194 15.204.224.32 36.163.199.18 36.151.192.243 45.131.111.106 147.93.62.20 185.103.103.83 211.101.244.162 120.48.32.185 212.115.54.22 46.235.84.183 125.124.106.113 120.233.147.34 158.51.96.38 111.170.168.6 139.214.222.149 43.167.236.203 221.14.147.153 152.110.82.109 34.122.156.88 139.59.253.66 96.78.175.36 62.171.184.111 157.255.155.179 145.223.117.124 43.139.160.130 103.232.21.226 117.173.76.160 39.164.232.214 103.145.145.78 106.75.68.22 117.149.247.143 178.128.253.94 114.231.77.98 163.172.34.113 45.15.168.245 111.12.131.236 154.124.241.135 &", "sensor": "cowrie-azure-worker-00-8ff84698d-4226n", "src_ip": "10.42.4.1", "timestamp": "2025-08-10T22:23:26.627275Z"}
 
-:example-6 rdf:type mlsx:DatasetRow;
-    mlsx:eventMessage "{\"eventid\": \"cowrie.command.input\", \"input\": \"chmod +x ./.5577515578064049276/sshd;nohup ./.5577515578064049276/sshd 124.225.67.32 39.106.57.208 8.245.24.52 180.163.61.238 62.171.162.142 5.178.111.210 82.180.154.188 85.174.227.19 188.235.158.122 116.128.243.59 47.109.28.100 192.241.228.126 176.126.84.72 222.187.215.194 15.204.224.32 36.163.199.18 36.151.192.243 45.131.111.106 147.93.62.20 185.103.103.83 211.101.244.162 120.48.32.185 212.115.54.22 46.235.84.183 125.124.106.113 120.233.147.34 158.51.96.38 111.170.168.6 139.214.222.149 43.167.236.203 221.14.147.153 152.110.82.109 34.122.156.88 139.59.253.66 96.78.175.36 62.171.184.111 157.255.155.179 145.223.117.124 43.139.160.130 103.232.21.226 117.173.76.160 39.164.232.214 103.145.145.78 106.75.68.22 117.149.247.143 178.128.253.94 114.231.77.98 163.172.34.113 45.15.168.245 111.12.131.236 154.124.241.135 &\", \"message\": \"CMD: chmod +x ./.5577515578064049276/sshd;nohup ./.5577515578064049276/sshd 124.225.67.32 39.106.57.208 8.245.24.52 180.163.61.238 62.171.162.142 5.178.111.210 82.180.154.188 85.174.227.19 188.235.158.122 116.128.243.59 47.109.28.100 192.241.228.126 176.126.84.72 222.187.215.194 15.204.224.32 36.163.199.18 36.151.192.243 45.131.111.106 147.93.62.20 185.103.103.83 211.101.244.162 120.48.32.185 212.115.54.22 46.235.84.183 125.124.106.113 120.233.147.34 158.51.96.38 111.170.168.6 139.214.222.149 43.167.236.203 221.14.147.153 152.110.82.109 34.122.156.88 139.59.253.66 96.78.175.36 62.171.184.111 157.255.155.179 145.223.117.124 43.139.160.130 103.232.21.226 117.173.76.160 39.164.232.214 103.145.145.78 106.75.68.22 117.149.247.143 178.128.253.94 114.231.77.98 163.172.34.113 45.15.168.245 111.12.131.236 154.124.241.135 &\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:23:26.627275Z\"}";
-    mlsx:hasTactic "Execution", "Initial Access".
+:timestamp-7 rdf:type time:Instant;
+  time:inXSDDateTimeStamp "2025-08-10T22:23:26.627275Z"^^xsd:dateTimeStamp.
+
+:network-address-7-1 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "124.225.67.32".
+
+:network-address-7-2 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "39.106.57.208".
+
+:network-address-7-3 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "8.245.24.52".
+
+:network-address-7-4 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "180.163.61.238".
+
+:network-address-7-5 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "62.171.162.142".
+
+:network-address-7-6 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "5.178.111.210".
+
+:network-address-7-7 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "82.180.154.188".
+
+:network-address-7-8 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "85.174.227.19".
+
+:network-address-7-9 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "188.235.158.122".
+
+:network-address-7-10 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "116.128.243.59".
+
+:network-address-7-11 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "47.109.28.100".
+
+:network-address-7-12 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "192.241.228.126".
+
+:network-address-7-13 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "176.126.84.72".
+
+:network-address-7-14 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "222.187.215.194".
+
+:network-address-7-15 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "15.204.224.32".
+
+:network-address-7-16 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "36.163.199.18".
+
+:network-address-7-17 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "36.151.192.243".
+
+:network-address-7-18 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "45.131.111.106".
+
+:network-address-7-19 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "147.93.62.20".
+
+:network-address-7-20 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "185.103.103.83".
+
+:network-address-7-21 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "211.101.244.162".
+
+:network-address-7-22 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "120.48.32.185".
+
+:network-address-7-23 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "212.115.54.22".
+
+:network-address-7-24 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "46.235.84.183".
+
+:network-address-7-25 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "125.124.106.113".
+
+:network-address-7-26 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "120.233.147.34".
+
+:network-address-7-27 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "158.51.96.38".
+
+:network-address-7-28 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "111.170.168.6".
+
+:network-address-7-29 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "139.214.222.149".
+
+:network-address-7-30 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "43.167.236.203".
+
+:network-address-7-31 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "221.14.147.153".
+
+:network-address-7-32 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "152.110.82.109".
+
+:network-address-7-33 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "34.122.156.88".
+
+:network-address-7-34 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "139.59.253.66".
+
+:network-address-7-35 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "96.78.175.36".
+
+:network-address-7-36 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "62.171.184.111".
+
+:network-address-7-37 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "157.255.155.179".
+
+:network-address-7-38 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "145.223.117.124".
+
+:network-address-7-39 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "43.139.160.130".
+
+:network-address-7-40 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "103.232.21.226".
+
+:network-address-7-41 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "117.173.76.160".
+
+:network-address-7-42 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "39.164.232.214".
+
+:network-address-7-43 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "103.145.145.78".
+
+:network-address-7-44 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "106.75.68.22".
+
+:network-address-7-45 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "117.149.247.143".
+
+:network-address-7-46 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "178.128.253.94".
+
+:network-address-7-47 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "114.231.77.98".
+
+:network-address-7-48 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "163.172.34.113".
+
+:network-address-7-49 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "45.15.168.245".
+
+:network-address-7-50 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "111.12.131.236".
+
+:network-address-7-51 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "154.124.241.135".
+
+:network-address-7-52 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "10.42.4.1".
+
+:network-protocol-7 rdf:type olx:NetworkProtocol;
+  olx:networkProtocolName "ssh".
+
+:file-7 rdf:type olx:File;
+  olx:filePath "./.5577515578064049276/sshd".
+
+:shell-command-7-1 rdf:type olx:ShellCommand;
+  olx:applicationName "chmod";
+  olx:hasParameter :file-7.
+
+:shell-command-7-2 rdf:type olx:ShellCommand;
+  olx:applicationName "nohup";
+  olx:hasParameter :file-7, :network-address-7-1, :network-address-7-2, :network-address-7-3, :network-address-7-4, :network-address-7-5, :network-address-7-6, :network-address-7-7, :network-address-7-8, :network-address-7-9, :network-address-7-10, :network-address-7-11, :network-address-7-12, :network-address-7-13, :network-address-7-14, :network-address-7-15, :network-address-7-16, :network-address-7-17, :network-address-7-18, :network-address-7-19, :network-address-7-20, :network-address-7-21, :network-address-7-22, :network-address-7-23, :network-address-7-24, :network-address-7-25, :network-address-7-26, :network-address-7-27, :network-address-7-28, :network-address-7-29, :network-address-7-30, :network-address-7-31, :network-address-7-32, :network-address-7-33, :network-address-7-34, :network-address-7-35, :network-address-7-36, :network-address-7-37, :network-address-7-38, :network-address-7-39, :network-address-7-40, :network-address-7-41, :network-address-7-42, :network-address-7-43, :network-address-7-44, :network-address-7-45, :network-address-7-46, :network-address-7-47, :network-address-7-48, :network-address-7-49, :network-address-7-50, :network-address-7-51.
+
+:source-7 rdf:type olx:Source;
+  olx:sourceName "cowrie";
+  olx:sourceDevice "cowrie-azure-worker-00-8ff84698d-4226n".
+
+:event-7 rdf:type olx:Event;
+  olx:eventID "cowrie.command.input";
+  olx:eventSessionID "fcfef7904937";
+  olx:hasParameter :timestamp-7, :network-address-7-52, :network-protocol-7, :shell-command-7-1, :shell-command-7-2;
+  olx:wasLoggedBy :source-7.
+
+:example-7 rdf:type mlsx:DatasetRow;
+  mlsx:eventMessage "{\"eventid\": \"cowrie.command.input\", \"input\": \"chmod +x ./.5577515578064049276/sshd;nohup ./.5577515578064049276/sshd 124.225.67.32 39.106.57.208 8.245.24.52 180.163.61.238 62.171.162.142 5.178.111.210 82.180.154.188 85.174.227.19 188.235.158.122 116.128.243.59 47.109.28.100 192.241.228.126 176.126.84.72 222.187.215.194 15.204.224.32 36.163.199.18 36.151.192.243 45.131.111.106 147.93.62.20 185.103.103.83 211.101.244.162 120.48.32.185 212.115.54.22 46.235.84.183 125.124.106.113 120.233.147.34 158.51.96.38 111.170.168.6 139.214.222.149 43.167.236.203 221.14.147.153 152.110.82.109 34.122.156.88 139.59.253.66 96.78.175.36 62.171.184.111 157.255.155.179 145.223.117.124 43.139.160.130 103.232.21.226 117.173.76.160 39.164.232.214 103.145.145.78 106.75.68.22 117.149.247.143 178.128.253.94 114.231.77.98 163.172.34.113 45.15.168.245 111.12.131.236 154.124.241.135 &\", \"message\": \"CMD: chmod +x ./.5577515578064049276/sshd;nohup ./.5577515578064049276/sshd 124.225.67.32 39.106.57.208 8.245.24.52 180.163.61.238 62.171.162.142 5.178.111.210 82.180.154.188 85.174.227.19 188.235.158.122 116.128.243.59 47.109.28.100 192.241.228.126 176.126.84.72 222.187.215.194 15.204.224.32 36.163.199.18 36.151.192.243 45.131.111.106 147.93.62.20 185.103.103.83 211.101.244.162 120.48.32.185 212.115.54.22 46.235.84.183 125.124.106.113 120.233.147.34 158.51.96.38 111.170.168.6 139.214.222.149 43.167.236.203 221.14.147.153 152.110.82.109 34.122.156.88 139.59.253.66 96.78.175.36 62.171.184.111 157.255.155.179 145.223.117.124 43.139.160.130 103.232.21.226 117.173.76.160 39.164.232.214 103.145.145.78 106.75.68.22 117.149.247.143 178.128.253.94 114.231.77.98 163.172.34.113 45.15.168.245 111.12.131.236 154.124.241.135 &\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:23:26.627275Z\"}";
+  mlsx:hasLabel :event-7;
+  mlsx:hasTactic "Execution", "Initial Access".
 
 # {"duplicate": false, "duration": "0.1", "eventid": "cowrie.log.closed", "message": "Closing TTY Log: var/lib/cowrie/tty/0fb58a44ee8287bb57f0929489413d4c1608fe57461b8b12f5728858607db0f6 after 0.1 seconds", "sensor": "cowrie-azure-worker-00-8ff84698d-4226n", "shasum": "0fb58a44ee8287bb57f0929489413d4c1608fe57461b8b12f5728858607db0f6", "size": 136.0, "src_ip": "10.42.4.1", "timestamp": "2025-08-10T22:23:26.714168Z", "ttylog": "var/lib/cowrie/tty/0fb58a44ee8287bb57f0929489413d4c1608fe57461b8b12f5728858607db0f6"}
 
-:example-7 rdf:type mlsx:DatasetRow;
-    mlsx:eventMessage "{\"duplicate\": false, \"duration\": \"0.1\", \"eventid\": \"cowrie.log.closed\", \"message\": \"Closing TTY Log: var/lib/cowrie/tty/0fb58a44ee8287bb57f0929489413d4c1608fe57461b8b12f5728858607db0f6 after 0.1 seconds\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"shasum\": \"0fb58a44ee8287bb57f0929489413d4c1608fe57461b8b12f5728858607db0f6\", \"size\": 136.0, \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:23:26.714168Z\", \"ttylog\": \"var/lib/cowrie/tty/0fb58a44ee8287bb57f0929489413d4c1608fe57461b8b12f5728858607db0f6\"}";
-    mlsx:hasTactic "Execution", "Initial Access".
+:timestamp-8 rdf:type time:Instant;
+  time:inXSDDateTimeStamp "2025-08-10T22:23:26.714168Z"^^xsd:dateTimeStamp.
+
+:hash-string-8 rdf:type olx:HashString;
+  olx:hashStringAlgorithm "SHA-256";
+  olx:hashStringValue "0fb58a44ee8287bb57f0929489413d4c1608fe57461b8b12f5728858607db0f6".
+
+:network-address-8 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "10.42.4.1".
+
+:file-8 rdf:type olx:File;
+  olx:filePath "var/lib/cowrie/tty/0fb58a44ee8287bb57f0929489413d4c1608fe57461b8b12f5728858607db0f6".
+
+:network-protocol-8 rdf:type olx:NetworkProtocol;
+  olx:networkProtocolName "ssh".
+
+:source-8 rdf:type olx:Source;
+  olx:sourceName "cowrie";
+  olx:sourceDevice "cowrie-azure-worker-00-8ff84698d-4226n".
+
+:event-8 rdf:type olx:Event;
+  olx:eventID "cowrie.log.closed";
+  olx:eventSessionID "fcfef7904937";
+  olx:hasParameter :timestamp-8, :hash-string-8, :network-address-8, :file-8, :network-protocol-8;
+  olx:wasLoggedBy :source-8.
+
+:example-8 rdf:type mlsx:DatasetRow;
+  mlsx:eventMessage "{\"duplicate\": false, \"duration\": \"0.1\", \"eventid\": \"cowrie.log.closed\", \"message\": \"Closing TTY Log: var/lib/cowrie/tty/0fb58a44ee8287bb57f0929489413d4c1608fe57461b8b12f5728858607db0f6 after 0.1 seconds\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"shasum\": \"0fb58a44ee8287bb57f0929489413d4c1608fe57461b8b12f5728858607db0f6\", \"size\": 136.0, \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:23:26.714168Z\", \"ttylog\": \"var/lib/cowrie/tty/0fb58a44ee8287bb57f0929489413d4c1608fe57461b8b12f5728858607db0f6\"}";
+  mlsx:hasLabel :event-8;
+  mlsx:hasTactic "Execution", "Initial Access".
 
 # {"duration": "88.8", "eventid": "cowrie.session.closed", "message": "Connection lost after 88.8 seconds", "sensor": "cowrie-azure-worker-00-8ff84698d-4226n", "src_ip": "10.42.4.1", "timestamp": "2025-08-10T22:23:26.722445Z"}
 
-:example-8 rdf:type mlsx:DatasetRow;
-    mlsx:eventMessage "{\"duration\": \"88.8\", \"eventid\": \"cowrie.session.closed\", \"message\": \"Connection lost after 88.8 seconds\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:23:26.722445Z\"}";
-    mlsx:hasTactic "Execution", "Initial Access".
+:timestamp-9 rdf:type time:Instant;
+  time:inXSDDateTimeStamp "2025-08-10T22:23:26.722445Z"^^xsd:dateTimeStamp.
+
+:network-address-9 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "10.42.4.1".
+
+:network-protocol-9 rdf:type olx:NetworkProtocol;
+  olx:networkProtocolName "ssh".
+
+:source-9 rdf:type olx:Source;
+  olx:sourceName "cowrie";
+  olx:sourceDevice "cowrie-azure-worker-00-8ff84698d-4226n".
+
+:event-9 rdf:type olx:Event;
+  olx:eventID "cowrie.session.closed";
+  olx:eventSessionID "fcfef7904937";
+  olx:hasParameter :timestamp-9, :network-address-9, :network-protocol-9;
+  olx:wasLoggedBy :source-9.
+
+:example-9 rdf:type mlsx:DatasetRow;
+  mlsx:eventMessage "{\"duration\": \"88.8\", \"eventid\": \"cowrie.session.closed\", \"message\": \"Connection lost after 88.8 seconds\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:23:26.722445Z\"}";
+  mlsx:hasLabel :event-9;
+  mlsx:hasTactic "Execution", "Initial Access".
 
 # {"dst_ip": "10.42.6.15", "dst_port": 2222.0, "eventid": "cowrie.session.connect", "message": "New connection: 10.42.6.1:8906 (10.42.6.15:2222) [session: be1939f18ace]", "protocol": "ssh", "sensor": "cowrie-poli-worker-01-89bfdd5dd-v7wvn", "src_ip": "10.42.6.1", "src_port": 8906.0, "timestamp": "2025-08-04T23:53:22.641240Z"}
 
-:example-9 rdf:type mlsx:DatasetRow;
-    mlsx:eventMessage "{\"dst_ip\": \"10.42.6.15\", \"dst_port\": 2222.0, \"eventid\": \"cowrie.session.connect\", \"message\": \"New connection: 10.42.6.1:8906 (10.42.6.15:2222) [session: be1939f18ace]\", \"protocol\": \"ssh\", \"sensor\": \"cowrie-poli-worker-01-89bfdd5dd-v7wvn\", \"src_ip\": \"10.42.6.1\", \"src_port\": 8906.0, \"timestamp\": \"2025-08-04T23:53:22.641240Z\"}";
-    mlsx:hasTactic "Execution", "Initial Access".
+:timestamp-10 rdf:type time:Instant;
+  time:inXSDDateTimeStamp "2025-08-04T23:53:22.641240Z"^^xsd:dateTimeStamp.
+
+:network-address-10-1 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "10.42.6.15".
+
+:network-address-10-2 rdf:type olx:NetworkAddress;
+  olx:networkAddressIPV4 "10.42.6.1".
+
+:network-protocol-10 rdf:type olx:NetworkProtocol;
+  olx:networkProtocolName "ssh".
+
+:source-10 rdf:type olx:Source;
+  olx:sourceName "cowrie";
+  olx:sourceDevice "cowrie-poli-worker-01-89bfdd5dd-v7wvn".
+
+:event-10 rdf:type olx:Event;
+  olx:eventID "cowrie.session.connect";
+  olx:eventSessionID "be1939f18ace";
+  olx:hasParameter :timestamp-10, :network-address-10-1, :network-address-10-2, :network-protocol-10;
+  olx:wasLoggedBy :source-10.
+
+:example-10 rdf:type mlsx:DatasetRow;
+  mlsx:eventMessage "{\"dst_ip\": \"10.42.6.15\", \"dst_port\": 2222.0, \"eventid\": \"cowrie.session.connect\", \"message\": \"New connection: 10.42.6.1:8906 (10.42.6.15:2222) [session: be1939f18ace]\", \"protocol\": \"ssh\", \"sensor\": \"cowrie-poli-worker-01-89bfdd5dd-v7wvn\", \"src_ip\": \"10.42.6.1\", \"src_port\": 8906.0, \"timestamp\": \"2025-08-04T23:53:22.641240Z\"}";
+  mlsx:hasLabel :event-10;
+  mlsx:hasTactic "Execution", "Initial Access".
 
 :example-dataset rdf:type mlsx:ExampleDataset;
-    mlsx:hasPart :example-0, :example-1, :example-2, :example-3, :example-4, :example-5, :example-6, :example-7, :example-8, :example-9.
+  mlsx:hasPart :example-1, :example-2, :example-3, :example-4, :example-5, :example-6, :example-7, :example-8, :example-9, :example-10.
