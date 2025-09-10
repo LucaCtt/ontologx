@@ -127,7 +127,7 @@ class TacticsMetrics:
         sessions_dict = {}
         tactics_dict = {}
         for pred, true in zip(y_pred, y_true, strict=True):
-            event_node = next(e for e in true.nodes if e.type == "olx:Event")
+            event_node = next(e for e in pred.nodes if e.type == "olx:Event")
             session_id = event_node.properties.get("olx:eventSessionID")
 
             if session_id is None:
@@ -146,6 +146,7 @@ class TacticsMetrics:
         self.__llm = llm
         self.__prompt_predict_tactics = prompt_predict_tactics
 
+    @functools.cached_property
     def precision(self) -> float:
         """Calculate the overall precision of the predicted tactics across all sessions."""
         return (
@@ -154,6 +155,7 @@ class TacticsMetrics:
             else 0.0
         )
 
+    @functools.cached_property
     def recall(self) -> float:
         """Calculate the overall recall of the predicted tactics across all sessions."""
         return (
@@ -162,6 +164,7 @@ class TacticsMetrics:
             else 0.0
         )
 
+    @functools.cached_property
     def f1_score(self) -> float:
         """Calculate the overall F1 score of the predicted tactics across all sessions."""
         return (

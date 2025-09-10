@@ -1,32 +1,4 @@
 services:
-  tactics:
-    image: vllm/vllm-openai:v0.10.1.1
-    container_name: ${EXPERIMENT_NAME:-default}_tactics
-    volumes:
-      - ${PWD}/exps/${EXPERIMENT_NAME:-default}/vllm/llms:/root/.cache/huggingface # Save models so they are not downloaded every time
-    runtime: nvidia
-    ipc: host # Allow the container access to the host's shared memory
-    restart: on-failure:3
-    expose:
-      - 8000
-    networks:
-      - ontologx
-    entrypoint: python3
-    command: -m vllm.entrypoints.openai.api_server --model ${TACTICS_MODEL} --task generate --trust-remote-code ${VLLM_ADDITIONAL_ARGS-} # Ad-hoc vllm arguments are likely to be needed
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 20s
-      timeout: 10s
-      retries: 300 # A lot of retries because big models may take a while to load
-      start_period: 30s
-      start_interval: 10s
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              capabilities: [gpu]
-
   embs:
     image: michaelf34/infinity:0.0.77
     container_name: ${EXPERIMENT_NAME:-default}_embs
