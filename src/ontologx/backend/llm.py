@@ -29,7 +29,7 @@ def bedrock_llm(model: str, temperature: float) -> BaseChatModel:
     response = sts_client.assume_role(
         RoleArn=os.environ["AWS_ROLE_ARN"],
         RoleSessionName="langchain-bedrock-session",
-        DurationSeconds=60 * 60 * 3,  # 3 hours
+        DurationSeconds=60 * 60 * 10,  # 10 hours
     )
 
     # Extract the temporary credentials
