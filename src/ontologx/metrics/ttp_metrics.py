@@ -11,31 +11,29 @@ from pydantic import BaseModel, Field
 from ontologx.store import GraphDocument
 
 
-class _MITRETactic(StrEnum):
+class MITRETactic(StrEnum):
     """Enumeration of MITRE ATT&CK tactics."""
 
-    RECONNAISSANCE = "Reconnaissance"
-    RESOURCE_DEVELOPMENT = "Resource Development"
-    INITIAL_ACCESS = "Initial Access"
     EXECUTION = "Execution"
-    PERSISTENCE = "Persistence"
-    PRIVILEGE_ESCALATION = "Privilege Escalation"
-    DEFENSE_EVASION = "Defense Evasion"
-    CREDENTIAL_ACCESS = "Credential Access"
     DISCOVERY = "Discovery"
+    INITIAL_ACCESS = "Initial Access"
+    PERSISTENCE = "Persistence"
+    EXFILTRATION = "Exfiltration"
+    IMPACT = "Impact"
+    DEFENSE_EVASION = "Defense Evasion"
+    PRIVILEGE_ESCALATION = "Privilege Escalation"
+    CREDENTIAL_ACCESS = "Credential Access"
     LATERAL_MOVEMENT = "Lateral Movement"
     COLLECTION = "Collection"
     COMMAND_AND_CONTROL = "Command and Control"
-    EXFILTRATION = "Exfiltration"
-    IMPACT = "Impact"
 
 
 class _SessionTactics(BaseModel):
     """List of MITRE ATT&CK tactics observed in a session."""
 
-    tactics: list[_MITRETactic] = Field(
+    tactics: list[MITRETactic] = Field(
         description="List of MITRE ATT&CK tactics observed in the session.",
-        examples=[_MITRETactic.INITIAL_ACCESS, _MITRETactic.EXECUTION, _MITRETactic.PERSISTENCE],
+        examples=[MITRETactic.INITIAL_ACCESS, MITRETactic.EXECUTION, MITRETactic.PERSISTENCE],
     )
 
 
@@ -57,7 +55,7 @@ class _TacticsPredictor:
 
         self.__chain = prompt | model
 
-    def predict_tactics(self, graphs: list[GraphDocument]) -> list[_MITRETactic]:
+    def predict_tactics(self, graphs: list[GraphDocument]) -> list[MITRETactic]:
         """Predict the MITRE ATT&CK tactics for a given session of logs given as graphs.
 
         Args:
@@ -73,45 +71,62 @@ class _TacticsPredictor:
 
 
 class _SessionTacticMetrics:
-    def __init__(self, y_labels_pred: list[_MITRETactic], y_labels_true: list[_MITRETactic]):
-        predicted_set = set(y_labels_pred)
-        ground_truth_set = set(y_labels_true)
+    def __init__(self, y_labels_pred: list[MITRETactic], y_labels_true: list[MITRETactic]):
+        self.__predicted_set = set(y_labels_pred)
+        self.__ground_truth_set = set(y_labels_true)
 
-        self.__tp = len(predicted_set & ground_truth_set)
-        self.__fp = len(predicted_set - ground_truth_set)  # in predicted but not in ground truth
-        self.__fn = len(ground_truth_set - predicted_set)  # in ground truth but not in predicted
 
     @functools.cached_property
-    def precision(self) -> float:
+    def precisions(self) -> dict[MITRETactic, float]:
         """Calculate the precision of the predicted tactics.
 
         Returns:
             float: Precision of the predicted tactics.
 
         """
-        return self.__tp / (self.__tp + self.__fp) if (self.__tp + self.__fp) > 0 else 0.0
+        precisions = {}
+
+        for tactic in self.__ground_truth_set.union(self.__predicted_set):
+            tp = len(self.__predicted_set.intersection(self.__ground_truth_set).intersection({tactic}))
+            fp = len(self.__predicted_set.difference(self.__ground_truth_set).intersection({tactic}))
+            precisions[tactic] = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+
+        return precisions
 
     @functools.cached_property
-    def recall(self) -> float:
+    def recalls(self) -> dict[MITRETactic, float]:
         """Calculate the recall of the predicted tactics.
 
         Returns:
             float: Recall of the predicted tactics.
 
         """
-        return self.__tp / (self.__tp + self.__fn) if (self.__tp + self.__fn) > 0 else 0.0
+        recalls = {}
+
+        for tactic in self.__ground_truth_set.union(self.__predicted_set):
+            tp = len(self.__predicted_set.intersection(self.__ground_truth_set).intersection({tactic}))
+            fn = len(self.__ground_truth_set.difference(self.__predicted_set).intersection({tactic}))
+            recalls[tactic] = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+
+        return recalls
 
     @functools.cached_property
-    def f1_score(self) -> float:
+    def f1_scores(self) -> dict[MITRETactic, float]:
         """Calculate the F1 score of the predicted tactics.
 
         Returns:
             float: F1 score of the predicted tactics.
 
         """
-        precision = self.precision
-        recall = self.recall
-        return 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
+        f1_scores = {}
+        for tactic in self.__ground_truth_set.union(self.__predicted_set):
+            precision = self.precisions[tactic]
+            recall = self.recalls[tactic]
+            f1_scores[tactic] = (
+                2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
+            )
+
+        return f1_scores
 
 
 class TacticsMetrics:
@@ -138,7 +153,7 @@ class TacticsMetrics:
                 tactics_dict[session_id] = []
 
             sessions_dict[session_id].append(pred)
-            true_tactics = [_MITRETactic(i) for i in true.source.metadata["tactics"]]
+            true_tactics = [MITRETactic(i) for i in true.source.metadata["tactics"]]
             tactics_dict[session_id] = list(set(tactics_dict[session_id] + true_tactics))
 
         self.__y_pred_sessions = [sessions_dict[session_id] for session_id in sessions_dict]
@@ -147,31 +162,41 @@ class TacticsMetrics:
         self.__prompt_predict_tactics = prompt_predict_tactics
 
     @functools.cached_property
-    def precision(self) -> float:
+    def precisions(self) -> dict[MITRETactic, float]:
         """Calculate the overall precision of the predicted tactics across all sessions."""
-        return (
-            sum(m.precision for m in self.__session_metrics) / len(self.__session_metrics)
-            if self.__session_metrics
-            else 0.0
-        )
+        all_precisions = {}
+        for m in self.__session_metrics:
+            for tactic, precision in m.precisions.items():
+                if tactic not in all_precisions:
+                    all_precisions[tactic] = []
+                all_precisions[tactic].append(precision)
+        
+        return {tactic: sum(precisions) / len(precisions) for tactic, precisions in all_precisions.items()}
 
     @functools.cached_property
-    def recall(self) -> float:
+    def recalls(self) -> dict[MITRETactic, float]:
         """Calculate the overall recall of the predicted tactics across all sessions."""
-        return (
-            sum(m.recall for m in self.__session_metrics) / len(self.__session_metrics)
-            if self.__session_metrics
-            else 0.0
-        )
+        all_recalls = {}
+        for m in self.__session_metrics:
+            for tactic, recall in m.recalls.items():
+                if tactic not in all_recalls:
+                    all_recalls[tactic] = []
+                all_recalls[tactic].append(recall)
+        
+        return {tactic: sum(recalls) / len(recalls) for tactic, recalls in all_recalls.items()}
+
 
     @functools.cached_property
-    def f1_score(self) -> float:
+    def f1_scores(self) -> dict[MITRETactic, float]:
         """Calculate the overall F1 score of the predicted tactics across all sessions."""
-        return (
-            sum(m.f1_score for m in self.__session_metrics) / len(self.__session_metrics)
-            if self.__session_metrics
-            else 0.0
-        )
+        all_f1_scores = {}
+        for m in self.__session_metrics:
+            for tactic, f1_score in m.f1_scores.items():
+                if tactic not in all_f1_scores:
+                    all_f1_scores[tactic] = []
+                all_f1_scores[tactic].append(f1_score) 
+        
+        return {tactic: sum(f1_scores) / len(f1_scores) for tactic, f1_scores in all_f1_scores.items()}
 
     @functools.cached_property
     def __session_metrics(self) -> list[_SessionTacticMetrics]:

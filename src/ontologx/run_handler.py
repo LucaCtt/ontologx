@@ -46,7 +46,7 @@ class RunHandler:
         self.__tactics_model = LLMFactory.create(
             backend=config.tactics_backend,
             model=config.tactics_model,
-            temperature=0.4,
+            temperature=0,
             url=config.tactics_backend_url,
         )
 
@@ -215,12 +215,11 @@ class RunHandler:
 
         if "tactics" in self.__config.metrics:
             ttps_metrics = TacticsMetrics(y_pred, y_true, self.__tactics_model, self.__config.tactics_prompt_path)
-            results.update(
-                {
-                    "tactics_precision": ttps_metrics.precision,
-                    "tactics_recall": ttps_metrics.recall,
-                    "tactics_f1_score": ttps_metrics.f1_score,
-                },
-            )
+            keys = ttps_metrics.precisions.keys()
+
+            for tactic in keys:
+                results[f"tactic_{tactic.name.lower()}_precision"] = ttps_metrics.precisions[tactic]
+                results[f"tactic_{tactic.name.lower()}_recall"] = ttps_metrics.recalls[tactic]
+                results[f"tactic_{tactic.name.lower()}_f1_score"] = ttps_metrics.f1_scores[tactic]
 
         return results
