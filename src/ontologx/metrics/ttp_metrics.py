@@ -12,7 +12,7 @@ from ontologx.store import GraphDocument
 
 
 class MITRETactic(StrEnum):
-    """Enumeration of MITRE ATT&CK tactics."""
+    """Enumeration of MITRE ATT&CK enterprise tactics."""
 
     EXECUTION = "Execution"
     DISCOVERY = "Discovery"
@@ -37,7 +37,9 @@ class _SessionTactics(BaseModel):
     )
 
 
-class _TacticsPredictor:
+class TacticsPredictor:
+    """Class to predict MITRE ATT&CK tactics for a given session of logs."""
+
     def __init__(self, llm: BaseChatModel, prompt_predict_tactics: str):
         # Check if the model supports structured output
         try:
@@ -70,11 +72,12 @@ class _TacticsPredictor:
         return cast("_SessionTactics", out).tactics
 
 
-class _SessionTacticMetrics:
+class SessionTacticsMetrics:
+    """Class to calculate metrics for MITRE Tactics predictions for a single session."""
+
     def __init__(self, y_labels_pred: list[MITRETactic], y_labels_true: list[MITRETactic]):
         self.__predicted_set = set(y_labels_pred)
         self.__ground_truth_set = set(y_labels_true)
-
 
     @functools.cached_property
     def precisions(self) -> dict[MITRETactic, float]:
@@ -122,9 +125,7 @@ class _SessionTacticMetrics:
         for tactic in self.__ground_truth_set.union(self.__predicted_set):
             precision = self.precisions[tactic]
             recall = self.recalls[tactic]
-            f1_scores[tactic] = (
-                2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
-            )
+            f1_scores[tactic] = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
 
         return f1_scores
 
@@ -170,7 +171,7 @@ class TacticsMetrics:
                 if tactic not in all_precisions:
                     all_precisions[tactic] = []
                 all_precisions[tactic].append(precision)
-        
+
         return {tactic: sum(precisions) / len(precisions) for tactic, precisions in all_precisions.items()}
 
     @functools.cached_property
@@ -182,9 +183,8 @@ class TacticsMetrics:
                 if tactic not in all_recalls:
                     all_recalls[tactic] = []
                 all_recalls[tactic].append(recall)
-        
-        return {tactic: sum(recalls) / len(recalls) for tactic, recalls in all_recalls.items()}
 
+        return {tactic: sum(recalls) / len(recalls) for tactic, recalls in all_recalls.items()}
 
     @functools.cached_property
     def f1_scores(self) -> dict[MITRETactic, float]:
@@ -194,19 +194,19 @@ class TacticsMetrics:
             for tactic, f1_score in m.f1_scores.items():
                 if tactic not in all_f1_scores:
                     all_f1_scores[tactic] = []
-                all_f1_scores[tactic].append(f1_score) 
-        
+                all_f1_scores[tactic].append(f1_score)
+
         return {tactic: sum(f1_scores) / len(f1_scores) for tactic, f1_scores in all_f1_scores.items()}
 
     @functools.cached_property
-    def __session_metrics(self) -> list[_SessionTacticMetrics]:
+    def __session_metrics(self) -> list[SessionTacticsMetrics]:
         """Predict tactics for each session using the predictor."""
-        predictor = _TacticsPredictor(
+        predictor = TacticsPredictor(
             llm=self.__llm,
             prompt_predict_tactics=self.__prompt_predict_tactics,
         )
         pred_tactics = [predictor.predict_tactics(session) for session in self.__y_pred_sessions]
         return [
-            _SessionTacticMetrics(y_pred, y_true)
+            SessionTacticsMetrics(y_pred, y_true)
             for y_pred, y_true in zip(pred_tactics, self.__y_true_tactics, strict=True)
         ]
