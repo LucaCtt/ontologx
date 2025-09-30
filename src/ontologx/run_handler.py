@@ -10,6 +10,7 @@ from rich.progress import track
 from ontologx.backend import EmbeddingsFactory, LLMFactory
 from ontologx.config import Config
 from ontologx.metrics import GEvalGraphAlignmentMetrics, OntologyMetrics, SHACLMetrics, TacticsMetrics
+from ontologx.metrics.ttp_metrics import MITRETactic
 from ontologx.parser import ParserFactory
 from ontologx.store import GraphDocument, Store
 from ontologx.store.config import StoreAuth, StoreConfig
@@ -214,12 +215,28 @@ class RunHandler:
                 )
 
         if "tactics" in self.__config.metrics:
-            ttps_metrics = TacticsMetrics(y_pred, y_true, self.__tactics_model, self.__config.tactics_prompt_path)
-            keys = ttps_metrics.precisions.keys()
+            ttps_metrics = TacticsMetrics.from_ungrouped_events(
+                y_pred,
+                y_true,
+                self.__tactics_model,
+                self.__config.tactics_prompt_path,
+            )
 
-            for tactic in keys:
-                results[f"tactic_{tactic.name.lower()}_precision"] = ttps_metrics.precisions[tactic]
-                results[f"tactic_{tactic.name.lower()}_recall"] = ttps_metrics.recalls[tactic]
-                results[f"tactic_{tactic.name.lower()}_f1_score"] = ttps_metrics.f1_scores[tactic]
+            results.update(
+                {
+                    "tactics_precision": ttps_metrics.precision,
+                    "tactics_recall": ttps_metrics.recall,
+                    "tactics_f1_score": ttps_metrics.f1_score,
+                },
+            )
+
+            for tactic in MITRETactic:
+                results.update(
+                    {
+                        f"{tactic.name.lower()}_precision": ttps_metrics.tactics_precision.get(tactic, -1),
+                        f"{tactic.name.lower()}_recall": ttps_metrics.tactics_recall.get(tactic, -1),
+                        f"{tactic.name.lower()}_f1_score": ttps_metrics.tactics_f1_score.get(tactic, -1),
+                    },
+                )
 
         return results

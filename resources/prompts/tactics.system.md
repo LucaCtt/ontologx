@@ -19,7 +19,7 @@ Here is a list of MITRE ATT&CK enterprise tactics for reference:
 # Rules
 You MUST adhere to the following constraints at all times:
 1. The output tactics must be matched to the observed behaviors in the session.
-2. If multiple tactics apply to the session, include only the ones that you are absolutely confident about.
+2. If multiple tactics apply to the session, include only the ones that you are confident about.
 3. The output tactics must be defined in MITRE ATT&CK enterprise.
 
 # Strict Compliance

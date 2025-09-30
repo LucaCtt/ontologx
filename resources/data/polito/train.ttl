@@ -35,7 +35,7 @@
 :example-1 rdf:type mlsx:DatasetRow;
   mlsx:eventMessage "{\"dst_ip\": \"10.42.4.33\", \"dst_port\": 2222.0, \"eventid\": \"cowrie.session.connect\", \"message\": \"New connection: 10.42.4.1:46516 (10.42.4.33:2222) [session: fcfef7904937]\", \"protocol\": \"ssh\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"src_port\": 46516.0, \"timestamp\": \"2025-08-10T22:21:57.893589Z\", \"session_id\": \"fcfef7904937\"}";
   mlsx:hasLabel :event-1;
-  mlsx:hasTactic "Initial Access", "Execution" , "Persistence", "Command and Control".
+  mlsx:hasTactic "Execution", "Initial Access", "Privilege Escalation", "Persistence".
 
 # {"eventid": "cowrie.client.version", "message": "Remote SSH version: SSH-2.0-Go", "sensor": "cowrie-azure-worker-00-8ff84698d-4226n", "src_ip": "10.42.4.1", "timestamp": "2025-08-10T22:21:57.894158Z", "version": "SSH-2.0-Go", "session_id": "fcfef7904937"}
 
@@ -65,7 +65,7 @@
 :example-2 rdf:type mlsx:DatasetRow;
   mlsx:eventMessage "{\"eventid\": \"cowrie.client.version\", \"message\": \"Remote SSH version: SSH-2.0-Go\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:21:57.894158Z\", \"version\": \"SSH-2.0-Go\", \"session_id\": \"fcfef7904937\"}";
   mlsx:hasLabel :event-2;
-  mlsx:hasTactic "Initial Access", "Execution" , "Persistence", "Command and Control".
+  mlsx:hasTactic "Execution", "Initial Access", "Privilege Escalation", "Persistence".
 
 # {"compCS": ["none"], "encCS": ["aes128-gcm@openssh.com", "chacha20-poly1305@openssh.com", "aes128-ctr", "aes192-ctr", "aes256-ctr"], "eventid": "cowrie.client.kex", "hash": "98ddc5604ef6a1006a2b49a58759fbe6", "hashAlgorithms": "curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha1;aes128-gcm@openssh.com,chacha20-poly1305@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr;hmac-sha2-256-etm@openssh.com,hmac-sha2-256,hmac-sha1,hmac-sha1-96;none", "kexAlgs": ["curve25519-sha256@libssh.org", "ecdh-sha2-nistp256", "ecdh-sha2-nistp384", "ecdh-sha2-nistp521", "diffie-hellman-group14-sha1"], "keyAlgs": ["rsa-sha2-512-cert-v01@openssh.com", "rsa-sha2-256-cert-v01@openssh.com", "ssh-rsa-cert-v01@openssh.com", "ssh-dss-cert-v01@openssh.com", "ecdsa-sha2-nistp256-cert-v01@openssh.com", "ecdsa-sha2-nistp384-cert-v01@openssh.com", "ecdsa-sha2-nistp521-cert-v01@openssh.com", "ssh-ed25519-cert-v01@openssh.com", "ecdsa-sha2-nistp256", "ecdsa-sha2-nistp384", "ecdsa-sha2-nistp521", "rsa-sha2-512", "rsa-sha2-256", "ssh-rsa", "ssh-dss", "ssh-ed25519"], "langCS": [""], "macCS": ["hmac-sha2-256-etm@openssh.com", "hmac-sha2-256", "hmac-sha1", "hmac-sha1-96"], "message": "SSH client hassh fingerprint: 98ddc5604ef6a1006a2b49a58759fbe6", "sensor": "cowrie-azure-worker-00-8ff84698d-4226n", "src_ip": "10.42.4.1", "timestamp": "2025-08-10T22:21:57.979625Z", "session_id": "fcfef7904937"}
 
@@ -95,7 +95,7 @@
 :example-3 rdf:type mlsx:DatasetRow;
   mlsx:eventMessage "{\"compCS\": [\"none\"], \"encCS\": [\"aes128-gcm@openssh.com\", \"chacha20-poly1305@openssh.com\", \"aes128-ctr\", \"aes192-ctr\", \"aes256-ctr\"], \"eventid\": \"cowrie.client.kex\", \"hash\": \"98ddc5604ef6a1006a2b49a58759fbe6\", \"hashAlgorithms\": \"curve25519-sha256@libssh.org,ecdh-sha2-nistp256,ecdh-sha2-nistp384,ecdh-sha2-nistp521,diffie-hellman-group14-sha1;aes128-gcm@openssh.com,chacha20-poly1305@openssh.com,aes128-ctr,aes192-ctr,aes256-ctr;hmac-sha2-256-etm@openssh.com,hmac-sha2-256,hmac-sha1,hmac-sha1-96;none\", \"kexAlgs\": [\"curve25519-sha256@libssh.org\", \"ecdh-sha2-nistp256\", \"ecdh-sha2-nistp384\", \"ecdh-sha2-nistp521\", \"diffie-hellman-group14-sha1\"], \"keyAlgs\": [\"rsa-sha2-512-cert-v01@openssh.com\", \"rsa-sha2-256-cert-v01@openssh.com\", \"ssh-rsa-cert-v01@openssh.com\", \"ssh-dss-cert-v01@openssh.com\", \"ecdsa-sha2-nistp256-cert-v01@openssh.com\", \"ecdsa-sha2-nistp384-cert-v01@openssh.com\", \"ecdsa-sha2-nistp521-cert-v01@openssh.com\", \"ssh-ed25519-cert-v01@openssh.com\", \"ecdsa-sha2-nistp256\", \"ecdsa-sha2-nistp384\", \"ecdsa-sha2-nistp521\", \"rsa-sha2-512\", \"rsa-sha2-256\", \"ssh-rsa\", \"ssh-dss\", \"ssh-ed25519\"], \"langCS\": [\"\"], \"macCS\": [\"hmac-sha2-256-etm@openssh.com\", \"hmac-sha2-256\", \"hmac-sha1\", \"hmac-sha1-96\"], \"message\": \"SSH client hassh fingerprint: 98ddc5604ef6a1006a2b49a58759fbe6\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:21:57.979625Z\", \"session_id\": \"fcfef7904937\"}";
   mlsx:hasLabel :event-3;
-  mlsx:hasTactic "Initial Access", "Execution" , "Persistence", "Command and Control".
+  mlsx:hasTactic "Execution", "Initial Access", "Privilege Escalation", "Persistence".
 
 # {"eventid": "cowrie.login.success", "message": "login attempt [root/ubuntu] succeeded", "password": "ubuntu", "sensor": "cowrie-azure-worker-00-8ff84698d-4226n", "src_ip": "10.42.4.1", "timestamp": "2025-08-10T22:21:58.244271Z", "username": "root", "session_id": "fcfef7904937"}
 
@@ -130,7 +130,7 @@
 :example-4 rdf:type mlsx:DatasetRow;
   mlsx:eventMessage "{\"eventid\": \"cowrie.login.success\", \"message\": \"login attempt [root/ubuntu] succeeded\", \"password\": \"ubuntu\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:21:58.244271Z\", \"username\": \"root\", \"session_id\": \"fcfef7904937\"}";
   mlsx:hasLabel :event-4;
-  mlsx:hasTactic "Initial Access", "Execution" , "Persistence", "Command and Control".
+  mlsx:hasTactic "Execution", "Initial Access", "Privilege Escalation", "Persistence".
 
 # {"eventid": "cowrie.session.file_upload", "filename": "sshd", "message": "SFTP Uploaded file \"sshd\" to var/lib/cowrie/downloads/94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00", "outfile": "var/lib/cowrie/downloads/94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00", "sensor": "cowrie-azure-worker-00-8ff84698d-4226n", "shasum": "94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00", "src_ip": "10.42.4.1", "timestamp": "2025-08-10T22:23:26.278996Z", "session_id": "fcfef7904937"}
 
@@ -169,7 +169,7 @@
 :example-5 rdf:type mlsx:DatasetRow;
   mlsx:eventMessage "{\"eventid\": \"cowrie.session.file_upload\", \"filename\": \"sshd\", \"message\": \"SFTP Uploaded file \\\"sshd\\\" to var/lib/cowrie/downloads/94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00\", \"outfile\": \"var/lib/cowrie/downloads/94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"shasum\": \"94f2e4d8d4436874785cd14e6e6d403507b8750852f7f2040352069a75da4c00\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:23:26.278996Z\", \"session_id\": \"fcfef7904937\"}";
   mlsx:hasLabel :event-5;
-  mlsx:hasTactic "Initial Access", "Execution" , "Persistence", "Command and Control".
+  mlsx:hasTactic "Execution", "Initial Access", "Privilege Escalation", "Persistence".
 
 # {"arch": "linux-x64-lsb", "eventid": "cowrie.session.params", "message": "[]", "sensor": "cowrie-azure-worker-00-8ff84698d-4226n", "src_ip": "10.42.4.1", "timestamp": "2025-08-10T22:23:26.626913Z", "session_id": "fcfef7904937"}
 
@@ -192,7 +192,7 @@
 :example-6 rdf:type mlsx:DatasetRow;
   mlsx:eventMessage "{\"arch\": \"linux-x64-lsb\", \"eventid\": \"cowrie.session.params\", \"message\": \"[]\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:23:26.626913Z\", \"session_id\": \"fcfef7904937\"}";
   mlsx:hasLabel :event-6;
-  mlsx:hasTactic "Initial Access", "Execution" , "Persistence", "Command and Control".
+  mlsx:hasTactic "Execution", "Initial Access", "Privilege Escalation", "Persistence".
 
 # {"eventid": "cowrie.command.input", "input": "chmod +x ./.5577515578064049276/sshd;nohup ./.5577515578064049276/sshd 124.225.67.32 39.106.57.208 8.245.24.52 180.163.61.238 62.171.162.142 5.178.111.210 82.180.154.188 85.174.227.19 188.235.158.122 116.128.243.59 47.109.28.100 192.241.228.126 176.126.84.72 222.187.215.194 15.204.224.32 36.163.199.18 36.151.192.243 45.131.111.106 147.93.62.20 185.103.103.83 211.101.244.162 120.48.32.185 212.115.54.22 46.235.84.183 125.124.106.113 120.233.147.34 158.51.96.38 111.170.168.6 139.214.222.149 43.167.236.203 221.14.147.153 152.110.82.109 34.122.156.88 139.59.253.66 96.78.175.36 62.171.184.111 157.255.155.179 145.223.117.124 43.139.160.130 103.232.21.226 117.173.76.160 39.164.232.214 103.145.145.78 106.75.68.22 117.149.247.143 178.128.253.94 114.231.77.98 163.172.34.113 45.15.168.245 111.12.131.236 154.124.241.135 &", "message": "CMD: chmod +x ./.5577515578064049276/sshd;nohup ./.5577515578064049276/sshd 124.225.67.32 39.106.57.208 8.245.24.52 180.163.61.238 62.171.162.142 5.178.111.210 82.180.154.188 85.174.227.19 188.235.158.122 116.128.243.59 47.109.28.100 192.241.228.126 176.126.84.72 222.187.215.194 15.204.224.32 36.163.199.18 36.151.192.243 45.131.111.106 147.93.62.20 185.103.103.83 211.101.244.162 120.48.32.185 212.115.54.22 46.235.84.183 125.124.106.113 120.233.147.34 158.51.96.38 111.170.168.6 139.214.222.149 43.167.236.203 221.14.147.153 152.110.82.109 34.122.156.88 139.59.253.66 96.78.175.36 62.171.184.111 157.255.155.179 145.223.117.124 43.139.160.130 103.232.21.226 117.173.76.160 39.164.232.214 103.145.145.78 106.75.68.22 117.149.247.143 178.128.253.94 114.231.77.98 163.172.34.113 45.15.168.245 111.12.131.236 154.124.241.135 &", "sensor": "cowrie-azure-worker-00-8ff84698d-4226n", "src_ip": "10.42.4.1", "timestamp": "2025-08-10T22:23:26.627275Z", "session_id": "fcfef7904937"}
 
@@ -382,7 +382,7 @@
 :example-7 rdf:type mlsx:DatasetRow;
   mlsx:eventMessage "{\"eventid\": \"cowrie.command.input\", \"input\": \"chmod +x ./.5577515578064049276/sshd;nohup ./.5577515578064049276/sshd 124.225.67.32 39.106.57.208 8.245.24.52 180.163.61.238 62.171.162.142 5.178.111.210 82.180.154.188 85.174.227.19 188.235.158.122 116.128.243.59 47.109.28.100 192.241.228.126 176.126.84.72 222.187.215.194 15.204.224.32 36.163.199.18 36.151.192.243 45.131.111.106 147.93.62.20 185.103.103.83 211.101.244.162 120.48.32.185 212.115.54.22 46.235.84.183 125.124.106.113 120.233.147.34 158.51.96.38 111.170.168.6 139.214.222.149 43.167.236.203 221.14.147.153 152.110.82.109 34.122.156.88 139.59.253.66 96.78.175.36 62.171.184.111 157.255.155.179 145.223.117.124 43.139.160.130 103.232.21.226 117.173.76.160 39.164.232.214 103.145.145.78 106.75.68.22 117.149.247.143 178.128.253.94 114.231.77.98 163.172.34.113 45.15.168.245 111.12.131.236 154.124.241.135 &\", \"message\": \"CMD: chmod +x ./.5577515578064049276/sshd;nohup ./.5577515578064049276/sshd 124.225.67.32 39.106.57.208 8.245.24.52 180.163.61.238 62.171.162.142 5.178.111.210 82.180.154.188 85.174.227.19 188.235.158.122 116.128.243.59 47.109.28.100 192.241.228.126 176.126.84.72 222.187.215.194 15.204.224.32 36.163.199.18 36.151.192.243 45.131.111.106 147.93.62.20 185.103.103.83 211.101.244.162 120.48.32.185 212.115.54.22 46.235.84.183 125.124.106.113 120.233.147.34 158.51.96.38 111.170.168.6 139.214.222.149 43.167.236.203 221.14.147.153 152.110.82.109 34.122.156.88 139.59.253.66 96.78.175.36 62.171.184.111 157.255.155.179 145.223.117.124 43.139.160.130 103.232.21.226 117.173.76.160 39.164.232.214 103.145.145.78 106.75.68.22 117.149.247.143 178.128.253.94 114.231.77.98 163.172.34.113 45.15.168.245 111.12.131.236 154.124.241.135 &\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:23:26.627275Z\", \"session_id\": \"fcfef7904937\"}";
   mlsx:hasLabel :event-7;
-  mlsx:hasTactic "Initial Access", "Execution" , "Persistence", "Command and Control".
+  mlsx:hasTactic "Execution", "Initial Access", "Privilege Escalation", "Persistence".
 
 # {"duplicate": false, "duration": "0.1", "eventid": "cowrie.log.closed", "message": "Closing TTY Log: var/lib/cowrie/tty/0fb58a44ee8287bb57f0929489413d4c1608fe57461b8b12f5728858607db0f6 after 0.1 seconds", "sensor": "cowrie-azure-worker-00-8ff84698d-4226n", "shasum": "0fb58a44ee8287bb57f0929489413d4c1608fe57461b8b12f5728858607db0f6", "size": 136.0, "src_ip": "10.42.4.1", "timestamp": "2025-08-10T22:23:26.714168Z", "ttylog": "var/lib/cowrie/tty/0fb58a44ee8287bb57f0929489413d4c1608fe57461b8b12f5728858607db0f6", "session_id": "fcfef7904937"}
 
@@ -415,7 +415,7 @@
 :example-8 rdf:type mlsx:DatasetRow;
   mlsx:eventMessage "{\"duplicate\": false, \"duration\": \"0.1\", \"eventid\": \"cowrie.log.closed\", \"message\": \"Closing TTY Log: var/lib/cowrie/tty/0fb58a44ee8287bb57f0929489413d4c1608fe57461b8b12f5728858607db0f6 after 0.1 seconds\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"shasum\": \"0fb58a44ee8287bb57f0929489413d4c1608fe57461b8b12f5728858607db0f6\", \"size\": 136.0, \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:23:26.714168Z\", \"ttylog\": \"var/lib/cowrie/tty/0fb58a44ee8287bb57f0929489413d4c1608fe57461b8b12f5728858607db0f6\", \"session_id\": \"fcfef7904937\"}";
   mlsx:hasLabel :event-8;
-  mlsx:hasTactic "Initial Access", "Execution" , "Persistence", "Command and Control".
+  mlsx:hasTactic "Execution", "Initial Access", "Privilege Escalation", "Persistence".
 
 # {"duration": "88.8", "eventid": "cowrie.session.closed", "message": "Connection lost after 88.8 seconds", "sensor": "cowrie-azure-worker-00-8ff84698d-4226n", "src_ip": "10.42.4.1", "timestamp": "2025-08-10T22:23:26.722445Z", "session_id": "fcfef7904937"}
 
@@ -441,9 +441,7 @@
 :example-9 rdf:type mlsx:DatasetRow;
   mlsx:eventMessage "{\"duration\": \"88.8\", \"eventid\": \"cowrie.session.closed\", \"message\": \"Connection lost after 88.8 seconds\", \"sensor\": \"cowrie-azure-worker-00-8ff84698d-4226n\", \"src_ip\": \"10.42.4.1\", \"timestamp\": \"2025-08-10T22:23:26.722445Z\", \"session_id\": \"fcfef7904937\"}";
   mlsx:hasLabel :event-9;
-  mlsx:hasTactic "Initial Access", "Execution" , "Persistence", "Command and Control".
-
-# {"dst_ip": "10.42.6.15", "dst_port": 2222.0, "eventid": "cowrie.session.connect", "message": "New connection: 10.42.6.1:8906 (10.42.6.15:2222) [session: be1939f18ace]", "protocol": "ssh", "sensor": "cowrie-poli-worker-01-89bfdd5dd-v7wvn", "src_ip": "10.42.6.1", "src_port": 8906.0, "timestamp": "2025-08-04T23:53:22.641240Z"}
+  mlsx:hasTactic "Execution", "Initial Access", "Privilege Escalation", "Persistence".
 
 :example-dataset rdf:type mlsx:ExampleDataset;
   mlsx:hasPart :example-1, :example-2, :example-3, :example-4, :example-5, :example-6, :example-7, :example-8, :example-9.
