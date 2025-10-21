@@ -195,7 +195,7 @@ class TacticsMetrics:
                 tactics_dict[session_id] = []
 
             sessions_dict[session_id].append(pred)
-            true_tactics = [MITRETactic(i) for i in true.source.metadata["tactics"]]
+            true_tactics = [MITRETactic(i.lower().title()) for i in true.source.metadata["tactics"]]
             tactics_dict[session_id] = list(set(tactics_dict[session_id] + true_tactics))
 
         return cls(sessions_dict, tactics_dict, llm, prompt_predict_tactics)
