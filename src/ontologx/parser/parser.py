@@ -1,33 +1,38 @@
-"""Parser module for parsing log events and constructing knowledge graphs."""
+"""Parser module for parsing messages and constructing knowledge graphs."""
 
 import logging
 from abc import ABC, abstractmethod
 
 from langchain_core.language_models import BaseChatModel
 
-from ontologx.store import GraphDocument, Store
+from ontologx.store import GraphDocument
 
 logger = logging.getLogger("rich")
 
 
 class Parser(ABC):
-    """Parser class for parsing log events and constructing knowledge graphs using a LLM."""
+    """Parser class for parsing messages and constructing knowledge graphs using a LLM."""
 
-    def __init__(self, llm: BaseChatModel, store: Store, prompt_build_graph: str) -> None:
+    def __init__(self, llm: BaseChatModel, prompt_build_graph: str, ontology: GraphDocument) -> None:
         self.llm = llm
-        self.store = store
         self.prompt_build_graph = prompt_build_graph
+        self.ontology = ontology
 
     @abstractmethod
-    def parse(self, event: str, context: dict) -> GraphDocument | None:
-        """Parse the given event and construct a knowledge graph.
+    def parse(
+        self,
+        message: str,
+        context: dict | None = None,
+        examples: list[GraphDocument] | None = None,
+    ) -> GraphDocument | None:
+        """Parse the given message and construct a knowledge graph.
 
         Args:
-            event: The log event to parse.
+            message: The message to parse.
             context: The context of the event.
+            examples: A list of example GraphDocuments to guide the parsing.
 
         Returns:
-            A report containing the stats of the parsing process.
+            A GraphDocument representing the constructed knowledge graph, or None if parsing failed.
 
         """
-        # Retrieve examples once for all the self-reflection steps

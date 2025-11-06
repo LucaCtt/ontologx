@@ -5,7 +5,7 @@ from langchain_core.language_models import BaseChatModel
 from ontologx.parser.baseline_parser import BaselineParser
 from ontologx.parser.main_parser import MainParser
 from ontologx.parser.parser import Parser
-from ontologx.store import Store
+from ontologx.store import GraphDocument
 
 
 class ParserFactory:
@@ -15,9 +15,8 @@ class ParserFactory:
     def create(
         parser_type: str,
         llm: BaseChatModel,
-        store: Store,
         prompt_build_graph: str,
-        examples_retrieval: bool,
+        ontology: GraphDocument,
         correction_steps: int = 0,
     ) -> Parser:
         """Create a Parser instance.
@@ -25,11 +24,9 @@ class ParserFactory:
         Args:
             parser_type: The type of parser to create. Can be "baseline" or "main".
             llm: The language model to use for parsing.
-            store: The store to use for storing the parsed graphs.
             prompt_build_graph: The prompt to use for building the graph.
-            examples_retrieval: Whether to use examples retrieval.
+            ontology: The ontology graph document.
             correction_steps: The number of correction steps to perform.
-            **kwargs: Additional arguments to pass to the parser constructor.
 
         Returns:
             A Parser instance.
@@ -37,9 +34,9 @@ class ParserFactory:
         """
         match parser_type:
             case "baseline":
-                return BaselineParser(llm, store, prompt_build_graph, examples_retrieval)
+                return BaselineParser(llm, prompt_build_graph, ontology)
             case "main":
-                return MainParser(llm, store, prompt_build_graph, correction_steps, examples_retrieval)
+                return MainParser(llm, prompt_build_graph, ontology, correction_steps)
             case _:
                 msg = f"Unknown parser type: {parser_type}"
                 raise ValueError(msg)

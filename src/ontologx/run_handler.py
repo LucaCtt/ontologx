@@ -74,9 +74,8 @@ class RunHandler:
         parser = ParserFactory.create(
             self.__config.parser_type,
             self.__parser_model,
-            store,
             Path(self.__config.parser_prompt_path).read_text(),
-            examples_retrieval=self.__config.examples_retrieval,
+            store.ontology(),
             correction_steps=self.__config.correction_steps,
         )
         logger.info("Parser '%s' created.", self.__config.parser_type)
@@ -93,7 +92,10 @@ class RunHandler:
             logger.info("Parsing event: '%s'", event)
 
             start_time = time.time()
-            graph_pred = parser.parse(event, context)
+
+            examples = store.search("mmr", event, context, k=3) if self.__config.generated_graphs_retrieval else None
+            graph_pred = parser.parse(event, context, examples)
+
             total_time += time.time() - start_time
 
             if graph_pred is None:
