@@ -6,19 +6,19 @@ in the root directory of the project.
 """
 
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
-_DEFAULT_LLM_MODELS = {
+_DEFAULT_LLMS = {
     "openai": "gpt-oss-20b",
     "ollama": "llama3.2:3b",
     "bedrock": "meta.llama3-2-3b-instruct-v1:0",
 }
 
-_DEFAULT_EMBEDDINGS_MODELS = {
+_DEFAULT_EMBEDDINGS = {
     "ollama": "milkey/gte",
     "infinity": "Alibaba-NLP/gte-multilingual-base",
 }
@@ -38,40 +38,22 @@ class Config:
     the criterion for grouping is up to the user.
     """
 
-    parser_type = os.getenv("PARSER_TYPE", "main")
-    """The type of parser to use. Supported values are 'main' and 'baseline'"""
-
-    examples_retrieval = bool(int(os.getenv("EXAMPLES_RETRIEVAL", "1")))
-    """If True, the parser will retrieve examples from the graph store."""
-
-    generated_graphs_retrieval = bool(int(os.getenv("GENERATED_GRAPHS_RETRIEVAL", "1")))
-    """If True, only the labelled examples will be used in the RAG."""
+    n_runs = int(os.getenv("N_RUNS", "1"))
+    """The number of runs to execute in the experiment."""
 
     correction_steps = int(os.getenv("CORRECTION_STEPS", "3"))
     """The number of correction steps to take. Must be greater or equal to 0."""
 
-    metrics: list[str] = field(default_factory=lambda: os.getenv("METRICS", "ontology,shacl,g-eval,tactics").split(","))
-    """The metrics to compute at the end of the experiment."""
-
-    n_runs = int(os.getenv("N_RUNS", "10"))
-    """The number of runs to execute in the experiment."""
-
-    ontology_path = os.getenv("ONTOLOGY_PATH", "resources/ontologies/logs.ttl")
+    ontology_path = os.getenv("ONTOLOGY_PATH", "resources/ontologies/uco_1_5_owl.rdf")
     """The path to the ontology file."""
 
-    examples_path = os.getenv("EXAMPLES_PATH", "resources/data/ait/train.ttl")
-    """ The path to the examples log graphs file. Used to retrieve the examples."""
+    examples_path = os.getenv("EXAMPLES_PATH", "resources/data/examples.ttl")
+    """ The path to the starter examples graphs file."""
 
-    tests_path = os.getenv("TESTS_PATH", "resources/data/ait/test.ttl")
+    logs_path = os.getenv("TESTS_PATH", "resources/data/ait/logs.ttl")
     """The input path to the logs to parse."""
 
-    shacl_path = os.getenv("CONSTRAINTS_PATH", "resources/ontologies/logs_shacl.ttl")
-    """The path to the SHACL constraints file for the ontology."""
-
-    parser_prompt_path = os.getenv(
-        "PARSER_PROMPT_PATH",
-        "resources/prompts/main.system.md" if parser_type == "main" else "resources/prompts/baseline.system.md",
-    )
+    builder_prompt_path = os.getenv("BUILDER_PROMPT_PATH", "resources/prompts/builder.system.md")
     """The path of the prompt used to build the graph."""
 
     tactics_prompt_path = os.getenv(
@@ -90,64 +72,31 @@ class Config:
     embeddings_backend_url = os.getenv("EMBEDDINGS_BACKEND_URL", "http://localhost:11434")
     """The URL of the embeddings backend. Used only if the backend is "ollama" or "infinity"."""
 
-    embeddings_model = os.getenv(
-        "EMBEDDINGS_MODEL",
-        _DEFAULT_EMBEDDINGS_MODELS[embeddings_backend],
+    embeddings_name = os.getenv(
+        "EMBEDDINGS_NAME",
+        _DEFAULT_EMBEDDINGS[embeddings_backend],
     )
     """
     The model used to embed logs.
     """
 
-    parser_backend = os.getenv("PARSER_BACKEND", "openai")
+    llm_backend = os.getenv("LLM_BACKEND", "bedrock")
     """
-    The backend to use for the parser llm.
-    Must be one of "ollama", "openai", or "bedrock".
-    Default is "openai".
+    The backend to use for the llm.
+    Must be one of "ollama", "openai", or "bedrock". Default is "bedrock".
     """
 
-    parser_backend_url = os.getenv("PARSER_BACKEND_URL", "http://localhost:11434")
-    """The URL of the parser llm backend. Used only if the backend is "ollama" or "vllm"."""
+    llm_backend_url = os.getenv("LLM_BACKEND_URL", "http://localhost:11434")
+    """The URL of the llm backend. Used only if the backend is "ollama" or "vllm"."""
 
-    parser_model = os.getenv(
-        "PARSER_MODEL",
-        _DEFAULT_LLM_MODELS[parser_backend],
+    llm_name = os.getenv(
+        "LLM_NAME",
+        _DEFAULT_LLMS[llm_backend],
     )
-    """
-    The model used to parse logs.
-    """
+    """The name of the llm to use."""
 
-    parser_temperature = float(os.getenv("PARSER_TEMPERATURE", "0.7"))
-    """The temperature of the LLM used to parse logs. Must be between 0 and 1."""
-
-    geval_backend = os.getenv("GEVAL_BACKEND", "bedrock")
-    """The LLM backend to use for the G-Eval tests. Must be one of the supported LLM backends."""
-
-    geval_backend_url = os.getenv("GEVAL_BACKEND_URL", "http://localhost:11434")
-    """The URL of the G-Eval LLM backend. Used only if the backend is "ollama" or "vllm"."""
-
-    geval_model = os.getenv(
-        "GEVAL_MODEL",
-        _DEFAULT_LLM_MODELS[geval_backend],
-    )
-    """
-    The model used to evaluate the tests.
-    """
-
-    tactics_backend = os.getenv("TACTICS_BACKEND", "ollama")
-    """The backend to use for the tactics llm.
-    Must be one of "ollama", "huggingface", "vllm", or "bedrock".
-    """
-
-    tactics_backend_url = os.getenv("TACTICS_BACKEND_URL", "http://localhost:11434")
-    """The URL of the tactics llm backend. Used only if the backend is "ollama" or "vllm"."""
-
-    tactics_model = os.getenv(
-        "TACTICS_MODEL",
-        _DEFAULT_LLM_MODELS[tactics_backend],
-    )
-    """
-    The model used to suggest tactics.
-    """
+    llm_temperature = float(os.getenv("LLM_TEMPERATURE", "0"))
+    """The temperature of the llm. Must be between 0 and 1."""
 
     neo4j_url = os.getenv("NEO4J_URL", "bolt://localhost:7687")
     """The URL of the Neo4j database. Use bolt+ssc for self-signed certificates."""
