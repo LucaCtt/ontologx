@@ -35,9 +35,8 @@ config = Config()
 def main() -> None:
     """Run the log knowledge graph builder."""
     logger.info("Experiment: '%s'", config.experiment_name)
-    logger.info("Embeddings model: '%s'", config.embeddings_model)
-    logger.info("Language model: '%s'", config.parser_model)
-    logger.info("Parser type: '%s'", config.parser_type)
+    logger.info("Embeddings: '%s'", config.embeddings_name)
+    logger.info("LLM: '%s'", config.llm_name)
 
     run_handler = RunHandler(config)
 

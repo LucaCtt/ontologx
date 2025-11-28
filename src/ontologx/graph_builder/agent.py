@@ -22,6 +22,8 @@ GET_CORRECTIONS_NODE = "get_corrections"
 ERROR_NODE = "error"
 CLEANUP_HISTORY_NODE = "cleanup_history"
 
+MAX_CONVERSATION_HISTORY = 5
+
 
 class GraphBuilderState(TypedDict):
     """State of the parser agent."""
@@ -31,6 +33,9 @@ class GraphBuilderState(TypedDict):
 
     # Context of the input event
     input_context: dict
+
+    # Examples provided to the LLM for few-shot learning
+    input_examples: list[GraphDocument]
 
     # LLM used for parsing
     llm: BaseChatModel
@@ -204,6 +209,24 @@ def cleanup_history(state: GraphBuilderState) -> Command:
     # a ToolMessage, and a final AIMessage.
     messages_to_keep = [*state["messages"][: last_human_index + 1], state["messages"][last_ai_index:]]
 
+    # Find the total number of conversations in history
+    n_conversations = sum(
+        1
+        for i in range(len(messages_to_keep))
+        if isinstance(messages_to_keep[i], HumanMessage) and str(messages_to_keep[i].content).startswith("Event: ")
+    )
+
+    # If we have more than MAX_CONVERSATION_HISTORY conversations, trim the history
+    if n_conversations >= MAX_CONVERSATION_HISTORY:
+        # Keep only the last 5 conversations
+        current_conversations = 0
+        for i in reversed(range(len(messages_to_keep))):
+            if isinstance(messages_to_keep[i], HumanMessage) and str(messages_to_keep[i].content).startswith("Event: "):
+                current_conversations += 1
+                if current_conversations == MAX_CONVERSATION_HISTORY:
+                    messages_to_keep = messages_to_keep[i:]
+                    break
+
     return Command(
         update={
             "messages": messages_to_keep,
@@ -212,15 +235,15 @@ def cleanup_history(state: GraphBuilderState) -> Command:
     )
 
 
-parser_agent = StateGraph(GraphBuilderState)
+graph_builder_agent = StateGraph(GraphBuilderState)
 
-parser_agent.add_node(INITIALIZE_STATE_NODE, initialize_state)
-parser_agent.add_node(BUILD_GRAPH_NODE, build_graph)
-parser_agent.add_node(GET_CORRECTIONS_NODE, correct_graph)
-parser_agent.add_node(ERROR_NODE, error)
-parser_agent.add_node(CLEANUP_HISTORY_NODE, cleanup_history)
+graph_builder_agent.add_node(INITIALIZE_STATE_NODE, initialize_state)
+graph_builder_agent.add_node(BUILD_GRAPH_NODE, build_graph)
+graph_builder_agent.add_node(GET_CORRECTIONS_NODE, correct_graph)
+graph_builder_agent.add_node(ERROR_NODE, error)
+graph_builder_agent.add_node(CLEANUP_HISTORY_NODE, cleanup_history)
 
-parser_agent.add_edge(START, INITIALIZE_STATE_NODE)
+graph_builder_agent.add_edge(START, INITIALIZE_STATE_NODE)
 
 memory = MemorySaver()
-parser_agent = parser_agent.compile(checkpointer=memory)
+graph_builder_agent = graph_builder_agent.compile(checkpointer=memory)

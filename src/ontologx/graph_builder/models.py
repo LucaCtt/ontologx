@@ -185,30 +185,4 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
 
             return self
 
-        @model_validator(mode="after")
-        def validate_event(self) -> "EventGraph":
-            """Validate the event graph.
-
-            This method is a placeholder for any additional validation logic that may be needed.
-            """
-            event_nodes = [node for node in self.nodes if node.type == "olx:Event"]
-            if len(event_nodes) != 1:
-                msg = "The event graph must contain exactly one 'Event' node."
-                err_type = "IncorrectEventNodes"
-                raise PydanticCustomError(err_type, msg)
-
-            return self
-
     return EventGraph
-
-
-def build_baseline_prompt(ontology: GraphDocument, base_prompt: str) -> str:
-    """Build a baseline prompt for the LLM to generate an event graph."""
-    valid = _OntologyValidValues(ontology)
-
-    prompt = base_prompt.replace("{{node_types}}", str(valid.node_types))
-    prompt = prompt.replace("{{relationship_types}}", str(valid.relationship_types))
-    prompt = prompt.replace("{{properties}}", str(valid.properties))
-    prompt = prompt.replace("{{properties_schema}}", str(valid.properties_schema))
-    prompt = prompt.replace("{{structural_triples}}", str(valid.structural_triples))
-    return prompt.replace("{{triples}}", str(valid.triples))

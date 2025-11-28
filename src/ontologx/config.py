@@ -1,8 +1,8 @@
-"""Configuration module for setting up variables used in the log graph building.
+"""Configuration module for setting experiment parameters.
 
 The variables are set using environment variables, with default values provided.
-Environment variables can be set in the shell before running the script, or in a `.env` file
-in the root directory of the project.
+Environment variables can be set in the shell before running the script,
+or in a `.env` file in the root directory of the project.
 """
 
 import os
