@@ -17,15 +17,10 @@ from ontologx.store.config import StoreConfig
 from ontologx.store.neo4j.utils import get_uri_from_ttl, normalize_input_graph, normalize_output_graph
 
 
-def _compose_embeddings_text(event: str, context: dict[str, str]) -> str:
+def _compose_embeddings_text(event: str) -> str:
     # Note: the following characters will be stripped out by langchain-neo4j:
     # + - = && || > < ! ( ) { } [ ] ^ " ~ * ? : \ /
-    text = f"event is '{event}'"
-
-    for key, value in context.items():
-        text += f", {key} is '{value}'"
-
-    return text
+    return f"event is '{event}'"
 
 
 class Dataset:
@@ -96,21 +91,11 @@ class Dataset:
             """
             MATCH (d:mlsx__ExampleDataset)-[:mlsx__hasPart]->(r:mlsx__DatasetRow)
             WHERE r.embedding IS NULL
-            OPTIONAL MATCH (r)-[:mlsx__hasContext]->(s:olx__Source)
-            RETURN elementId(r) AS id, r.mlsx__eventMessage AS eventMessage, s.olx__sourceName AS sourceName,
-            s.olx__sourceDevice AS sourceDevice
+            RETURN elementId(r) AS id, r.mlsx__eventMessage AS eventMessage
             """,
         )
 
-        texts = []
-        for el in to_populate:
-            context = {}
-            if el.get("sourceName"):
-                context["sourceName"] = el["sourceName"]
-            if el.get("sourceDevice"):
-                context["sourceDevice"] = el["sourceDevice"]
-
-            texts.append(_compose_embeddings_text(el["eventMessage"], context))
+        texts = [_compose_embeddings_text(el["eventMessage"]) for el in to_populate]
 
         text_embeddings = self.__embeddings.embed_documents(texts)
         self.__graph_store.query(
@@ -131,8 +116,8 @@ class Dataset:
         # Load the tests
         # Note: the test events should not have an embedding.
         self.__graph_store.query(
-            "CALL n10s.rdf.import.inline($tests, 'Turtle')",
-            params={"tests": Path(self.__config.tests_path).read_text()},
+            "CALL n10s.rdf.import.inline($logs, 'Turtle')",
+            params={"logs": Path(self.__config.logs_path).read_text()},
         )
         self.__graph_store.query(
             """
@@ -164,17 +149,9 @@ class Dataset:
         for test in test_nodes:
             graph = self.__get_subgraph_from_node(test["uri"])
 
-            source_node = next((node for node in graph.nodes if node.type == "olx__Source"), None)
-            context = {}
-            if source_node:
-                if source_node.properties.get("olx__sourceName"):
-                    context["sourceName"] = source_node.properties["olx__sourceName"]
-                if source_node.properties.get("olx__sourceDevice"):
-                    context["sourceDevice"] = source_node.properties["olx__sourceDevice"]
-
             graph.source = Document(
                 page_content=test["eventMessage"],
-                metadata={"context": context, "tactics": test["tactics"]},
+                metadata={"tactics": test["tactics"]},
             )
             tests.append(normalize_output_graph(graph))
 
@@ -224,7 +201,6 @@ class Dataset:
 
         text = _compose_embeddings_text(
             norm_graph.source.page_content,
-            norm_graph.source.metadata["context"],
         )
 
         dataset_row_properties = {
@@ -270,7 +246,6 @@ class Dataset:
     def events_mmr_search(
         self,
         event: str,
-        context: dict | None = None,
         k: int = 3,
         fetch_k: int = 30,
         lambda_mult: float = 0.5,
@@ -279,7 +254,6 @@ class Dataset:
 
         Args:
             event (str): The event message to search for.
-            context (dict): The context to use for the search.
             k (int): The number of events to return.
             fetch_k (int): The number of events to pass to the MMR algorithm.
             lambda_mult (float): number between 0 and 1, that determines the trade-off between relevance and diversity.
@@ -290,17 +264,12 @@ class Dataset:
                 with the nodes they are connected to and their relationships.
 
         """
-        # This filter is for retrieving examples only,
-        # or examples + generated events.
+        # This filter is for retrieving examples + generated events.
         # Examples will have no run name but an embedding,
         # Tests will have neither. Generated events will have both.
-        uri_filter = (
-            [self.__examples_uri]
-            if not self.__config.generated_graphs_retrieval
-            else [self.__examples_uri, self.__config.run_uri]
-        )
+        uri_filter = [self.__examples_uri, self.__config.run_uri]
 
-        query = _compose_embeddings_text(event, context or {})
+        query = _compose_embeddings_text(event)
         query_embedding = self.__embeddings.embed_query(query)
 
         got_docs = self.__vector_index.similarity_search_with_score_by_vector(
@@ -416,16 +385,11 @@ class Dataset:
             else []  # The node may not have any relationships
         )
 
-        # Create the context from the event source, if present.
-        source_node = next((node for node in nodes_dict.values() if node.type == "olx__Source"), None)
-        context = {key: value for key, value in source_node.properties.items() if key != "uri"} if source_node else {}
-
         return GraphDocument(
             nodes=list(nodes_dict.values()),
             relationships=relationships,
             source=Document(
                 page_content=dataset_row_node["properties"]["mlsx__eventMessage"],
-                metadata={"context": context},
             ),
         )
 

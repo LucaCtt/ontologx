@@ -5,7 +5,6 @@ from langchain_neo4j import Neo4jGraph
 
 from ontologx.store import GraphDocument, Store, StoreConfig
 from ontologx.store.neo4j.dataset import Dataset
-from ontologx.store.neo4j.ontology import Ontology
 from ontologx.store.neo4j.schema import Schema
 
 
@@ -24,13 +23,11 @@ class Neo4jStore(Store):
             password=config.auth.password,
         )
 
-        self.__onto = Ontology(self.__graph_store, config.ontology_path)
         self.__schema = Schema(self.__graph_store, config.study_uri, config.experiment_uri, config.run_uri)
         self.__dataset = Dataset(self.__graph_store, self._embeddings, config)
 
     def initialize(self) -> None:
         """Initialize the Neo4j graph database by creating necessary nodes, relationships, constraints, and indexes."""
-        self.__onto.initialize()
         self.__schema.initialize()
         self.__dataset.initialize()
 
@@ -83,10 +80,6 @@ class Neo4jStore(Store):
     def add_event_graph(self, event_graph: GraphDocument) -> None:
         """Add an event graph to the dataset."""
         self.__dataset.add_event_graph(event_graph)
-
-    def ontology(self) -> GraphDocument:
-        """Return the ontology graph as a GraphDocument."""
-        return self.__onto.graph()
 
     def add_evaluation_result(self, measure: str, evaluation: str | float) -> None:
         """Add an evaluation result to the schema."""

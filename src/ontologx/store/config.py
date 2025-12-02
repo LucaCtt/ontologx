@@ -22,12 +22,8 @@ class StoreConfig:
 
     run_uri: str
 
-    ontology_path: str
-
     examples_path: str
 
-    tests_path: str
-
-    generated_graphs_retrieval: bool
+    logs_path: str
 
     auth: StoreAuth

@@ -2,7 +2,8 @@
 
 from abc import ABC, abstractmethod
 
-from ontologx.backend.embeddings import Embeddings
+from langchain_core.embeddings import Embeddings
+
 from ontologx.store import GraphDocument, StoreConfig
 
 
@@ -34,10 +35,6 @@ class Store(ABC):
     @abstractmethod
     def clear(self) -> None:
         """Clear the store back to a clean state, removing nodes, relationships, constraints, and indexes."""
-
-    @abstractmethod
-    def ontology(self) -> GraphDocument:
-        """Get the log ontology."""
 
     @abstractmethod
     def tests(self) -> list[GraphDocument]:
