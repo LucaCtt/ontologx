@@ -3,7 +3,7 @@
 from langchain_core.embeddings import Embeddings
 from langchain_neo4j import Neo4jGraph
 
-from ontologx.store import GraphDocument, Store, StoreConfig
+from ontologx.store import Graph, Store, StoreConfig
 from ontologx.store.neo4j.dataset import Dataset
 from ontologx.store.neo4j.schema import Schema
 
@@ -46,7 +46,7 @@ class Neo4jStore(Store):
         for index in indexes:
             self.__graph_store.query(f"DROP INDEX {index['name']}")
 
-    def tests(self) -> list[GraphDocument]:
+    def tests(self) -> list[Graph]:
         """Return a list of test documents from the dataset."""
         return self.__dataset.tests()
 
@@ -54,9 +54,8 @@ class Neo4jStore(Store):
         self,
         criterion: str,
         event: str,
-        context: dict | None = None,
         **kwargs: str | float,
-    ) -> list[GraphDocument]:
+    ) -> list[Graph]:
         """Search for events in the dataset based on the given criterion.
 
         Currently supports 'mmr' for maximum marginal relevance search.
@@ -64,7 +63,6 @@ class Neo4jStore(Store):
         Args:
             criterion: The search criterion to use.
             event: The event to search for.
-            context: Additional context for the search.
             **kwargs: Additional keyword arguments for the search.
 
         Returns:
@@ -72,12 +70,12 @@ class Neo4jStore(Store):
 
         """
         if criterion == "mmr":
-            return self.__dataset.events_mmr_search(event, context, **kwargs)  # type: ignore[call-arg]
+            return self.__dataset.events_mmr_search(event, **kwargs)  # type: ignore[call-arg]
 
         msg = f"Unknown search criterion: {criterion}"
         raise ValueError(msg)
 
-    def add_event_graph(self, event_graph: GraphDocument) -> None:
+    def add_event_graph(self, event_graph: Graph) -> None:
         """Add an event graph to the dataset."""
         self.__dataset.add_event_graph(event_graph)
 

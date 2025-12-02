@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 from langchain_core.embeddings import Embeddings
 
-from ontologx.store import GraphDocument, StoreConfig
+from ontologx.store import Graph, StoreConfig
 
 
 class Store(ABC):
@@ -37,7 +37,7 @@ class Store(ABC):
         """Clear the store back to a clean state, removing nodes, relationships, constraints, and indexes."""
 
     @abstractmethod
-    def tests(self) -> list[GraphDocument]:
+    def tests(self) -> list[Graph]:
         """Get the test set."""
 
     @abstractmethod
@@ -45,15 +45,13 @@ class Store(ABC):
         self,
         criterion: str,
         event: str,
-        context: dict | None = None,
         **kwargs: str | float,
-    ) -> list[GraphDocument]:
+    ) -> list[Graph]:
         """Search for event graphs in the store based on a criterion and event.
 
         Args:
             criterion (str): The search criterion.
             event (str): The event to search for.
-            context (dict | None): Optional context for the log event.
             **kwargs: Additional keyword arguments for the search.
 
         Returns:
@@ -62,7 +60,7 @@ class Store(ABC):
         """
 
     @abstractmethod
-    def add_event_graph(self, event_graph: GraphDocument) -> None:
+    def add_event_graph(self, event_graph: Graph) -> None:
         """Add an event graph to the store.
 
         Args:

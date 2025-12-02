@@ -6,13 +6,12 @@ from pathlib import Path
 
 import neo4j
 import numpy as np
-from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_core.vectorstores.utils import maximal_marginal_relevance
 from langchain_neo4j import Neo4jGraph, Neo4jVector
 from neo4j_graphrag.types import SearchType
 
-from ontologx.store import GraphDocument, Node, Relationship
+from ontologx.store import Graph, Node, Relationship
 from ontologx.store.config import StoreConfig
 from ontologx.store.neo4j.utils import get_uri_from_ttl, normalize_input_graph, normalize_output_graph
 
@@ -130,18 +129,18 @@ class Dataset:
         )
         self.__graph_store.query(
             """
-            MATCH (d:mlsx__TestDataset)-[:mlsx__hasPart]->(r:mlsx__DatasetRow)-[:mlsx__hasLabel]->(e:olx__Event)
+            MATCH (d:mlsx__TestDataset)-[:mlsx__hasPart]->(r:mlsx__DatasetRow)-[:mlsx__hasGraph]->(e)
             WHERE r.embedding IS NULL
             SET r.embedding = ''
             """,
         )
 
-    def tests(self) -> list[GraphDocument]:
+    def tests(self) -> list[Graph]:
         """Return a list of test documents from the dataset."""
         test_nodes = self.__graph_store.query(
             """
-            MATCH (d:mlsx__TestDataset)-[:mlsx__hasPart]->(r:mlsx__DatasetRow)-[:mlsx__hasLabel]->(e:olx__Event)
-            RETURN r.mlsx__eventMessage as eventMessage, e.uri as uri, r.mlsx__hasTactic as tactics
+            MATCH (d:mlsx__TestDataset)-[:mlsx__hasPart]->(r:mlsx__DatasetRow)-[:mlsx__hasGraph]->(e)
+            RETURN r.mlsx__eventMessage as eventMessage, e.uri as uri
             ORDER BY e.uri
             """,
         )
@@ -149,15 +148,12 @@ class Dataset:
         for test in test_nodes:
             graph = self.__get_subgraph_from_node(test["uri"])
 
-            graph.source = Document(
-                page_content=test["eventMessage"],
-                metadata={"tactics": test["tactics"]},
-            )
+            graph.source_event = test["eventMessage"]
             tests.append(normalize_output_graph(graph))
 
         return tests
 
-    def add_event_graph(self, graph: GraphDocument) -> None:
+    def add_event_graph(self, graph: Graph) -> None:
         """Add an event graph to the store.
 
         All the nodes will be tagged with the current run name,
@@ -200,11 +196,11 @@ class Dataset:
             node.properties["uri"] = node.id
 
         text = _compose_embeddings_text(
-            norm_graph.source.page_content,
+            norm_graph.source_event,
         )
 
         dataset_row_properties = {
-            "mlsx__eventMessage": graph.source.page_content,
+            "mlsx__eventMessage": graph.source_event,
             "embedding": self.__embeddings.embed_query(text),
             "uri": f"{self.__config.run_uri}/{uuid.uuid4()}",
         }
@@ -213,7 +209,7 @@ class Dataset:
             MATCH (d:mlsx__OutputDataset)
             WHERE d.uri STARTS WITH $out_dataset_uri
             CREATE (d)-[:mlsx__hasPart]->(r:mlsx__DatasetRow $row_props)
-                -[:mlsx__hasLabel]->(n:olx__Event $event_props)
+                -[:mlsx__hasGraph]->(n:olx__Event $event_props)
             """,
             params={
                 "event_props": event_node.properties,
@@ -249,7 +245,7 @@ class Dataset:
         k: int = 3,
         fetch_k: int = 30,
         lambda_mult: float = 0.5,
-    ) -> list[GraphDocument]:
+    ) -> list[Graph]:
         """Search for similar events in the store.
 
         Args:
@@ -260,7 +256,7 @@ class Dataset:
                 0 means maximum diversity, 1 means maximum relevance.
 
         Returns:
-            list[GraphDocument]: The list of graphs of similar events,
+            list[Graph]: The list of graphs of similar events,
                 with the nodes they are connected to and their relationships.
 
         """
@@ -298,7 +294,7 @@ class Dataset:
 
         return [normalize_output_graph(self.__get_subgraph_from_node(doc.metadata["uri"])) for doc in selected_docs]
 
-    def __get_subgraph_from_node(self, node_uri: str) -> GraphDocument:
+    def __get_subgraph_from_node(self, node_uri: str) -> Graph:
         """Get the subgraph of a node in the store.
 
         The subgraph will contain all the nodes and relationships connected to the given node, even indirectly.
@@ -385,12 +381,10 @@ class Dataset:
             else []  # The node may not have any relationships
         )
 
-        return GraphDocument(
+        return Graph(
             nodes=list(nodes_dict.values()),
             relationships=relationships,
-            source=Document(
-                page_content=dataset_row_node["properties"]["mlsx__eventMessage"],
-            ),
+            source_event=dataset_row_node["properties"]["mlsx__eventMessage"],
         )
 
     @functools.cached_property

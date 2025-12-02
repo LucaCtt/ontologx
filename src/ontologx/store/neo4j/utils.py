@@ -4,17 +4,17 @@ from copy import deepcopy
 
 import rdflib
 
-from ontologx.store import GraphDocument
+from ontologx.store import Graph
 
 
-def normalize_output_graph(graph: GraphDocument) -> GraphDocument:
+def normalize_output_graph(graph: Graph) -> Graph:
     """Normalize a graph document for output by removing internal-only properties and renaming namespace separators.
 
     Args:
-        graph (GraphDocument): The graph document to normalize.
+        graph (Graph): The graph to normalize.
 
     Returns:
-        GraphDocument: The normalized graph document.
+        Graph: The normalized graph.
 
     """
     norm = deepcopy(graph)
@@ -37,15 +37,10 @@ def normalize_output_graph(graph: GraphDocument) -> GraphDocument:
         # Convert namespace separator for relationship type
         relationship.type = relationship.type.replace("n4sch", "rdfs").replace("__", ":")
 
-        # Convert namespace separator for properties, rename "n4sch" to "rdfs"
-        for key in list(relationship.properties.keys()):
-            new_key = key.replace("n4sch", "rdfs").replace("__", ":")
-            relationship.properties[new_key] = relationship.properties.pop(key)
-
     return norm
 
 
-def normalize_input_graph(graph: GraphDocument) -> GraphDocument:
+def normalize_input_graph(graph: Graph) -> Graph:
     """Normalize a graph document for input by converting namespace separators and renaming properties.
 
     Args:
@@ -73,11 +68,6 @@ def normalize_input_graph(graph: GraphDocument) -> GraphDocument:
     for relationship in norm.relationships:
         # Convert namespace separator for relationship type
         relationship.type = relationship.type.replace("rdfs", "n4sch").replace(":", "__")
-
-        # Convert namespace separator for properties, rename "rdfs" to "n4sch"
-        for key in list(relationship.properties.keys()):
-            new_key = key.replace("rdfs", "n4sch").replace(":", "__")
-            relationship.properties[new_key] = relationship.properties.pop(key)
 
     return norm
 
