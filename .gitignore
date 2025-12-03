@@ -1,8 +1,9 @@
+# Byte-compiled / optimized / DLL files
 .venv/
 .env
 __pycache__/
 .ruff_cache/
 .vscode/
 
-.deepeval
-exps/
+# Any license file
+**/*.license

@@ -25,28 +25,18 @@ services:
             - driver: nvidia
               capabilities: [gpu]
 
-  neo4j:
-    image: neo4j:5.20.0
-    container_name: ${EXPERIMENT_NAME:-default}_neo4j
-    environment:
-      - NEO4J_PLUGINS=["apoc", "n10s"]
-      - NEO4J_dbms_usage__report_enabled=false
-      - NEO4J_AUTH=neo4j/password
-      - NEO4J_apoc_export_file_enabled=true
-      - NEO4J_apoc_import_file_enabled=true
-      - NEO4J_apoc_import_file_use__neo4j__config=true
+  graphdb:
+    image: ontotext/graphdb:11.2.0
+    container_name: ${EXPERIMENT_NAME:-default}_graphdb
     volumes:
-      - ${PWD}/exps/${EXPERIMENT_NAME:-default}/neo4j/data:/data
-      - ${PWD}/exps/${EXPERIMENT_NAME:-default}/neo4j/logs:/logs
-      - ${PWD}/exps/${EXPERIMENT_NAME:-default}/neo4j/plugins:/plugins
+      - ${PWD}/resources/graphdb/graphdb.license:/opt/graphdb/home/conf/graphdb.license
     networks:
       - ontologx
     expose:
-      - 7474
-      - 7687
+      - 7200
     restart: on-failure:3
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:7474"] # The neo4j image has wget only, not curl
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:7200"]
       interval: 20s
       timeout: 10s
       retries: 30
