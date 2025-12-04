@@ -98,11 +98,5 @@ class Config:
     llm_temperature = float(os.getenv("LLM_TEMPERATURE", "0"))
     """The temperature of the llm. Must be between 0 and 1."""
 
-    neo4j_url = os.getenv("NEO4J_URL", "bolt://localhost:7687")
-    """The URL of the Neo4j database. Use bolt+ssc for self-signed certificates."""
-
-    neo4j_username = os.getenv("NEO4J_USERNAME", "neo4j")
-    """The username to use for the Neo4j database."""
-
-    neo4j_password = os.getenv("NEO4J_PASSWORD", "password")
-    """The password to use for the Neo4j database."""
+    db_url = os.getenv("DB_URL", "http://localhost:7200")
+    """The URL of the graph database. """

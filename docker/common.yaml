@@ -29,7 +29,7 @@ services:
     image: ontotext/graphdb:11.2.0
     container_name: ${EXPERIMENT_NAME:-default}_graphdb
     volumes:
-      - ${PWD}/resources/graphdb/graphdb.license:/opt/graphdb/home/conf/graphdb.license
+      - ${PWD}/graphdb.license:/opt/graphdb/home/conf/graphdb.license
     networks:
       - ontologx
     expose:

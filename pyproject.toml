@@ -9,13 +9,12 @@ dependencies = [
     "langchain>=0.3.18",
     "langchain-community>=0.3.17",
     "python-dotenv>=1.0.1",
-    "neo4j>=5.28.1",
     "pydantic (>=2.11.7,<3.0.0)",
-    "langchain-neo4j (>=0.5.0,<0.6.0)",
     "rdflib (>=7.1.4,<8.0.0)",
     "rich (>=14.1.0,<15.0.0)",
     "langgraph>=1.0.1",
     "mitreattack-python>=5.3.0",
+    "langchain-milvus>=0.2.1",
 ]
 
 [project.scripts]
