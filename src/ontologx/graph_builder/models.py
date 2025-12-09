@@ -2,13 +2,9 @@
 
 from enum import Enum
 
-from langchain_core.documents import Document
 from pydantic import BaseModel, Field, model_validator
 from pydantic_core import PydanticCustomError
-
-from ontologx.store import GraphDocument
-from ontologx.store import Node as LibNode
-from ontologx.store import Relationship as LibRelationship
+from rdflib import OWL, RDFS, Graph, Literal, URIRef
 
 
 class BaseEventGraph(BaseModel):
@@ -21,98 +17,94 @@ class BaseEventGraph(BaseModel):
     nodes: list
     relationships: list
 
-    def graph(self, source_event: str, context: dict) -> GraphDocument:
-        """Convert the generated event graph to a GraphDocument.
+    def rdflib_graph(self, ontology: Graph) -> Graph:
+        """Convert the generated event graph to a rdflib Graph.
 
         This method assumes that the nodes and relationships are already in the correct format,
         ontology-compliant, and with valid ids. As such, it does not perform any validation.
 
         Args:
-            source_event (str): The event that was parsed to create this graph.
-            context (dict): The context of the event, which will be used as metadata in the GraphDocument.
+            ontology (Graph): The ontology graph to use for namespace resolution.
 
         Returns:
-            GraphDocument: A GraphDocument containing the nodes and relationships of the event graph.
+            Graph: The rdflib Graph representation of the event graph.
 
         """
-        nodes_dict = {
-            node.id: LibNode(
-                id=node.id,
-                type=node.type.value,
-                properties={prop.type.value: prop.value for prop in node.properties} if node.properties else {},
-            )
-            for node in self.nodes
-        }
+        res = Graph(namespace_manager=ontology.namespace_manager)
 
-        relationships = [
-            LibRelationship(source=nodes_dict[rel.source_id], target=nodes_dict[rel.target_id], type=rel.type.value)
-            for rel in self.relationships
-        ]
+        for node in self.nodes:
+            node_uri = URIRef(str(node.id))
+            res.add((node_uri, RDFS.type, node.type))
 
-        return GraphDocument(
-            nodes=list(nodes_dict.values()),
-            relationships=relationships,
-            source=Document(page_content=source_event, metadata={"context": context}),
-        )
+            for prop, value in node.properties.items():
+                res.add((node_uri, prop, Literal(value)))
+
+        for rel in self.relationships:
+            start_uri = URIRef(str(rel.source.id))
+            end_uri = URIRef(str(rel.target.id))
+            res.add((start_uri, rel.type, end_uri))
+
+        return res
 
 
 class _OntologyValidValues:
     """Class to hold the valid values for the ontology."""
 
-    def __init__(self, ontology: GraphDocument):
+    def __init__(self, ontology: Graph):
         self.ontology = ontology
 
     @property
-    def node_types(self) -> list[str]:
-        return [node.type for node in self.ontology.nodes if not node.type.startswith("rdfs")]
+    def classes(self) -> list[str]:
+        """Return a list of classes URIs (as strings) defined as owl:Class in the ontology."""
+        return [str(s) for s in self.ontology.subjects(predicate=RDFS.type, object=OWL.Class)]
 
     @property
-    def relationship_types(self) -> list[str]:
-        return [rel.type for rel in self.ontology.relationships if not rel.type.startswith("rdfs")]
+    def object_properties(self) -> list[str]:
+        """Return a list of relationship type URIs (as strings) defined in the ontology."""
+        return [str(s) for s in self.ontology.subjects(predicate=RDFS.type, object=OWL.ObjectProperty)]
 
     @property
-    def structural_triples(self) -> list[tuple[str, str, str]]:
-        """Return the structural relationships in the ontology."""
-        return [
-            (rel.source.type, rel.type, rel.target.type)
-            for rel in self.ontology.relationships
-            if rel.type.startswith("rdfs")
-        ]
+    def type_triples(self) -> list[tuple[str, str, str]]:
+        """Return the type definition triples in the ontology."""
+        return [(str(s), str(p), str(o)) for s, p, o in self.ontology.triples((None, RDFS.type, None))]
 
     @property
-    def triples(self) -> list[tuple[str, str, str]]:
-        return [
-            (rel.source.type, rel.type, rel.target.type)
-            for rel in self.ontology.relationships
-            if not rel.type.startswith("rdfs")
-        ]
+    def non_type_triples(self) -> list[tuple[str, str, str]]:
+        """Return the non-type definition triples in the ontology."""
+        return [(str(s), str(p), str(o)) for s, p, o in self.ontology.triples((None, None, None)) if p != RDFS.type]
 
     @property
-    def properties_per_node(self) -> dict[str, list[str]]:
-        return {
-            node.type: [k for k in node.properties if not k.startswith("rdfs")]
-            for node in self.ontology.nodes
-            if not node.type.startswith("rdfs")
-        }
+    def data_properties_per_class(self) -> dict[str, list[str]]:
+        """Return a mapping of classes to their data properties defined in the ontology."""
+        class_data_props: dict[str, list[str]] = {}
+        for s, _, _ in self.ontology.triples((None, RDFS.type, OWL.DatatypeProperty)):
+            for class_s, class_p, _ in self.ontology.triples((None, None, s)):
+                if class_p == RDFS.domain:
+                    class_uri = str(class_s)
+                    prop_uri = str(s)
+                    if class_uri not in class_data_props:
+                        class_data_props[class_uri] = []
+                    class_data_props[class_uri].append(prop_uri)
+        return class_data_props
 
     @property
-    def properties(self) -> list[str]:
+    def data_properties(self) -> list[str]:
         return list(
-            {prop for props in self.properties_per_node.values() for prop in props},
+            {prop for props in self.data_properties_per_class.values() for prop in props},
         )
 
     @property
-    def properties_schema(self) -> list[str]:
-        return [f"{node}:{props}" for node, props in self.properties_per_node.items()]
+    def data_properties_schema(self) -> list[str]:
+        return [f"{cls}:{props}" for cls, props in self.data_properties_per_class.items()]
 
 
-def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
+def build_dynamic_model(ontology: Graph) -> type[BaseEventGraph]:
     """Build a dynamic event graph model based on the ontology."""
     valid = _OntologyValidValues(ontology)
 
-    NodeType = Enum("NodeType", {node: node for node in valid.node_types}, type=str)  # noqa: N806
-    PropertyType = Enum("PropertyType", {prop: prop for prop in valid.properties}, type=str)  # noqa: N806
-    RelationshipType = Enum("RelationshipType", {rel: rel for rel in valid.relationship_types}, type=str)  # noqa: N806
+    NodeType = Enum("NodeType", {node: node for node in valid.classes}, type=str)  # noqa: N806
+    PropertyType = Enum("PropertyType", {prop: prop for prop in valid.data_properties}, type=str)  # noqa: N806
+    RelationshipType = Enum("RelationshipType", {rel: rel for rel in valid.object_properties}, type=str)  # noqa: N806
 
     # Note: The following class names clash with the ones from langchain_neo4j.
     # These names will be passed to the LLM, so it's (probably) better to keep them
@@ -122,7 +114,7 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
         """A property of a node in the event knowledge graph."""
 
         type: PropertyType = Field(  # type: ignore[valid-type]
-            description=f"Type of the property. Must be one of {valid.properties}.",
+            description=f"Type of the property. Must be one of {valid.classes}.",
         )
         value: str | int | float = Field(description="Extracted value of the property.")
 
@@ -131,15 +123,15 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
 
         id: str = Field(description="Unique identifier for the node.")
         type: NodeType = Field(  # type: ignore[valid-type]
-            description=f"Type of the node. Must be one of {valid.node_types}.",
+            description=f"Type of the node. Must be one of {valid.classes}.",
         )
         properties: list[Property] | None = Field(default=None, description="List of properties of the node.")
 
         __doc__ = (
             "A node in the event graph. "
             "Each node type has a specific set of allowed properties. "
-            f"The allowed properties for each node type are: {valid.properties_schema} "
-            f"The following structural relationships exist among node types: {valid.structural_triples}."
+            f"The allowed properties for each node type are: {valid.data_properties_schema} "
+            f"The following structural relationships exist among node types: {valid.type_triples}."
         )
 
     class Relationship(BaseModel):
@@ -148,14 +140,14 @@ def build_dynamic_model(ontology: GraphDocument) -> type[BaseEventGraph]:
         source_id: str = Field(description="Unique identifier of source node.")
         target_id: str = Field(description="Unique identifier of target node.")
         type: RelationshipType = Field(  # type: ignore[valid-type]
-            description=f"Type of the relationship. Must be one of {valid.relationship_types}.",
+            description=f"Type of the relationship. Must be one of {valid.object_properties}.",
         )
 
         __doc__ = (
             "A relationship between two nodes in the event graph. "
             "Each relationship type has a predefined source and target node type. "
             "The allowed relationships, formatted as (source type, relationship type, target type), are: "
-            f"{valid.triples}."
+            f"{valid.non_type_triples}."
         )
 
     class EventGraph(BaseEventGraph):
