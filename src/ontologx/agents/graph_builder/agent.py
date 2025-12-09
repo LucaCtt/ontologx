@@ -6,13 +6,12 @@ from typing import cast
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AnyMessage, HumanMessage, SystemMessage, ToolMessage
-from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.runtime import Runtime
 from pydantic import ValidationError
 from rdflib import Graph
 
-from ontologx.graph_builder.models import BaseEventGraph, build_dynamic_model
+from ontologx.agents.graph_builder.models import BaseEventGraph, build_dynamic_model
 
 logger = logging.getLogger("rich")
 
@@ -21,6 +20,33 @@ BUILD_GRAPH_NODE = "build_graph"
 VALIDATE_GRAPH_NODE = "validate_graph"
 GET_CORRECTIONS_NODE = "get_corrections"
 CLEANUP_MESSAGES_NODE = "cleanup_messages"
+
+_PROMPT = """
+# Overview
+You are a top-tier cybersecurity expert specialized in extracting structured information \
+from unstructured data to construct a knowledge graph according to a predefined "olx" ontology. \
+You will be provided with a log event, optionally accompanied by contextual information.
+
+Your goal is to maximize information extraction from the event while maintaining absolute accuracy. \
+Leverage both the contextual information and your knowledge of computer systems \
+and cybersecurity to infer additional insights where possible. \
+The objective is to achieve completeness in the knowledge graph while remaining strictly ontology-compliant.
+
+# Rules
+You MUST adhere to the following constraints at all times:
+- The graph must contain exactly one "Event" node.
+- Use only the available types as defined in the ontology, without introducing new ones.
+- Use the most specific type available for nodes and relationships, e.g. "UserPassword" instead of "UserCredential".
+- Respect the appropriate casing for all types.
+- Use the appropriate node prefix for properties, e.g. "userUID" instead of "uid".
+- Omit properties with empty values.
+- Use the most specific type available for nodes and relationships.
+- Respect the structural relationships to infer properties and relationships allowed by the ontology for each node type.
+- The graph must be connected: every node must be reachable from the "Event" node.
+
+# Strict Compliance
+Adhere to these rules strictly. Any deviation will result in termination.
+"""
 
 
 @dataclass(frozen=True)
@@ -66,9 +92,6 @@ class GraphBuilderContext:
     # Ontology used for parsing
     ontology: Graph
 
-    # The prompt used to build the graph
-    prompt_build_graph: str
-
     # Maximum number of conversations to keep in history
     max_conversation_history: int = 5
 
@@ -76,13 +99,11 @@ class GraphBuilderContext:
     max_correction_steps: int = 3
 
 
-def _initialize_state(state: _GraphBuilderState, runtime: Runtime[GraphBuilderContext]) -> _GraphBuilderState:
+def _initialize_state(state: _GraphBuilderState) -> _GraphBuilderState:
     """Initialize the parser agent state."""
     logger.info("Initializing parser agent state.")
 
-    messages: list[AnyMessage] = (
-        state.messages if state.messages else [SystemMessage(runtime.context.prompt_build_graph)]
-    )
+    messages: list[AnyMessage] = state.messages if state.messages else [SystemMessage(_PROMPT)]
 
     # If the last message is not from the human,
     # it means that we are parsing the event for the first time.
@@ -209,6 +230,8 @@ def _cleanup_messages(state: _GraphBuilderState, runtime: Runtime[GraphBuilderCo
 graph_builder_agent = StateGraph(
     _GraphBuilderState,
     context_schema=GraphBuilderContext,
+    input_schema=GraphBuilderInputState,
+    output_schema=GraphBuilderOutputState,
 )
 
 graph_builder_agent.add_node(INITIALIZE_STATE_NODE, _initialize_state)
@@ -235,5 +258,4 @@ graph_builder_agent.add_conditional_edges(
 graph_builder_agent.add_edge(GET_CORRECTIONS_NODE, BUILD_GRAPH_NODE)
 graph_builder_agent.add_edge(CLEANUP_MESSAGES_NODE, END)
 
-memory = MemorySaver()
-graph_builder_agent = graph_builder_agent.compile(checkpointer=memory)
+graph_builder_agent = graph_builder_agent.compile()
