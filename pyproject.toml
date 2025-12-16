@@ -16,13 +16,17 @@ dependencies = [
     "pydantic (>=2.11.7,<3.0.0)",
     "pydantic-settings>=2.12.0",
     "polars>=1.36.0",
+    "langchain-aws>=0.2.35",
 ]
 
 [project.scripts]
 olx = "ontologx.__main__:main"
 
 [dependency-groups]
-dev = ["ruff>=0.12.4,<0.13", "pre-commit>=4.1.0,<5"]
+dev = [
+    "ruff>=0.12.4,<0.13",
+    "pre-commit>=4.1.0,<5",
+]
 bedrock = ["langchain-aws>=0.2.22,<0.3"]
 openai = ["langchain-openai>=0.3.30,<0.4"]
 notebooks = ["thefuzz>=0.22.1"]

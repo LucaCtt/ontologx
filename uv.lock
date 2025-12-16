@@ -836,6 +836,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "langchain" },
+    { name = "langchain-aws" },
     { name = "langchain-community" },
     { name = "langchain-milvus" },
     { name = "langgraph" },
@@ -865,6 +866,7 @@ openai = [
 [package.metadata]
 requires-dist = [
     { name = "langchain", specifier = ">=0.3.18" },
+    { name = "langchain-aws", specifier = ">=0.2.35" },
     { name = "langchain-community", specifier = ">=0.3.17" },
     { name = "langchain-milvus", specifier = ">=0.2.1" },
     { name = "langgraph", specifier = ">=1.0.1" },

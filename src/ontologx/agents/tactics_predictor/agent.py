@@ -45,14 +45,14 @@ Adhere to these rules strictly. Any deviation will result in termination.
 
 
 @dataclass(frozen=True)
-class TacticsPredictorInputState:
+class TacticsPredictorInput:
     """Input state for the graph builder agent."""
 
     chunk: list[Graph]
 
 
 @dataclass(frozen=True)
-class TacticsPredictorOutputState:
+class TacticsPredictorOutput:
     """Output state for the graph builder agent."""
 
     # Parsed and validated knowledge graph
@@ -62,7 +62,7 @@ class TacticsPredictorOutputState:
 
 
 @dataclass(frozen=True)
-class _GraphBuilderState(TacticsPredictorOutputState, TacticsPredictorInputState):
+class _GraphBuilderState(TacticsPredictorOutput, TacticsPredictorInput):
     """Full state of the parser agent, with internal only fields."""
 
 
@@ -75,9 +75,9 @@ class TacticsPredictorContext:
 
 
 def _predict_tactics(
-    state: TacticsPredictorInputState,
+    state: TacticsPredictorInput,
     runtime: Runtime[TacticsPredictorContext],
-) -> TacticsPredictorOutputState:
+) -> TacticsPredictorOutput:
     """Predict tactics from the input graphs using the LLM."""
     logger.info("Predicting tactics from input graphs.")
 
@@ -96,14 +96,14 @@ def _predict_tactics(
     response = llm.invoke([SystemMessage(_PROMPT), HumanMessage(prompt)])
     response = cast("SessionTTPs", response)
 
-    return TacticsPredictorOutputState(tactics=response.tactics, techniques=response.techniques)
+    return TacticsPredictorOutput(tactics=response.tactics, techniques=response.techniques)
 
 
 tactics_predictor_agent = StateGraph(
     _GraphBuilderState,
     context_schema=TacticsPredictorContext,
-    input_schema=TacticsPredictorInputState,
-    output_schema=TacticsPredictorOutputState,
+    input_schema=TacticsPredictorInput,
+    output_schema=TacticsPredictorOutput,
 )
 
 tactics_predictor_agent.add_node(PREDICT_TACTICS_NODE, _predict_tactics)

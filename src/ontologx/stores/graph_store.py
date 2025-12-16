@@ -67,8 +67,34 @@ class GraphStore:
 
         return g
 
-    def add_graph(self, event: str, graph: Graph, tactic: Tactic) -> None:
+    def add_graph(self, graph: Graph) -> None:
         """Add a graph to the store.
+
+        Args:
+            graph (Graph): The graph to add.
+
+        """
+        template = Template("""<<$s $p $o>> .""")
+
+        embedded_triples = [
+            template.safe_substitute(
+                s=s,
+                p=p,
+                o=o,
+            )
+            for s, p, o in graph
+        ]
+
+        self.__graph.query(
+            f"""
+            PREFIX mlsx: <https://cyberseclab.unibs.it/mlsx/dict#>
+
+            INSERT DATA { {"\n\n".join(embedded_triples)} }
+            """,
+        )
+
+    def add_annotated_graph(self, event: str, graph: Graph, tactic: Tactic) -> None:
+        """Add an annotated graph to the store.
 
         Args:
             event (str): The event associated with the graph.
@@ -78,7 +104,7 @@ class GraphStore:
         """
         template = Template("""
         <<$s $p $o>> mlsx:eventMessage "$event"^^xsd:string ;
-            mlsx:tactic "$tactic"^^xsd:string ;
+            mlsx:tactic "$tactic"^^xsd:string .
         """)
 
         embedded_triples = [

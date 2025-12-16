@@ -1,14 +1,14 @@
+name: ${EXPERIMENT_NAME:-olx}
+
 services:
   embs:
     image: michaelf34/infinity:0.0.77
-    container_name: ${EXPERIMENT_NAME:-default}_embs
+    container_name: ${EXPERIMENT_NAME:-olx}_embs
     volumes:
-      - ${PWD}/exps/${EXPERIMENT_NAME:-default}/embs:/app/.cache
+      - ${PWD}/exps/${EXPERIMENT_NAME:-olx}/embs:/app/.cache
     restart: on-failure:3
     runtime: nvidia
     command: v2 --model-id ${EMBEDDINGS_MODEL} --dtype float16 --port 9000
-    networks:
-      - ontologx
     expose:
       - 9000
     healthcheck:
@@ -27,11 +27,10 @@ services:
 
   graphdb:
     image: ontotext/graphdb:11.2.0
-    container_name: ${EXPERIMENT_NAME:-default}_graphdb
+    container_name: ${EXPERIMENT_NAME:-olx}_graphdb
     volumes:
       - ${PWD}/graphdb.license:/opt/graphdb/home/conf/graphdb.license
-    networks:
-      - ontologx
+      - ${PWD}/exps/${EXPERIMENT_NAME:-olx}/graphdb_data:/opt/graphdb/home/data
     expose:
       - 7200
     restart: on-failure:3
@@ -43,6 +42,21 @@ services:
       start_period: 30s
       start_interval: 10s
 
-networks:
   ontologx:
-    driver: bridge
+    build:
+      context: ..
+      dockerfile: docker/ontologx.dockerfile
+    container_name: ${EXPERIMENT_NAME:-olx}_ontologx
+    environment:
+      - EMBEDDINGS_URL=http://embs:9000
+      - DB_URL=http://graphdb:7200
+      - OPENAI_API_KEY=Empty # Required by OpenAI client API
+    env_file:
+      - ${PWD}/.env
+    depends_on:
+      embs:
+        condition: service_healthy
+        restart: true
+      graphdb:
+        condition: service_healthy
+        restart: true
