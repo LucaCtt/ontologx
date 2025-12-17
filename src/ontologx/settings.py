@@ -18,8 +18,8 @@ class Settings(BaseSettings):
     ontology_path: str = "resources/ontologies/logs.ttl"
     """The path to the ontology file."""
 
-    examples_path: str = "resources/data/train.ttl"
-    """ The path to the starter examples graphs file."""
+    examples_path: str = "resources/data/train"
+    """ The path to the starter examples logs file."""
 
     logs_path: str = "resources/data/ait/validation.csv"
     """The input path to the logs to parse."""
@@ -39,8 +39,10 @@ class Settings(BaseSettings):
     llm_temperature: float = Field(default=0.0, ge=0.0, le=1.0)
     """The temperature of the llm. Must be between 0 and 1."""
 
-    db_url: str = "http://localhost:7200"
+    graph_database_url: str = "http://localhost:7200"
     """The URL of the graph database. """
+
+    vector_database_url: str = "http://localhost:8080"
 
     hf_token: SecretStr | None = None
 

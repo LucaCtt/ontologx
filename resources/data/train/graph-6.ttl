@@ -1,0 +1,19 @@
+@prefix : <https://cyberseclab.unibs.it/olx/examples/#>.
+@prefix olx: <https://cyberseclab.unibs.it/olx/dict#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix time: <http://www.w3.org/2006/time#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+# mail, stats.log.csv, "Date: 1/23/2022 -- 06:42:05 (uptime: 2d, 17h 25m 39s)"
+:timestamp-6 rdf:type olx:TimeStamp;
+  time:inXSDDate "2022-01-23"^^xsd:date;
+  time:inXSDDateTimeStamp "2022-01-23T06:42:05Z"^^xsd:dateTimeStamp;
+  time:inXSDgYear "2022"^^xsd:gYear;
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
+
+:source-6 rdf:type olx:Source;
+  olx:sourceDevice "mail".
+
+:event-6 rdf:type olx:Event;
+  olx:hasParameter :timestamp-6;
+  olx:wasLoggedBy :source-6.

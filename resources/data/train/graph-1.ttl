@@ -1,0 +1,49 @@
+@prefix : <https://cyberseclab.unibs.it/olx/examples/#>.
+@prefix olx: <https://cyberseclab.unibs.it/olx/dict#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix time: <http://www.w3.org/2006/time#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+# inet-dns, syslog.1.csv, Jan 25 06:17:01 inet-dns CRON[16314]: (root) CMD (   cd / && run-parts --report /etc/cron.hourly)
+:timestamp-1 rdf:type olx:TimeStamp;
+  time:inXSDDate "2022-01-25"^^xsd:date;
+  time:inXSDDateTimeStamp "2022-01-25T06:17:01Z"^^xsd:dateTimeStamp;
+  time:inXSDgYear "2022"^^xsd:gYear;
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
+
+:source-1 rdf:type olx:Source;
+  olx:sourceName "syslog";
+  olx:sourceDevice "inet-dns".
+
+:username-1 rdf:type olx:UserName;
+  olx:userCredentialValue "root".
+
+:user-1 rdf:type olx:User;
+  olx:hasCredential :username-1.
+
+:system-process-1 rdf:type olx:SystemProcess;
+  olx:applicationName "CRON";
+  olx:systemProcessPID 16314.
+
+:file-1-1 rdf:type olx:File;
+  olx:filePath "/".
+
+:shell-command-1 rdf:type olx:ShellCommand;
+  olx:applicationName "cd";
+  olx:hasParameter :file-1-1.
+
+:file-1-2 rdf:type olx:File;
+  olx:filePath "/etc/cron.hourly".
+
+:shell-command-2 rdf:type olx:ShellCommand;
+  olx:applicationName "run-parts";
+  olx:hasParameter :file-1-2.
+
+:event-1 rdf:type olx:Event;
+  olx:hasParameter :timestamp-1,
+    :user-1,
+    :system-process-1,
+    :shell-command-1,
+    :shell-command-2;
+  olx:wasLoggedBy :source-1.
+

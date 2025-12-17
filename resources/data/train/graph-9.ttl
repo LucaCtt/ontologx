@@ -1,0 +1,24 @@
+@prefix : <https://cyberseclab.unibs.it/olx/examples/#>.
+@prefix olx: <https://cyberseclab.unibs.it/olx/dict#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix time: <http://www.w3.org/2006/time#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+# webserver, syslog.1.csv, "Jan 24 22:48:53 webserver systemd-timesyncd[30824]: Network configuration changed, trying to establish connection."
+:timestamp-9 rdf:type olx:TimeStamp;
+  time:inXSDDate "2022-01-24"^^xsd:date;
+  time:inXSDDateTimeStamp "2022-01-24T22:48:53Z"^^xsd:dateTimeStamp;
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
+
+:system-process-9 rdf:type olx:SystemProcess;
+  olx:applicationName "systemd-timesyncd";
+  olx:systemProcessPID 30824.
+
+:source-9 rdf:type olx:Source;
+  olx:sourceName "syslog";
+  olx:sourceDevice "webserver".
+
+:event-9 rdf:type olx:Event;
+  olx:hasParameter :timestamp-9, :system-process-9;
+  olx:wasLoggedBy :source-9.
+

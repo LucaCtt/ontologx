@@ -1,0 +1,28 @@
+@prefix : <https://cyberseclab.unibs.it/olx/examples/#>.
+@prefix olx: <https://cyberseclab.unibs.it/olx/dict#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix time: <http://www.w3.org/2006/time#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+# mail, mail.log.csv, Jan 23 08:06:19 mail dovecot: imap(traci.stevenson): Logged out in=70 out=599
+:timestamp-4 rdf:type olx:TimeStamp;
+  time:inXSDDate "2022-01-23"^^xsd:date;
+  time:inXSDDateTimeStamp "2022-01-23T08:06:19Z"^^xsd:dateTimeStamp;
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
+
+:application-4 rdf:type olx:Application;
+  olx:applicationName "dovecot".
+
+:username-4 rdf:type olx:UserName;
+  olx:userCredentialValue "traci.stevenson".
+
+:user-4 rdf:type olx:User;
+  olx:hasCredential :username-4.
+
+:source-4 rdf:type olx:Source;
+  olx:sourceName "dovecot";
+  olx:sourceDevice "mail".
+
+:event-4 rdf:type olx:Event;
+  olx:hasParameter :timestamp-4, :application-4, :user-4;
+  olx:wasLoggedBy :source-4.

@@ -1,0 +1,23 @@
+@prefix : <https://cyberseclab.unibs.it/olx/examples/#>.
+@prefix olx: <https://cyberseclab.unibs.it/olx/dict#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix time: <http://www.w3.org/2006/time#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+# inet-dns, syslog.4.csv, Jan 20 11:12:22 inet-dns kernel: [    3.552456] raid6: using avx2x2 recovery algorithm
+:timestamp-8 rdf:type olx:TimeStamp;
+  time:inXSDDate "2022-01-20"^^xsd:date;
+  time:inXSDDateTimeStamp "2022-01-20T11:12:22Z"^^xsd:dateTimeStamp;
+  time:inXSDgYear "2022"^^xsd:gYear;
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
+
+:application-8 rdf:type olx:Application;
+  olx:applicationName "kernel".
+
+:source-8 rdf:type olx:Source;
+  olx:sourceName "syslog";
+  olx:sourceDevice "inet-dns".
+
+:event-8 rdf:type olx:Event;
+  olx:hasParameter :timestamp-8, :application-8;
+  olx:wasLoggedBy :source-8.

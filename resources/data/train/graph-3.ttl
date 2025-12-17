@@ -1,0 +1,28 @@
+@prefix : <https://cyberseclab.unibs.it/olx/examples/#>.
+@prefix olx: <https://cyberseclab.unibs.it/olx/dict#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix time: <http://www.w3.org/2006/time#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+# inet-dns, dnsmasq.log.csv, Jan 20 13:47:21 dnsmasq[3326]: query[AAAA] d1zkz3k4cclnv6.cloudfront.net from 192.168.231.180
+:timestamp-3 rdf:type olx:TimeStamp;
+  time:inXSDDate "2022-01-20"^^xsd:date;
+  time:inXSDDateTimeStamp "2022-01-20T13:47:21Z"^^xsd:dateTimeStamp;
+  time:inXSDgYear "2022"^^xsd:gYear;
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
+
+:system-process-3 rdf:type olx:SystemProcess;
+  olx:applicationName "dnsmasq";
+  olx:systemProcessPID 3326.
+
+:network-address-3 rdf:type olx:NetworkAddress;
+  olx:networkAddressHostname "d1zkz3k4cclnv6.cloudfront.net";
+  olx:networkAddressIPV4 "192.168.231.180".
+
+:source-3 rdf:type olx:Source;
+  olx:sourceName "dnsmasq";
+  olx:sourceDevice "inet-dns".
+
+:event-3 rdf:type olx:Event;
+  olx:hasParameter :timestamp-3, :system-process-3, :network-address-3;
+  olx:wasLoggedBy :source-3.

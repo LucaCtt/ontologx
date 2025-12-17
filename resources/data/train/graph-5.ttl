@@ -1,0 +1,23 @@
+@prefix : <https://cyberseclab.unibs.it/olx/examples/#>.
+@prefix olx: <https://cyberseclab.unibs.it/olx/dict#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix time: <http://www.w3.org/2006/time#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+# vpn, syslog.3.csv, Jan 22 19:12:09 vpn systemd[1]: Starting Daily apt download activities...
+:timestamp-5 rdf:type olx:TimeStamp;
+  time:inXSDDate "2022-01-22"^^xsd:date;
+  time:inXSDDateTimeStamp "2022-01-22T19:12:09Z"^^xsd:dateTimeStamp;
+  time:inXSDgYearMonth "2022-01"^^xsd:gYearMonth.
+
+:system-process-5 rdf:type olx:SystemProcess;
+  olx:applicationName "systemd";
+  olx:systemProcessPID 1.
+
+:source-5 rdf:type olx:Source;
+  olx:sourceName "syslog";
+  olx:sourceDevice "vpn".
+
+:event-5 rdf:type olx:Event;
+  olx:hasParameter :timestamp-5, :system-process-5;
+  olx:wasLoggedBy :source-5.
