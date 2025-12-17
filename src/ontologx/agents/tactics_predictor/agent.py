@@ -79,7 +79,7 @@ def _predict_tactics(
     runtime: Runtime[TacticsPredictorContext],
 ) -> TacticsPredictorOutput:
     """Predict tactics from the input graphs using the LLM."""
-    logger.info("Predicting tactics from input graphs.")
+    logger.info("Predicting tactics from input graphs...")
 
     # Combine all input graphs into a single graph for analysis
     combined_graph = Graph()

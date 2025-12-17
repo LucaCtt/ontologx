@@ -13,8 +13,6 @@ from rdflib import Graph
 
 from ontologx.agents.graph_builder.models import BaseEventGraph, build_dynamic_model
 
-logger = logging.getLogger("rich")
-
 INITIALIZE_STATE_NODE = "initialize_state"
 BUILD_GRAPH_NODE = "build_graph"
 VALIDATE_GRAPH_NODE = "validate_graph"
@@ -48,6 +46,7 @@ You MUST adhere to the following constraints at all times:
 Adhere to these rules strictly. Any deviation will result in termination.
 """
 
+logger = logging.getLogger("rich")
 
 @dataclass(frozen=True)
 class GraphBuilderInputState:
@@ -137,6 +136,7 @@ def _build_graph(state: _GraphBuilderState, runtime: Runtime[GraphBuilderContext
     # If the LLM output is a valid graph we are done.
     if is_output_valid:
         logger.debug("LLM output is a valid graph.")
+        logger.debug(raw_output.get("parsed"))
 
         return replace(state, output_graph=raw_output.get("parsed"), parsing_error=None)
 

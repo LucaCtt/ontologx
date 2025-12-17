@@ -49,7 +49,7 @@ sts_client = boto3.client(
 response = sts_client.assume_role(
     RoleArn=settings.aws_role_arn.get_secret_value() if settings.aws_role_arn else None,
     RoleSessionName="langchain-bedrock-session",
-    DurationSeconds=60 * 60 * 1,  # 1 hour
+    DurationSeconds=60 * 60 * 10,  # 10 hours
 )
 
 # Extract the temporary credentials
@@ -66,21 +66,36 @@ llm = ChatBedrockConverse(
 
 embeddings = InfinityEmbeddings(model=settings.embeddings_name, infinity_api_url=settings.embeddings_url)
 
-graph_store = GraphStore(url=settings.db_url)
-vector_store = VectorStore(embeddings=embeddings)
+graph_store = GraphStore(url=settings.graph_database_url)
+vector_store = VectorStore(embeddings=embeddings, url=settings.vector_database_url)
 
 
 def main() -> None:
     """Entry point for the log knowledge graph builder."""
-    examples_graph = Graph()
-    examples_graph.parse(settings.examples_path)
-    graph_store.add_graph(examples_graph)
+    examples = pl.read_csv(settings.examples_path + "/index.csv")
+    examples = examples.rename({col: col.lower() for col in examples.columns})
 
+    # Load example events into the vector store
+    vector_store.add_events(
+        [
+            (row["log event"], {"application": row["application"], "device": row["device"]})
+            for row in examples.rows(named=True)
+        ],
+    )
+
+    # Load example graphs into the graph store
+    for example in examples.rows(named=True):
+        g = Graph()
+        g.parse(settings.examples_path + "/" + example["graph path"])
+
+        graph_store.add_graph(example["log event"], g)
+
+    # Load the ontology
     ontology = Graph()
     ontology.parse(settings.ontology_path)
 
+    # Read the log events
     events = pl.read_csv(settings.logs_path)
-    # Normalize column names to lowercase and save into settings for later use
     events = events.rename({col: col.lower() for col in events.columns})
 
     """Run the log knowledge graph builder."""

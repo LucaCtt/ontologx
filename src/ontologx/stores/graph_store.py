@@ -3,7 +3,6 @@
 from string import Template
 
 import requests
-from langchain_community.graphs import OntotextGraphDBGraph
 from mitreattack.stix20.MitreAttackData import Tactic, Technique
 from rdflib import Graph
 
@@ -29,7 +28,7 @@ _REPO_TTL = """\
 class GraphStore:
     """Abstract base class for a store module that manages the storage and retrieval of event graphs."""
 
-    def __init__(self, url: str, ontology_path: str) -> None:
+    def __init__(self, url: str) -> None:
         # Create repository
         requests.post(
             url + "/rest/repositories",
@@ -37,8 +36,6 @@ class GraphStore:
             timeout=10,
         )
         self.__url = url
-
-        self.__graph = OntotextGraphDBGraph(url + "/repositories/ontologx", local_file=ontology_path)
 
     def get_graph(self, event: str) -> Graph:
         """Retrieve a graph associated with a specific event.

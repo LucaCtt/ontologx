@@ -1,5 +1,6 @@
 """Graph Connector agent for processing and merging graphs."""
 
+import logging
 from dataclasses import dataclass, replace
 
 import polars as pl
@@ -20,7 +21,9 @@ from ontologx.stores import GraphStore, VectorStore
 CHUNK_GRAPHS_NODE = "chunk_graphs"
 BUILD_GRAPHS_FOR_CHUNK_NODE = "build_graphs_for_chunk"
 PREDICT_TTPS_FOR_CHUNK_NODE = "predict_ttps"
-MERGE_GRAPHS_NODE = "merge_graphs"
+SAVE_CHUNK_NODE = "save_chunk"
+
+logger = logging.getLogger("rich")
 
 
 @dataclass(frozen=True)
@@ -64,6 +67,7 @@ class GraphConnectorContext:
 def _chunk_graphs(state: GraphConnectorInput) -> _GraphConnectorState:
     # Group by application and device
     chunks = [df for _, df in state.events.group_by(["application", "device"])]
+    logger.info("Chunked events into %d chunks", len(chunks))
 
     return _GraphConnectorState(
         **state.__dict__,
@@ -77,13 +81,20 @@ def _build_graphs_for_chunk(
 ) -> _GraphConnectorState:
     # Build a graph for the current chunk of events
     current_chunk = state.chunks[state.current_chunk_index]
+    logger.info("Building graphs for chunk %d/%d", state.current_chunk_index + 1, len(state.chunks))
 
     # Reset memory saver for graph builder agent
     graph_builder_agent.checkpointer = MemorySaver()
 
     for row in current_chunk.iter_rows(named=True):
-        relevant_events = runtime.context.vector_store.search(row["event_text"])
+        relevant_events = runtime.context.vector_store.search(
+            row["event_text"],
+            {"application": row["application"], "device": row["device"]},
+        )
+        logger.info("Found %d relevant events for event '%s'", len(relevant_events), row["event"])
+
         relevant_kgs = [runtime.context.graph_store.get_graph(event) for event in relevant_events]
+        logger.info("Successfully retrieved %d relevant knowledge graphs", len(relevant_kgs))
 
         output = graph_builder_agent.invoke(
             GraphBuilderInputState(
@@ -98,6 +109,7 @@ def _build_graphs_for_chunk(
             ),
         )
         row["graph"] = output["output_graph"]
+        logger.info("Built graph for event '%s'", row["event"])
 
     # Maybe inefficient
     state.chunks[state.current_chunk_index] = current_chunk
@@ -109,12 +121,14 @@ def _predict_ttps_for_chunk(
     runtime: Runtime[GraphConnectorContext],
 ) -> _GraphConnectorState:
     current_chunk = state.chunks[state.current_chunk_index]
+    logger.info("Predicting TTPs for chunk %d/%d", state.current_chunk_index + 1, len(state.chunks))
 
     # Predict TTPs for chunk
     output = tactics_predictor_agent.invoke(
         TacticsPredictorInput(chunk=current_chunk["graph"].to_list()),
         context=TacticsPredictorContext(llm=runtime.context.llm),
     )
+    logger.info("Predicted TTPs for chunk %d/%d", state.current_chunk_index + 1, len(state.chunks))
 
     # Assign TTPs to the current chunk
     current_chunk["tactics"] = [output["tactics"]] * len(current_chunk)
@@ -124,10 +138,25 @@ def _predict_ttps_for_chunk(
     return replace(state, chunks=state.chunks, current_chunk_index=state.current_chunk_index + 1)
 
 
-def _merge_graphs(state: _GraphConnectorState) -> _GraphConnectorState:
-    # Merge
-
-    return state
+def _save_chunk(
+    state: _GraphConnectorState,
+    runtime: Runtime[GraphConnectorContext],
+) -> None:
+    for row in state.chunks[state.current_chunk_index].iter_rows(named=True):
+        runtime.context.graph_store.add_graph(
+            row["event"],
+            row["graph"],
+            tactics=row["tactics"],
+            techniques=row["techniques"],
+        )
+        runtime.context.vector_store.add_event(
+            row["event"],
+            metadata={
+                "application": row["application"],
+                "device": row["device"],
+            },
+        )
+    logger.info("Saved chunk with %d graphs to stores", len(state.chunks[state.current_chunk_index]))
 
 
 graph_connector_agent = StateGraph(
@@ -139,7 +168,7 @@ graph_connector_agent = StateGraph(
 
 def _get_next_node(state: _GraphConnectorState) -> str:
     if state.current_chunk_index >= len(state.chunks):
-        return MERGE_GRAPHS_NODE
+        return SAVE_CHUNK_NODE
 
     return BUILD_GRAPHS_FOR_CHUNK_NODE
 
@@ -147,7 +176,7 @@ def _get_next_node(state: _GraphConnectorState) -> str:
 graph_connector_agent.add_node(CHUNK_GRAPHS_NODE, _chunk_graphs)
 graph_connector_agent.add_node(BUILD_GRAPHS_FOR_CHUNK_NODE, _build_graphs_for_chunk)
 graph_connector_agent.add_node(PREDICT_TTPS_FOR_CHUNK_NODE, _predict_ttps_for_chunk)
-graph_connector_agent.add_node(MERGE_GRAPHS_NODE, _merge_graphs)
+graph_connector_agent.add_node(SAVE_CHUNK_NODE, _save_chunk)
 
 graph_connector_agent.add_edge(START, CHUNK_GRAPHS_NODE)
 graph_connector_agent.add_edge(CHUNK_GRAPHS_NODE, PREDICT_TTPS_FOR_CHUNK_NODE)
@@ -155,9 +184,9 @@ graph_connector_agent.add_edge(PREDICT_TTPS_FOR_CHUNK_NODE, BUILD_GRAPHS_FOR_CHU
 graph_connector_agent.add_conditional_edges(
     BUILD_GRAPHS_FOR_CHUNK_NODE,
     _get_next_node,
-    [MERGE_GRAPHS_NODE, BUILD_GRAPHS_FOR_CHUNK_NODE],
+    [SAVE_CHUNK_NODE, BUILD_GRAPHS_FOR_CHUNK_NODE],
 )
-graph_connector_agent.add_edge(MERGE_GRAPHS_NODE, END)
+graph_connector_agent.add_edge(SAVE_CHUNK_NODE, END)
 
 
 memory = MemorySaver()

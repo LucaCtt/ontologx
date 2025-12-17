@@ -17,6 +17,7 @@ dependencies = [
     "polars>=1.36.1",
     "langchain-aws>=0.2.35",
     "langchain-weaviate>=0.0.6",
+    "fastmcp>=2.14.1",
 ]
 
 [project.scripts]
