@@ -6,7 +6,7 @@ from enum import StrEnum
 from mitreattack.stix20 import MitreAttackData
 from pydantic import BaseModel, Field
 
-stix_filepath = os.environ.get("STIX_BUNDLE", "./enterprise-attack.json")
+stix_filepath = os.environ.get("STIX_BUNDLE", "./resources/enterprise-attack.json")
 mitre_attack_data = MitreAttackData(stix_filepath=stix_filepath)
 
 tactics_objs = mitre_attack_data.get_tactics()

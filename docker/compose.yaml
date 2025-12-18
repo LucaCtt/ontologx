@@ -31,11 +31,11 @@ services:
     volumes:
       - ${PWD}/graphdb.license:/opt/graphdb/home/conf/graphdb.license
       - ${PWD}/exps/${EXPERIMENT_NAME:-olx}/graphdb_data:/opt/graphdb/home/data
-    expose:
-      - 7200
+    ports:
+      - "7200:7200"
     restart: on-failure:3
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:7200"]
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:7200/repositories"]
       interval: 20s
       timeout: 10s
       retries: 30
@@ -76,7 +76,8 @@ services:
     container_name: ${EXPERIMENT_NAME:-olx}_ontologx
     environment:
       - EMBEDDINGS_URL=http://embs:9000
-      - DB_URL=http://graphdb:7200
+      - GRAPH_DATABASE_URL=http://graphdb:7200
+      - VECTOR_DATABASE_URL=http://weaviate:8080
       - OPENAI_API_KEY=Empty # Required by OpenAI client API
     env_file:
       - ${PWD}/.env

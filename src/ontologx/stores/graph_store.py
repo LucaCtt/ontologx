@@ -3,7 +3,6 @@
 from string import Template
 
 import requests
-from mitreattack.stix20.MitreAttackData import Tactic, Technique
 from rdflib import Graph
 
 _REPO_TTL = """\
@@ -74,8 +73,8 @@ class GraphStore:
         self,
         event: str,
         graph: Graph,
-        tactics: list[Tactic] | None = None,
-        techniques: list[Technique] | None = None,
+        tactics: list[str] | None = None,
+        techniques: list[str] | None = None,
     ) -> None:
         """Add a graph to the store.
 
@@ -86,18 +85,18 @@ class GraphStore:
             techniques (list[Technique], optional): The MITRE ATT&CK techniques associated with the event.
 
         """
-        namespaces = [f"PREFIX {prefix}: <{uri}>" for prefix, uri in graph.namespaces()]
+        namespaces = [f"PREFIX {prefix}: <{uri}>" for prefix, uri in graph.namespaces() if prefix != ""]
 
         template = Template('<<$s $p $o>> mlsx:eventMessage "$event"^^xsd:string')
         if tactics:
             for tactic in tactics:
                 template = Template(
-                    template.template + f' ; mlsx:tactic "{tactic.name}"^^xsd:string',
+                    template.template + f' ; mlsx:tactic "{tactic}"^^xsd:string',
                 )
         if techniques:
             for technique in techniques:
                 template = Template(
-                    template.template + f' ; mlsx:technique "{technique.name}"^^xsd:string',
+                    template.template + f' ; mlsx:technique "{technique}"^^xsd:string',
                 )
 
         template = Template(template.template + " .")
@@ -108,8 +107,6 @@ class GraphStore:
                 p=p.n3(graph.namespace_manager),
                 o=o.n3(graph.namespace_manager),
                 event=event,
-                tactic=tactics[0].name if tactics else "",
-                technique=techniques[0].name if techniques else "",
             )
             for s, p, o in graph.triples((None, None, None))
         ]
@@ -117,6 +114,7 @@ class GraphStore:
         template = Template("""\
             $namespaces
             PREFIX mlsx: <https://cyberseclab.unibs.it/mlsx/dict#>
+            PREFIX : <http://cyberseclab.unibs.it/ontologx/run#>
 
             INSERT DATA { $triples }\
         """)

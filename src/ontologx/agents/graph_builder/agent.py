@@ -48,6 +48,7 @@ Adhere to these rules strictly. Any deviation will result in termination.
 
 logger = logging.getLogger("rich")
 
+
 @dataclass(frozen=True)
 class GraphBuilderInputState:
     """Input state for the graph builder agent."""
@@ -109,7 +110,7 @@ def _initialize_state(state: _GraphBuilderState) -> _GraphBuilderState:
     if not isinstance(messages[-1], HumanMessage):
         messages.append(HumanMessage(f"Event: '{state.input_event}'"))
 
-    return _GraphBuilderState(**state.__dict__, messages=messages)
+    return replace(state, messages=messages)
 
 
 def _build_graph(state: _GraphBuilderState, runtime: Runtime[GraphBuilderContext]) -> _GraphBuilderState:
@@ -124,7 +125,7 @@ def _build_graph(state: _GraphBuilderState, runtime: Runtime[GraphBuilderContext
 
     # Add the graph structure to the structured output.
     # Also include raw output to retrieve eventual errors.
-    llm: BaseChatModel = state["llm"].with_structured_output(  # type: ignore[attr-defined]
+    llm: BaseChatModel = runtime.context.llm.with_structured_output(  # type: ignore[attr-defined]
         build_dynamic_model(runtime.context.ontology),
         include_raw=True,
         method="function_calling",
@@ -136,9 +137,13 @@ def _build_graph(state: _GraphBuilderState, runtime: Runtime[GraphBuilderContext
     # If the LLM output is a valid graph we are done.
     if is_output_valid:
         logger.debug("LLM output is a valid graph.")
-        logger.debug(raw_output.get("parsed"))
+        logger.debug(raw_output.get("parsed").rdflib_graph().serialize(format="turtle")) # pyright: ignore[reportOptionalMemberAccess]
 
-        return replace(state, output_graph=raw_output.get("parsed"), parsing_error=None)
+        return replace(
+            state,
+            output_graph=raw_output.get("parsed").rdflib_graph(), # pyright: ignore[reportOptionalMemberAccess]
+            parsing_error=None,
+        )
 
     logger.debug("LLM output is NOT a valid graph.")
 

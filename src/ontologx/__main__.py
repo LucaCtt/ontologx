@@ -77,10 +77,7 @@ def main() -> None:
 
     # Load example events into the vector store
     vector_store.add_events(
-        [
-            (row["log event"], {"application": row["application"], "device": row["device"]})
-            for row in examples.rows(named=True)
-        ],
+        [row["log event"] for row in examples.rows(named=True)],
     )
 
     # Load example graphs into the graph store
@@ -106,4 +103,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    finally:
+        vector_store.close()

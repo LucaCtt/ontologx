@@ -21,7 +21,7 @@ from ontologx.stores import GraphStore, VectorStore
 CHUNK_GRAPHS_NODE = "chunk_graphs"
 BUILD_GRAPHS_FOR_CHUNK_NODE = "build_graphs_for_chunk"
 PREDICT_TTPS_FOR_CHUNK_NODE = "predict_ttps"
-SAVE_CHUNK_NODE = "save_chunk"
+SAVE_CHUNKS_NODE = "save_chunk"
 
 logger = logging.getLogger("rich")
 
@@ -38,7 +38,7 @@ class GraphConnectorInput:
 class _GraphConnectorState(GraphConnectorInput):
     chunks: list[pl.DataFrame]
 
-    current_chunk_index = 0
+    current_chunk_index: int = 0
 
 
 @dataclass(frozen=True)
@@ -63,10 +63,24 @@ class GraphConnectorContext:
     # Maximum number of graph correction steps
     max_graph_correction_steps: int = 3
 
+    max_chunk_size: int = 10
 
-def _chunk_graphs(state: GraphConnectorInput) -> _GraphConnectorState:
+
+def _chunk_graphs(state: GraphConnectorInput, runtime: Runtime[GraphConnectorContext]) -> _GraphConnectorState:
     # Group by application and device
-    chunks = [df for _, df in state.events.group_by(["application", "device"])]
+    chunks = []
+    for _, df in state.events.group_by(["application", "device"]):
+        if df.height <= runtime.context.max_chunk_size:
+            chunks.append(df)
+        else:
+            chunks.extend(
+                [
+                    df.slice(i, runtime.context.max_chunk_size)
+                    for i in range(0, df.height, runtime.context.max_chunk_size)
+                ],
+            )
+
+    logger.info("Chunked events into %d chunks", len(chunks))
     logger.info("Chunked events into %d chunks", len(chunks))
 
     return _GraphConnectorState(
@@ -86,19 +100,19 @@ def _build_graphs_for_chunk(
     # Reset memory saver for graph builder agent
     graph_builder_agent.checkpointer = MemorySaver()
 
+    graphs = []
     for row in current_chunk.iter_rows(named=True):
         relevant_events = runtime.context.vector_store.search(
-            row["event_text"],
-            {"application": row["application"], "device": row["device"]},
+            row["log event"],
         )
-        logger.info("Found %d relevant events for event '%s'", len(relevant_events), row["event"])
+        logger.info("Found %d relevant events for event '%s'", len(relevant_events), row["log event"])
 
         relevant_kgs = [runtime.context.graph_store.get_graph(event) for event in relevant_events]
         logger.info("Successfully retrieved %d relevant knowledge graphs", len(relevant_kgs))
 
         output = graph_builder_agent.invoke(
             GraphBuilderInputState(
-                input_event=row["event_text"],
+                input_event=row["log event"],
                 input_examples=relevant_kgs,
             ),
             context=GraphBuilderContext(
@@ -108,12 +122,16 @@ def _build_graphs_for_chunk(
                 max_correction_steps=runtime.context.max_graph_correction_steps,
             ),
         )
-        row["graph"] = output["output_graph"]
-        logger.info("Built graph for event '%s'", row["event"])
+        graph = output["output_graph"]
+        graphs.append(graph if graph is not None else Graph())
+        logger.info("Built graph for event '%s'", row["log event"])
 
     # Maybe inefficient
-    state.chunks[state.current_chunk_index] = current_chunk
-    return replace(state, chunks=state.chunks)
+    new_chunks = state.chunks.copy()
+    new_chunks[state.current_chunk_index] = new_chunks[state.current_chunk_index].with_columns(
+        pl.Series("graph", graphs),
+    )
+    return replace(state, chunks=new_chunks)
 
 
 def _predict_ttps_for_chunk(
@@ -131,32 +149,32 @@ def _predict_ttps_for_chunk(
     logger.info("Predicted TTPs for chunk %d/%d", state.current_chunk_index + 1, len(state.chunks))
 
     # Assign TTPs to the current chunk
-    current_chunk["tactics"] = [output["tactics"]] * len(current_chunk)
-    current_chunk["techniques"] = [output["techniques"]] * len(current_chunk)
+    current_chunk = current_chunk.with_columns(
+        pl.Series("tactics", [output["tactics"]] * len(current_chunk)),
+        pl.Series("techniques", [output["techniques"]] * len(current_chunk)),
+    )
 
-    state.chunks[state.current_chunk_index] = current_chunk
-    return replace(state, chunks=state.chunks, current_chunk_index=state.current_chunk_index + 1)
+    new_chunks = state.chunks.copy()
+    new_chunks[state.current_chunk_index] = current_chunk
+    return replace(state, chunks=new_chunks, current_chunk_index=state.current_chunk_index + 1)
 
 
-def _save_chunk(
+def _save_chunks(
     state: _GraphConnectorState,
     runtime: Runtime[GraphConnectorContext],
 ) -> None:
-    for row in state.chunks[state.current_chunk_index].iter_rows(named=True):
-        runtime.context.graph_store.add_graph(
-            row["event"],
-            row["graph"],
-            tactics=row["tactics"],
-            techniques=row["techniques"],
-        )
-        runtime.context.vector_store.add_event(
-            row["event"],
-            metadata={
-                "application": row["application"],
-                "device": row["device"],
-            },
-        )
-    logger.info("Saved chunk with %d graphs to stores", len(state.chunks[state.current_chunk_index]))
+    for chunk in state.chunks:
+        for row in chunk.iter_rows(named=True):
+            runtime.context.graph_store.add_graph(
+                row["log event"],
+                row["graph"],
+                tactics=row["tactics"],
+                techniques=row["techniques"],
+            )
+            runtime.context.vector_store.add_event(
+                row["log event"],
+            )
+        logger.info("Saved chunk with %d graphs to store.", len(chunk))
 
 
 graph_connector_agent = StateGraph(
@@ -168,7 +186,7 @@ graph_connector_agent = StateGraph(
 
 def _get_next_node(state: _GraphConnectorState) -> str:
     if state.current_chunk_index >= len(state.chunks):
-        return SAVE_CHUNK_NODE
+        return SAVE_CHUNKS_NODE
 
     return BUILD_GRAPHS_FOR_CHUNK_NODE
 
@@ -176,18 +194,17 @@ def _get_next_node(state: _GraphConnectorState) -> str:
 graph_connector_agent.add_node(CHUNK_GRAPHS_NODE, _chunk_graphs)
 graph_connector_agent.add_node(BUILD_GRAPHS_FOR_CHUNK_NODE, _build_graphs_for_chunk)
 graph_connector_agent.add_node(PREDICT_TTPS_FOR_CHUNK_NODE, _predict_ttps_for_chunk)
-graph_connector_agent.add_node(SAVE_CHUNK_NODE, _save_chunk)
+graph_connector_agent.add_node(SAVE_CHUNKS_NODE, _save_chunks)
 
 graph_connector_agent.add_edge(START, CHUNK_GRAPHS_NODE)
-graph_connector_agent.add_edge(CHUNK_GRAPHS_NODE, PREDICT_TTPS_FOR_CHUNK_NODE)
-graph_connector_agent.add_edge(PREDICT_TTPS_FOR_CHUNK_NODE, BUILD_GRAPHS_FOR_CHUNK_NODE)
+graph_connector_agent.add_edge(CHUNK_GRAPHS_NODE, BUILD_GRAPHS_FOR_CHUNK_NODE)
+graph_connector_agent.add_edge(BUILD_GRAPHS_FOR_CHUNK_NODE, PREDICT_TTPS_FOR_CHUNK_NODE)
 graph_connector_agent.add_conditional_edges(
-    BUILD_GRAPHS_FOR_CHUNK_NODE,
+    PREDICT_TTPS_FOR_CHUNK_NODE,
     _get_next_node,
-    [SAVE_CHUNK_NODE, BUILD_GRAPHS_FOR_CHUNK_NODE],
+    [SAVE_CHUNKS_NODE, BUILD_GRAPHS_FOR_CHUNK_NODE],
 )
-graph_connector_agent.add_edge(SAVE_CHUNK_NODE, END)
+graph_connector_agent.add_edge(SAVE_CHUNKS_NODE, END)
 
 
-memory = MemorySaver()
-graph_connector_agent = graph_connector_agent.compile(checkpointer=memory)
+graph_connector_agent = graph_connector_agent.compile()

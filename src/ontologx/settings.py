@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     examples_path: str = "resources/data/train"
     """ The path to the starter examples logs file."""
 
-    logs_path: str = "resources/data/ait/validation.csv"
+    logs_path: str = "resources/data/validation.csv"
     """The input path to the logs to parse."""
 
     embeddings_url: str = "http://localhost:8000"
