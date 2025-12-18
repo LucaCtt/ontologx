@@ -57,7 +57,7 @@ class GraphStore:
 
         res = requests.post(
             self.__url + "/repositories/ontologx",
-            data={"query": template.safe_substitute(event=event)},
+            data={"query": template.safe_substitute(event=event.replace('"', "").replace("'", "").replace("\n", " "))},
             headers={
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Accept": "text/turtle",
@@ -106,7 +106,7 @@ class GraphStore:
                 s=s.n3(graph.namespace_manager),
                 p=p.n3(graph.namespace_manager),
                 o=o.n3(graph.namespace_manager),
-                event=event,
+                event=event.replace('"', "").replace("'", "").replace("\n", " "),
             )
             for s, p, o in graph.triples((None, None, None))
         ]

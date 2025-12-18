@@ -21,7 +21,7 @@ from ontologx.stores import GraphStore, VectorStore
 CHUNK_GRAPHS_NODE = "chunk_graphs"
 BUILD_GRAPHS_FOR_CHUNK_NODE = "build_graphs_for_chunk"
 PREDICT_TTPS_FOR_CHUNK_NODE = "predict_ttps"
-SAVE_CHUNKS_NODE = "save_chunk"
+SAVE_CHUNK_NODE = "save_chunk"
 
 logger = logging.getLogger("rich")
 
@@ -156,25 +156,30 @@ def _predict_ttps_for_chunk(
 
     new_chunks = state.chunks.copy()
     new_chunks[state.current_chunk_index] = current_chunk
-    return replace(state, chunks=new_chunks, current_chunk_index=state.current_chunk_index + 1)
+    return replace(
+        state,
+        chunks=new_chunks,
+    )
 
 
-def _save_chunks(
+def _save_chunk(
     state: _GraphConnectorState,
     runtime: Runtime[GraphConnectorContext],
-) -> None:
-    for chunk in state.chunks:
-        for row in chunk.iter_rows(named=True):
-            runtime.context.graph_store.add_graph(
-                row["log event"],
-                row["graph"],
-                tactics=row["tactics"],
-                techniques=row["techniques"],
-            )
-            runtime.context.vector_store.add_event(
-                row["log event"],
-            )
-        logger.info("Saved chunk with %d graphs to store.", len(chunk))
+) -> _GraphConnectorState:
+    chunk = state.chunks[state.current_chunk_index]
+    for row in chunk.iter_rows(named=True):
+        runtime.context.graph_store.add_graph(
+            row["log event"],
+            row["graph"],
+            tactics=row["tactics"],
+            techniques=row["techniques"],
+        )
+        runtime.context.vector_store.add_event(
+            row["log event"],
+        )
+    logger.info("Saved chunk with %d graphs to store.", len(chunk))
+
+    return replace(state, current_chunk_index=state.current_chunk_index + 1)
 
 
 graph_connector_agent = StateGraph(
@@ -186,7 +191,7 @@ graph_connector_agent = StateGraph(
 
 def _get_next_node(state: _GraphConnectorState) -> str:
     if state.current_chunk_index >= len(state.chunks):
-        return SAVE_CHUNKS_NODE
+        return END
 
     return BUILD_GRAPHS_FOR_CHUNK_NODE
 
@@ -194,17 +199,17 @@ def _get_next_node(state: _GraphConnectorState) -> str:
 graph_connector_agent.add_node(CHUNK_GRAPHS_NODE, _chunk_graphs)
 graph_connector_agent.add_node(BUILD_GRAPHS_FOR_CHUNK_NODE, _build_graphs_for_chunk)
 graph_connector_agent.add_node(PREDICT_TTPS_FOR_CHUNK_NODE, _predict_ttps_for_chunk)
-graph_connector_agent.add_node(SAVE_CHUNKS_NODE, _save_chunks)
+graph_connector_agent.add_node(SAVE_CHUNK_NODE, _save_chunk)
 
 graph_connector_agent.add_edge(START, CHUNK_GRAPHS_NODE)
 graph_connector_agent.add_edge(CHUNK_GRAPHS_NODE, BUILD_GRAPHS_FOR_CHUNK_NODE)
 graph_connector_agent.add_edge(BUILD_GRAPHS_FOR_CHUNK_NODE, PREDICT_TTPS_FOR_CHUNK_NODE)
+graph_connector_agent.add_edge(PREDICT_TTPS_FOR_CHUNK_NODE, SAVE_CHUNK_NODE)
 graph_connector_agent.add_conditional_edges(
-    PREDICT_TTPS_FOR_CHUNK_NODE,
+    SAVE_CHUNK_NODE,
     _get_next_node,
-    [SAVE_CHUNKS_NODE, BUILD_GRAPHS_FOR_CHUNK_NODE],
+    [END, BUILD_GRAPHS_FOR_CHUNK_NODE],
 )
-graph_connector_agent.add_edge(SAVE_CHUNKS_NODE, END)
 
 
 graph_connector_agent = graph_connector_agent.compile()

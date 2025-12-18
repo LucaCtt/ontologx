@@ -1,4 +1,4 @@
-Index,line_number,text,device,app,file_name,tactic,techniques
+Index,line_number,log event,device,application,file_name,tactic,techniques
 4331,4331,"2022-01-24 03:01:00 192.168.230.122:53581 VERIFY OK: depth=1, C=AT, ST=Vienna, L=Vienna, O=Some Organisation GmbH, CN=OpenVPN CA, emailAddress=admin@organisation.cyberrange.at",vpn,system,openvpn.log,Initial Access,[Valid Accounts]
 4332,4332,2022-01-24 03:01:00 192.168.230.122:53581 VERIFY KU OK,vpn,system,openvpn.log,Initial Access,[Valid Accounts]
 4333,4333,2022-01-24 03:01:00 192.168.230.122:53581 Validating certificate extended key usage,vpn,system,openvpn.log,Initial Access,[Valid Accounts]

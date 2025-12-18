@@ -99,6 +99,7 @@ def main() -> None:
     graph_connector_agent.invoke(
         input=GraphConnectorInput(events=events),
         context=GraphConnectorContext(llm=llm, ontology=ontology, vector_store=vector_store, graph_store=graph_store),
+        config={"recursion_limit": 500},
     )
 
 
