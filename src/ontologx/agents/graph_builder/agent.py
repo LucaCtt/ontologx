@@ -54,10 +54,13 @@ class GraphBuilderInputState:
     """Input state for the graph builder agent."""
 
     # Original input event text
-    input_event: str
+    event: str
+
+    # Contextual information to aid parsing
+    context_info: dict
 
     # Examples provided to the LLM for few-shot learning
-    input_examples: list[Graph]
+    examples: list[Graph]
 
     # LLM messages history, including previous events parsed
     messages: list[AnyMessage] = field(default_factory=list)
@@ -108,14 +111,14 @@ def _initialize_state(state: _GraphBuilderState) -> _GraphBuilderState:
     # If the last message is not from the human,
     # it means that we are parsing the event for the first time.
     if not isinstance(messages[-1], HumanMessage):
-        messages.append(HumanMessage(f"Event: '{state.input_event}'"))
+        messages.append(HumanMessage(f"Event: '{state.event}', Context: {state.context_info}"))
 
     return replace(state, messages=messages)
 
 
 def _build_graph(state: _GraphBuilderState, runtime: Runtime[GraphBuilderContext]) -> _GraphBuilderState:
     """Build the knowledge graph from the input event using the LLM."""
-    logger.info("Building knowledge graph for event: %s", {state.input_event})
+    logger.info("Building knowledge graph for event: %s", {state.event})
 
     try:
         runtime.context.llm.with_structured_output(BaseEventGraph)

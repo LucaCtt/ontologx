@@ -73,30 +73,30 @@ class GraphStore:
         self,
         event: str,
         graph: Graph,
-        tactics: list[str] | None = None,
-        techniques: list[str] | None = None,
+        metadata: dict | None = None,
     ) -> None:
         """Add a graph to the store.
 
         Args:
             event (str): The event associated with the graph.
             graph (Graph): The graph to add.
-            tactics (list[Tactic], optional): The MITRE ATT&CK tactics associated with the event.
-            techniques (list[Technique], optional): The MITRE ATT&CK techniques associated with the event.
+            metadata (dict, optional): Additional metadata associated with the graph.
 
         """
         namespaces = [f"PREFIX {prefix}: <{uri}>" for prefix, uri in graph.namespaces() if prefix != ""]
 
         template = Template('<<$s $p $o>> mlsx:eventMessage "$event"^^xsd:string')
-        if tactics:
-            for tactic in tactics:
+        for key, value in (metadata or {}).items():
+            key_norm = key.replace("_", " ").title().replace(" ", "")
+
+            if isinstance(value, list):
+                for v in value:
+                    template = Template(
+                        template.template + f' ; mlsx:{key_norm} "{v}"^^xsd:string',
+                    )
+            else:
                 template = Template(
-                    template.template + f' ; mlsx:tactic "{tactic}"^^xsd:string',
-                )
-        if techniques:
-            for technique in techniques:
-                template = Template(
-                    template.template + f' ; mlsx:technique "{technique}"^^xsd:string',
+                    template.template + f' ; mlsx:{key_norm} "{value}"^^xsd:string',
                 )
 
         template = Template(template.template + " .")

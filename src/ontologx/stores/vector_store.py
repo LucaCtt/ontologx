@@ -28,16 +28,17 @@ class VectorStore:
             text_key="text",
         )
 
-    def add_event(self, event: str) -> None:
+    def add_event(self, event: str, metadata: dict) -> None:
         """Add a single event to the vector store.
 
         Args:
             event (str): The event string to add.
+            metadata (dict): Metadata associated with the event.
 
         """
-        self.add_events([event])
+        self.add_events([(event, metadata)])
 
-    def add_events(self, events: list[str]) -> None:
+    def add_events(self, events: list[tuple[str, dict]]) -> None:
         """Add events to the vector store.
 
         Args:
@@ -45,7 +46,10 @@ class VectorStore:
 
 
         """
-        documents = [Document(page_content=event) for event in events]
+        documents = [
+            Document(page_content=f"{event}, {', '.join(metadata.values())}", metadata={**metadata, "event": event})
+            for event, metadata in events
+        ]
         ids = [str(uuid4()) for _ in events]
 
         self.__store.add_documents(documents, ids=ids)
@@ -60,8 +64,8 @@ class VectorStore:
             list[Document]: List of similar event documents.
 
         """
-        results = self.__store.max_marginal_relevance_search(event, alpha=0.5)
-        return [doc.page_content for doc in results]
+        results = self.__store.max_marginal_relevance_search(event, alpha=0.5, k=3)
+        return [doc.metadata["event"] for doc in results]
 
     def close(self) -> None:
         """Close the vector store connection."""
