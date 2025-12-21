@@ -103,16 +103,16 @@ def _build_graphs_for_chunk(
     graphs = []
     for row in current_chunk.iter_rows(named=True):
         relevant_events = runtime.context.vector_store.search(
-            row["log event"],
+            row["log_event"],
         )
-        logger.info("Found %d relevant events for event '%s'", len(relevant_events), row["log event"])
+        logger.info("Found %d relevant events for event '%s'", len(relevant_events), row["log_event"])
 
         relevant_kgs = [runtime.context.graph_store.get_graph(event) for event in relevant_events]
         logger.info("Successfully retrieved %d relevant knowledge graphs", len(relevant_kgs))
 
         output = graph_builder_agent.invoke(
             GraphBuilderInputState(
-                event=row["log event"],
+                event=row["log_event"],
                 context_info={
                     "device": row["device"],
                     "file_name": row["file_name"],
@@ -128,7 +128,7 @@ def _build_graphs_for_chunk(
         )
         graph = output["output_graph"]
         graphs.append(graph if graph is not None else Graph())
-        logger.info("Built graph for event '%s'", row["log event"])
+        logger.info("Built graph for event '%s'", row["log_event"])
 
     # Maybe inefficient
     new_chunks = state.chunks.copy()
@@ -173,7 +173,7 @@ def _save_chunk(
     chunk = state.chunks[state.current_chunk_index]
     for row in chunk.iter_rows(named=True):
         runtime.context.graph_store.add_graph(
-            row["log event"],
+            row["log_event"],
             row["graph"],
             metadata={
                 "device": row["device"],
@@ -183,7 +183,7 @@ def _save_chunk(
             },
         )
         runtime.context.vector_store.add_event(
-            row["log event"],
+            row["log_event"],
             {"device": row["device"], "file_name": row["file_name"]},
         )
     logger.info("Saved chunk with %d graphs to store.", len(chunk))

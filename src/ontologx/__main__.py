@@ -77,15 +77,15 @@ def main() -> None:
 
     # Load example events into the vector store
     vector_store.add_events(
-        [row["log event"] for row in examples.rows(named=True)],
+        [row["log_event"] for row in examples.rows(named=True)],
     )
 
     # Load example graphs into the graph store
     for example in examples.rows(named=True):
         g = Graph()
-        g.parse(settings.examples_path + "/" + example["graph path"])
+        g.parse(settings.examples_path + "/" + example["graph_path"])
 
-        graph_store.add_graph(example["log event"], g)
+        graph_store.add_graph(example["log_event"], g)
 
     # Load the ontology
     ontology = Graph()
