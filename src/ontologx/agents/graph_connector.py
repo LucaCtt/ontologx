@@ -67,9 +67,9 @@ class GraphConnectorContext:
 
 
 def _chunk_graphs(state: GraphConnectorInput, runtime: Runtime[GraphConnectorContext]) -> _GraphConnectorState:
-    # Group by application and device
+    # Group by device and file name
     chunks = []
-    for _, df in state.events.group_by(["application", "device", "file_name"]):
+    for _, df in state.events.group_by(["device", "file_name"]):
         if df.height <= runtime.context.max_chunk_size:
             chunks.append(df)
         else:
@@ -114,7 +114,6 @@ def _build_graphs_for_chunk(
             GraphBuilderInputState(
                 event=row["log event"],
                 context_info={
-                    "application": row["application"],
                     "device": row["device"],
                     "file_name": row["file_name"],
                 },
@@ -177,7 +176,6 @@ def _save_chunk(
             row["log event"],
             row["graph"],
             metadata={
-                "application": row["application"],
                 "device": row["device"],
                 "file_name": row["file_name"],
                 "tactics": row["tactics"],
@@ -186,7 +184,7 @@ def _save_chunk(
         )
         runtime.context.vector_store.add_event(
             row["log event"],
-            {"application": row["application"], "device": row["device"], "file_name": row["file_name"]},
+            {"device": row["device"], "file_name": row["file_name"]},
         )
     logger.info("Saved chunk with %d graphs to store.", len(chunk))
 

@@ -30,7 +30,7 @@ dev = [
 ]
 bedrock = ["langchain-aws>=0.2.22,<0.3"]
 openai = ["langchain-openai>=0.3.30,<0.4"]
-notebooks = ["thefuzz>=0.22.1"]
+notebooks = ["thefuzz>=0.22.1", "ipykernel>=7.1.0"]
 
 [build-system]
 requires = ["uv_build>=0.8.11,<0.9.0"]
