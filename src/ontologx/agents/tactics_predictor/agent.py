@@ -8,10 +8,9 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import HumanMessage, SystemMessage
 from langgraph.graph import END, START, StateGraph
 from langgraph.runtime import Runtime
-from mitreattack.stix20.MitreAttackData import Tactic, Technique
 from rdflib import Graph
 
-from ontologx.agents.tactics_predictor.models import SessionTTPs
+from ontologx.agents.tactics_predictor.models import SessionTTPs, Tactic, Technique
 
 logger = logging.getLogger("rich")
 
@@ -56,9 +55,9 @@ class TacticsPredictorOutput:
     """Output state for the graph builder agent."""
 
     # Parsed and validated knowledge graph
-    tactics: list[Tactic]
+    tactics: list[Tactic] # pyright: ignore[reportInvalidTypeForm]
 
-    techniques: list[Technique]
+    techniques: list[Technique] # pyright: ignore[reportInvalidTypeForm]
 
 
 @dataclass(frozen=True)

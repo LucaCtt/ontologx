@@ -24,6 +24,11 @@ _REPO_TTL = """\
 """
 
 
+def _to_camel_case(string: str) -> str:
+    title_case = string.title().replace(" ", "")
+    return title_case[0].lower() + title_case[1:]
+
+
 class GraphStore:
     """Abstract base class for a store module that manages the storage and retrieval of event graphs."""
 
@@ -87,7 +92,7 @@ class GraphStore:
 
         template = Template('<<$s $p $o>> mlsx:eventMessage "$event"^^xsd:string')
         for key, value in (metadata or {}).items():
-            key_norm = key.replace("_", " ").title().replace(" ", "")
+            key_norm = _to_camel_case(key.replace("_", " ").replace(" ", ""))
 
             if isinstance(value, list):
                 for v in value:

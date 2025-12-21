@@ -77,7 +77,10 @@ def main() -> None:
 
     # Load example events into the vector store
     vector_store.add_events(
-        [row["log_event"] for row in examples.rows(named=True)],
+        [
+            (row["log_event"], {"device": row["device"], "file_name": row["file_name"]})
+            for row in examples.rows(named=True)
+        ],
     )
 
     # Load example graphs into the graph store

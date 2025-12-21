@@ -18,36 +18,53 @@ class BaseEventGraph(BaseModel):
     nodes: list
     relationships: list
 
-    def rdflib_graph(self, namespaces: list[Namespace]) -> Graph:
+    def rdflib_graph(
+        self,
+        namespaces: list[tuple[str, URIRef]],
+    ) -> Graph:
         """Convert the generated event graph to a rdflib Graph.
 
         This method assumes that the nodes and relationships are already in the correct format,
         ontology-compliant, and with valid ids. As such, it does not perform any validation.
 
+        Args:
+            namespaces (list[tuple[str, URIRef]]): List of namespace prefixes and their URIs.
+
         Returns:
             Graph: The rdflib Graph representation of the event graph.
 
         """
-        res = Graph()
-        for ns in namespaces:
-            res.bind(ns.prefix, ns)
+        namespaces_with_default = [*namespaces, ("", URIRef("http://cyberseclab.unibs.it/olx/run/#"))]
 
-        run_ns = next((ns for ns in namespaces if ns.prefix == ""), Namespace("http://cyberseclab.unibs.it/olx/run"))
+        def assign_ns(node_id: str) -> URIRef:
+            node_id_split = node_id.split(":")
+            node_id_ns = node_id_split[0] if len(node_id_split) > 1 else ""
+            node_id_without_ns = node_id_split[1] if len(node_id_split) > 1 else node_id_split[0]
+
+            ns_uri = next((ns[1] for ns in namespaces_with_default if ns[0] == node_id_ns), None)
+            if not ns_uri:
+                return URIRef(node_id)
+
+            return Namespace(ns_uri)[node_id_without_ns]
+
+        res = Graph()
+        for ns in namespaces_with_default:
+            res.bind(ns[0], ns[1])
 
         node_ids_map = {}
         for node in self.nodes:
-            node_id = run_ns[str(uuid.uuid4())]
+            node_id = assign_ns(str(uuid.uuid4()))
             node_ids_map[node.id] = node_id
 
-            res.add((node_id, RDF.type, URIRef(node.type.value)))
+            res.add((node_id, RDF.type, assign_ns(node.type.value)))
 
             if node.properties:
                 for prop in node.properties:
-                    res.add((node_id, URIRef(prop.type.value), Literal(prop.value)))
+                    res.add((node_id, assign_ns(prop.type.value), Literal(prop.value)))
         for rel in self.relationships:
             start_uri = node_ids_map[rel.source_id]
             end_uri = node_ids_map[rel.target_id]
-            res.add((start_uri, URIRef(rel.type.value), end_uri))
+            res.add((start_uri, assign_ns(rel.type.value), end_uri))
 
         return res
 

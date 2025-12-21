@@ -178,8 +178,8 @@ def _save_chunk(
             metadata={
                 "device": row["device"],
                 "file_name": row["file_name"],
-                "tactics": row["tactics"],
-                "techniques": row["techniques"],
+                "tactic": row["tactics"],
+                "technique": row["techniques"],
             },
         )
         runtime.context.vector_store.add_event(
