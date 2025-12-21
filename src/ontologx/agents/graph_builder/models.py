@@ -5,20 +5,7 @@ from enum import Enum
 
 from pydantic import BaseModel, Field, model_validator
 from pydantic_core import PydanticCustomError
-from rdflib import DC, OWL, RDF, RDFS, Graph, Literal, Namespace, URIRef
-
-
-def _expand_namespace_prefix(name: str, namespaces: dict[str, URIRef]) -> URIRef:
-    """Expand a namespace prefix in a node type to a full URI."""
-    if ":" not in name:
-        return URIRef(name)
-
-    prefix, local_name = name.split(":", 1)
-    if prefix not in namespaces:
-        msg = f"Namespace prefix '{prefix}' not found in the provided namespaces."
-        raise ValueError(msg)
-
-    return URIRef(namespaces[prefix].toPython() + local_name)
+from rdflib import OWL, RDF, RDFS, Graph, Literal, Namespace, URIRef
 
 
 class BaseEventGraph(BaseModel):
@@ -31,7 +18,7 @@ class BaseEventGraph(BaseModel):
     nodes: list
     relationships: list
 
-    def rdflib_graph(self) -> Graph:
+    def rdflib_graph(self, namespaces: list[Namespace]) -> Graph:
         """Convert the generated event graph to a rdflib Graph.
 
         This method assumes that the nodes and relationships are already in the correct format,
@@ -42,15 +29,14 @@ class BaseEventGraph(BaseModel):
 
         """
         res = Graph()
+        for ns in namespaces:
+            res.bind(ns.prefix, ns)
 
-        ex = Namespace("http://cyberseclab.unibs.it/ontologx/run#")
-        olx = Namespace("https://cyberseclab.unibs.it/olx/dict#")
-        res.bind("olx", olx)
-        res.bind("", ex)
+        run_ns = next((ns for ns in namespaces if ns.prefix == ""), Namespace("http://cyberseclab.unibs.it/olx/run"))
 
         node_ids_map = {}
         for node in self.nodes:
-            node_id = ex[str(uuid.uuid4())]
+            node_id = run_ns[str(uuid.uuid4())]
             node_ids_map[node.id] = node_id
 
             res.add((node_id, RDF.type, URIRef(node.type.value)))
@@ -70,48 +56,60 @@ class _OntologyValidValues:
     """Class to hold the valid values for the ontology."""
 
     def __init__(self, ontology: Graph):
-        self.ontology = ontology
+        self.__ontology = ontology
 
     @property
     def classes(self) -> list[str]:
         """Return a list of classes URIs (as strings) defined as owl:Class in the ontology."""
-        return [str(s) for s in self.ontology.subjects(predicate=RDF.type, object=OWL.Class)]
+        return [
+            s.n3(self.__ontology.namespace_manager)
+            for s in self.__ontology.subjects(predicate=RDF.type, object=OWL.Class)
+        ]
 
     @property
     def object_properties(self) -> list[str]:
         """Return a list of relationship type URIs (as strings) defined in the ontology."""
-        return [str(s) for s in self.ontology.subjects(predicate=RDF.type, object=OWL.ObjectProperty)]
+        return [
+            s.n3(self.__ontology.namespace_manager)
+            for s in self.__ontology.subjects(predicate=RDF.type, object=OWL.ObjectProperty)
+        ]
 
     @property
     def type_triples(self) -> list[tuple[str, str, str]]:
         """Return the type definition triples in the ontology."""
         return [
-            (str(s), str(p), str(o))
-            for s, p, o in self.ontology.triples((None, RDF.type, None))
-            if o not in (OWL.Ontology, OWL.AnnotationProperty)
+            (
+                s.n3(self.__ontology.namespace_manager),
+                p.n3(self.__ontology.namespace_manager),
+                o.n3(self.__ontology.namespace_manager),
+            )
+            for s, p, o in self.__ontology.triples((None, None, None))
+            if o not in (OWL.Ontology, OWL.AnnotationProperty) and p in (RDF.type, RDFS.subClassOf)
         ]
 
     @property
-    def non_type_triples(self) -> list[tuple[str, str, str]]:
-        """Return the non-type definition triples in the ontology."""
-        return [
-            (
-                str(s),
-                str(p),
-                str(o),
-            )
-            for s, p, o in self.ontology.triples((None, None, None))
-            if p not in (RDF.type, DC.creator, DC.description)
-        ]
+    def object_property_triples(self) -> list[tuple[str, str, str]]:
+        """Return the object property triples in the ontology."""
+        triples: list[tuple[str, str, str]] = []
+        for prop_uri, _, _ in self.__ontology.triples((None, RDF.type, OWL.ObjectProperty)):
+            domains = list(self.__ontology.objects(prop_uri, RDFS.domain)) or [OWL.Thing]
+            ranges = list(self.__ontology.objects(prop_uri, RDFS.range)) or [OWL.Thing]
+            prop_n3 = prop_uri.n3(self.__ontology.namespace_manager)
+            for d in domains:
+                d_n3 = d.n3(self.__ontology.namespace_manager)
+                for r in ranges:
+                    r_n3 = r.n3(self.__ontology.namespace_manager)
+                    triples.append((d_n3, prop_n3, r_n3))
+        return triples
 
     @property
     def data_properties_per_class(self) -> dict[str, list[str]]:
         """Return a mapping of classes to their data properties defined in the ontology."""
         class_data_props: dict[str, list[str]] = {}
-        for dataprop_uri, _, _ in self.ontology.triples((None, RDF.type, OWL.DatatypeProperty)):
-            for class_uri in self.ontology.objects(dataprop_uri, RDFS.domain):
-                prop_uri = str(dataprop_uri)
-                class_uri_esc = str(class_uri)
+        for dataprop_uri, _, _ in self.__ontology.triples((None, RDF.type, OWL.DatatypeProperty)):
+            for class_uri in self.__ontology.objects(dataprop_uri, RDFS.domain):
+                prop_uri = dataprop_uri.n3(self.__ontology.namespace_manager)
+                class_uri_esc = class_uri.n3(self.__ontology.namespace_manager)
                 if class_uri_esc not in class_data_props:
                     class_data_props[class_uri_esc] = []
                 class_data_props[class_uri_esc].append(prop_uri)
@@ -177,7 +175,7 @@ def build_dynamic_model(ontology: Graph) -> type[BaseEventGraph]:
             "A relationship between two nodes in the event graph. "
             "Each relationship type has a predefined source and target node type. "
             "The allowed relationships, formatted as (source type, relationship type, target type), are: "
-            f"{valid.non_type_triples}."
+            f"{valid.object_property_triples}."
         )
 
     class EventGraph(BaseEventGraph):

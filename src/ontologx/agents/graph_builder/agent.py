@@ -134,14 +134,16 @@ def _build_graph(state: _GraphBuilderState, runtime: Runtime[GraphBuilderContext
     raw_output = cast("dict", llm.invoke(state.messages))
     is_output_valid = raw_output.get("parsed", False) and isinstance(raw_output.get("parsed"), BaseEventGraph)
 
+    ontology_ns = list(runtime.context.ontology.namespaces())
+
     # If the LLM output is a valid graph we are done.
     if is_output_valid:
         logger.debug("LLM output is a valid graph.")
-        logger.debug(raw_output.get("parsed").rdflib_graph().serialize(format="turtle")) # pyright: ignore[reportOptionalMemberAccess]
+        logger.debug(raw_output.get("parsed").rdflib_graph(ontology_ns).serialize(format="turtle"))  # pyright: ignore[reportOptionalMemberAccess]
 
         return replace(
             state,
-            output_graph=raw_output.get("parsed").rdflib_graph(), # pyright: ignore[reportOptionalMemberAccess]
+            output_graph=raw_output.get("parsed").rdflib_graph(ontology_ns),  # pyright: ignore[reportOptionalMemberAccess]
             parsing_error=None,
         )
 
