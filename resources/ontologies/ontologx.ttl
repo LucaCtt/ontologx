@@ -7,9 +7,11 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 @prefix prov: <http://www.w3.org/ns/prov#>.
 @prefix p-plan: <http://purl.org/net/p-plan#>.
+@prefix uco-observable: <https://ontology.unifiedcyberontology.org/uco/observable/> .
+@prefix uco-types: <https://ontology.unifiedcyberontology.org/uco/types/> .
 
 <https://cyberseclab.unibs.it/olx/dict> rdf:type owl:Ontology;
-  owl:versionIRI <https://cyberseclab.unibs.it/olx/dict/1.0.0>;
+  owl:versionIRI <https://cyberseclab.unibs.it/olx/dict/2.0.0>;
   <http://purl.org/dc/elements/1.1/creator> "Luca Cotti";
   <http://purl.org/dc/elements/1.1/description> "An ontology to represent log events.";
   <http://purl.org/dc/elements/1.1/rights> "http://creativecommons.org/licenses/by/4.0/";
@@ -27,16 +29,17 @@
 <http://purl.org/dc/elements/1.1/title> rdf:type owl:AnnotationProperty.
 <http://purl.org/dc/elements/1.1/language> rdf:type owl:AnnotationProperty.
 <http://purl.org/vocab/vann/preferredNamespacePrefix> rdf:type owl:AnnotationProperty.
+
 #################################################################
 #    Classes
 #################################################################
 olx:Event rdf:type owl:Class;
-  rdfs:subClassOf prov:Entity;
+  rdfs:subClassOf prov:Entity, uco-observable:EventRecord;
   rdfs:comment "A single log event, such a log line in a log file.";
   rdfs:label "Event".
 
 olx:Source rdf:type owl:Class;
-  rdfs:subClassOf prov:Agent;
+  rdfs:subClassOf prov:Agent, uco-observable:EventLog;
   rdfs:comment "A log source, such as an aggregation of logs from different applications (e.g., SysLog) or aggregation of several log files from different devices.";
   rdfs:label "Source".
 
@@ -52,26 +55,30 @@ olx:TimeStamp rdf:type owl:Class;
 
 olx:HashString rdf:type owl:Class;
   rdfs:subClassOf olx:Parameter;
+  owl:equivalentClass uco-types:Hash ;
   rdfs:comment "A hash string, such as a file hash, a password hash, etc.";
   rdfs:label "Hash String".
 
 olx:NetworkProtocol rdf:type owl:Class;
   rdfs:subClassOf olx:Parameter;
+  owl:equivalentClass uco-observable:NetworkProtocol ;
   rdfs:comment "A network protocol, such as TCP, UDP, etc.";
   rdfs:label "Network Protocol".
 
 olx:NetworkAddress rdf:type owl:Class;
   rdfs:subClassOf olx:Parameter;
+  owl:equivalentClass uco-observable:DigitalAddress ;
   rdfs:comment "A logical address in a network, such as an IP address or a MAC address.";
   rdfs:label "Network Address".
 
 olx:Application rdf:type owl:Class;
-  rdfs:subClassOf olx:Parameter, p-plan:Step;
+  rdfs:subClassOf olx:Parameter, p-plan:Step, uco-observable:Application ;
   rdfs:comment "An application, such as a web server, a database, etc.";
   rdfs:label "Application".
 
 olx:SystemProcess rdf:type owl:Class;
-  rdfs:subClassOf olx:Application;
+  rdfs:subClassOf olx:Application ;
+  owl:equivalentClass uco-observable:Process ;
   rdfs:comment "An operating system process.";
   rdfs:label "System Process".
 
@@ -81,21 +88,25 @@ olx:ShellCommand rdf:type owl:Class;
   rdfs:label "Shell Command".
 
 olx:File rdf:type owl:Class;
-  rdfs:subClassOf olx:Parameter;
+  rdfs:subClassOf olx:Parameter ;
+  owl:equivalentClass uco-observable:File ;
   rdfs:comment "A file, such as a configuration file, a data file, etc.";
   rdfs:label "File".
 
 olx:URL rdf:type owl:Class;
-  rdfs:subClassOf olx:Parameter;
+  rdfs:subClassOf olx:Parameter, uco-observable:URL ;
+  owl:equivalentClass uco-observable:URL ;
   rdfs:comment "A URL, e.g. leading to a web page, a file, etc.";
   rdfs:label "URL".
 
 olx:User rdf:type owl:Class;
-  rdfs:subClassOf olx:Parameter;
+  rdfs:subClassOf olx:Parameter ;
+  owl:equivalentClass uco-observable:UserAccount ;
   rdfs:comment "A user account, such as a local user, a domain user, etc.";
   rdfs:label "User".
 
 olx:UserCredential rdf:type owl:Class;
+  rdfs:subClassOf uco-observable:Credential ;
   rdfs:comment "A credential used by a user to authenticate, such as a username, password, or a token.";
   rdfs:label "Identity Credentials".
 
@@ -276,4 +287,3 @@ olx:userCredentialValue rdf:type owl:DatatypeProperty;
   rdfs:range xsd:string;
   rdfs:comment "Value of the user credential (e.g. username, password, etc.)";
   rdfs:label "User Credential Value".
-
