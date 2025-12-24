@@ -5,7 +5,7 @@ Environment variables can be set in the shell before running the script,
 or in a `.env` file in the root directory of the project.
 """
 
-from pydantic import Field, SecretStr
+from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
@@ -30,26 +30,17 @@ class Settings(BaseSettings):
     embeddings_name: str = "Alibaba-NLP/gte-multilingual-base"
     """The model used to embed logs."""
 
-    llm_url: str | None = None
-    """The URL of the llm backend."""
-
     llm_name: str = "us.anthropic.claude-sonnet-4-20250514-v1:0"
     """The name of the llm to use."""
 
     llm_temperature: float = Field(default=0.0, ge=0.0, le=1.0)
     """The temperature of the llm. Must be between 0 and 1."""
 
+    aws_region: str | None = None
+    """The AWS region for the LLM."""
+
     graph_database_url: str = "http://localhost:7200"
     """The URL of the graph database. """
 
     vector_database_url: str = "http://localhost:8080"
-
-    hf_token: SecretStr | None = None
-
-    aws_access_key_id: SecretStr | None = None
-
-    aws_secret_access_key: SecretStr | None = None
-
-    aws_role_arn: SecretStr | None = None
-
-    aws_region: str | None = None
+    """The URL of the vector database."""

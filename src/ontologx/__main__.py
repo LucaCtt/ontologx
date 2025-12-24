@@ -6,9 +6,7 @@ the reading of the logs, and the construction of the knowledge graph.
 
 import logging
 
-import boto3
 import polars as pl
-from botocore.config import Config
 from langchain_aws import ChatBedrockConverse
 from langchain_community.embeddings import InfinityEmbeddings
 from rdflib import Graph
@@ -38,30 +36,10 @@ logging.getLogger("neo4j").setLevel(logging.ERROR)
 
 settings = Settings()
 
-sts_client = boto3.client(
-    "sts",
-    config=Config(read_timeout=300),
-    aws_access_key_id=settings.aws_access_key_id.get_secret_value() if settings.aws_access_key_id else None,
-    aws_secret_access_key=settings.aws_secret_access_key.get_secret_value() if settings.aws_secret_access_key else None,
-)
-
-# Assume the role
-response = sts_client.assume_role(
-    RoleArn=settings.aws_role_arn.get_secret_value() if settings.aws_role_arn else None,
-    RoleSessionName="langchain-bedrock-session",
-    DurationSeconds=60 * 60 * 10,  # 10 hours
-)
-
-# Extract the temporary credentials
-credentials = response["Credentials"]
-
 llm = ChatBedrockConverse(
     model=settings.llm_name,
     temperature=settings.llm_temperature,
     region_name=settings.aws_region,
-    aws_access_key_id=credentials["AccessKeyId"],
-    aws_secret_access_key=credentials["SecretAccessKey"],
-    aws_session_token=credentials["SessionToken"],
 )
 
 embeddings = InfinityEmbeddings(model=settings.embeddings_name, infinity_api_url=settings.embeddings_url)
