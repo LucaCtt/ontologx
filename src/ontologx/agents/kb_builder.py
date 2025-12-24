@@ -27,7 +27,7 @@ logger = logging.getLogger("rich")
 
 
 @dataclass(frozen=True)
-class GraphConnectorInput:
+class KnowledgeBaseBuilderInput:
     """Input for the Graph Connector agent."""
 
     # The list of graphs to process
@@ -35,14 +35,14 @@ class GraphConnectorInput:
 
 
 @dataclass(frozen=True)
-class _GraphConnectorState(GraphConnectorInput):
+class _KnowledgeBaseBuilderState(KnowledgeBaseBuilderInput):
     chunks: list[pl.DataFrame]
 
     current_chunk_index: int = 0
 
 
 @dataclass(frozen=True)
-class GraphConnectorContext:
+class KnowledgeBaseBuilderContext:
     """Context for the Graph Connector agent."""
 
     # The LLM to use for TTP prediction
@@ -63,10 +63,14 @@ class GraphConnectorContext:
     # Maximum number of graph correction steps
     max_graph_correction_steps: int = 3
 
+    # Maximum chunk size
     max_chunk_size: int = 10
 
 
-def _chunk_graphs(state: GraphConnectorInput, runtime: Runtime[GraphConnectorContext]) -> _GraphConnectorState:
+def _chunk_graphs(
+    state: KnowledgeBaseBuilderInput,
+    runtime: Runtime[KnowledgeBaseBuilderContext],
+) -> _KnowledgeBaseBuilderState:
     # Group by device and file name
     chunks = []
     for _, df in state.events.group_by(["device", "file_name"]):
@@ -83,16 +87,16 @@ def _chunk_graphs(state: GraphConnectorInput, runtime: Runtime[GraphConnectorCon
     logger.info("Chunked events into %d chunks", len(chunks))
     logger.info("Chunked events into %d chunks", len(chunks))
 
-    return _GraphConnectorState(
+    return _KnowledgeBaseBuilderState(
         **state.__dict__,
         chunks=chunks,
     )
 
 
 def _build_graphs_for_chunk(
-    state: _GraphConnectorState,
-    runtime: Runtime[GraphConnectorContext],
-) -> _GraphConnectorState:
+    state: _KnowledgeBaseBuilderState,
+    runtime: Runtime[KnowledgeBaseBuilderContext],
+) -> _KnowledgeBaseBuilderState:
     # Build a graph for the current chunk of events
     current_chunk = state.chunks[state.current_chunk_index]
     logger.info("Building graphs for chunk %d/%d", state.current_chunk_index + 1, len(state.chunks))
@@ -139,9 +143,9 @@ def _build_graphs_for_chunk(
 
 
 def _predict_ttps_for_chunk(
-    state: _GraphConnectorState,
-    runtime: Runtime[GraphConnectorContext],
-) -> _GraphConnectorState:
+    state: _KnowledgeBaseBuilderState,
+    runtime: Runtime[KnowledgeBaseBuilderContext],
+) -> _KnowledgeBaseBuilderState:
     current_chunk = state.chunks[state.current_chunk_index]
     logger.info("Predicting TTPs for chunk %d/%d", state.current_chunk_index + 1, len(state.chunks))
 
@@ -167,9 +171,9 @@ def _predict_ttps_for_chunk(
 
 
 def _save_chunk(
-    state: _GraphConnectorState,
-    runtime: Runtime[GraphConnectorContext],
-) -> _GraphConnectorState:
+    state: _KnowledgeBaseBuilderState,
+    runtime: Runtime[KnowledgeBaseBuilderContext],
+) -> _KnowledgeBaseBuilderState:
     chunk = state.chunks[state.current_chunk_index]
     for row in chunk.iter_rows(named=True):
         runtime.context.graph_store.add_graph(
@@ -192,13 +196,13 @@ def _save_chunk(
 
 
 graph_connector_agent = StateGraph(
-    _GraphConnectorState,
-    input_schema=GraphConnectorInput,
-    context_schema=GraphConnectorContext,
+    _KnowledgeBaseBuilderState,
+    input_schema=KnowledgeBaseBuilderInput,
+    context_schema=KnowledgeBaseBuilderContext,
 )
 
 
-def _get_next_node(state: _GraphConnectorState) -> str:
+def _get_next_node(state: _KnowledgeBaseBuilderState) -> str:
     if state.current_chunk_index >= len(state.chunks):
         return END
 

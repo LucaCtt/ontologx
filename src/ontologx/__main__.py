@@ -12,7 +12,7 @@ from langchain_community.embeddings import InfinityEmbeddings
 from rdflib import Graph
 from rich.logging import RichHandler
 
-from ontologx.agents.graph_connector import GraphConnectorContext, GraphConnectorInput, graph_connector_agent
+from ontologx.agents.kb_builder import KnowledgeBaseBuilderContext, KnowledgeBaseBuilderInput, graph_connector_agent
 from ontologx.settings import Settings
 from ontologx.stores import GraphStore, VectorStore
 
@@ -78,8 +78,13 @@ def main() -> None:
 
     """Run the log knowledge graph builder."""
     graph_connector_agent.invoke(
-        input=GraphConnectorInput(events=events),
-        context=GraphConnectorContext(llm=llm, ontology=ontology, vector_store=vector_store, graph_store=graph_store),
+        input=KnowledgeBaseBuilderInput(events=events),
+        context=KnowledgeBaseBuilderContext(
+            llm=llm,
+            ontology=ontology,
+            vector_store=vector_store,
+            graph_store=graph_store,
+        ),
         config={"recursion_limit": 500},
     )
 
