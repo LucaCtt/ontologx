@@ -1,6 +1,6 @@
 # OntoLogX
 
-This repository contains the code for OntoLogX, developed by researchers at the University of Brescia under the NEACD project.
+This repository contains the code for OntoLogX, developed by researchers at the University of Brescia under the NEACD and PROTECT-IT projects.
 
 ## Getting Started
 
