@@ -1,6 +1,10 @@
 # OntoLogX
 
-This repository contains the code for OntoLogX, developed by researchers at the University of Brescia under the NEACD and PROTECT-IT projects.
+This repository contains the code for OntoLogX, developed at the University of Brescia.
+
+## Acknowledgements
+
+This work was partially supported by the SERICS project (PE00000014) under the Italian Ministry of University (MUR) National Recovery and Resilience Plan funded by the European Union - NextGenerationEU. Specifically, it was carried out within NEACD: Neurosymbolic Enhanced Active Cyber Defence (CUP J33C22002810001) and PROTECT-IT: imPROving The rEsilience to Cyberattacks of distributed ICT InfrastrucTures (under SERICS Spoke 8). This work was also partially funded by the MUR as part of the PRIN: PROGETTI DI RICERCA DI RILEVANTE INTERESSE NAZIONALE - Bando 2022, Prot. 2022EP2L7H.
 
 ## Getting Started
 
